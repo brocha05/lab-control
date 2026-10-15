@@ -50,6 +50,7 @@ pnpm test src/specimen-tests     # one folder/file
 pnpm test -t "planTestAges"      # one test by name
 pnpm lint | typecheck | format:check | build
 pnpm db:validate | db:generate   # prisma generate also runs on pnpm install
+pnpm db:migrate                  # apply/create migrations (needs Postgres)
 
 # apps/frontend  (on :3000)
 pnpm dev
@@ -60,7 +61,12 @@ Dependency install scripts are opt-in via `allowBuilds` in each app's
 `pnpm-workspace.yaml`; pnpm fails the install if a new dependency's script isn't listed.
 
 CI (`.github/workflows/ci.yml`) runs exactly these checks for both apps. The frontend has
-no test runner yet. There are no migrations yet (first one is development-plan 2.1).
+no test runner yet.
+
+Migrations: `pnpm db:migrate` (dev) / `pnpm db:migrate:deploy`. `prisma/schema.prisma` holds
+only migrated tables; the full domain model waits in `prisma/drafts/domain.prisma`
+(`pnpm db:validate:draft`) and moves over phase by phase, one migration per task. If
+port 5432 is taken, run compose with `POSTGRES_PORT=5433` and point `DATABASE_URL` at it.
 
 ## Backend architecture
 

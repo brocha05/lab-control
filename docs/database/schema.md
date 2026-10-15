@@ -1,7 +1,10 @@
 # Preliminary Database Schema
 
-> **DRAFT.** Source: [`apps/backend/prisma/schema.prisma`](../../apps/backend/prisma/schema.prisma)
-> (validated with `prisma validate`, **no migration created yet**). Domain columns come
+> Two sources. **Migrated** (Phase 2): `tenants`, `users`, `clients`, `projects`,
+> `project_test_configurations` in [`apps/backend/prisma/schema.prisma`](../../apps/backend/prisma/schema.prisma)
+> (first migration `20261015022343_init`). **Draft, not migrated**: every other table below,
+> in [`apps/backend/prisma/drafts/domain.prisma`](../../apps/backend/prisma/drafts/domain.prisma),
+> moved into the active schema by the phase that needs it. Domain columns come
 > from the lab forms FPC01-01, FPC06-01 and FPC06-04 (analyses in
 > [../domain/analysis/](../domain/analysis/README.md)). Each column's doc comment in the
 > Prisma file names the printed field it holds.

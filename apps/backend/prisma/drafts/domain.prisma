@@ -1,0 +1,549 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// DOMAIN DRAFT — the full model derived from the lab documents (2026-10-14).
+// NOT the active schema: `prisma/schema.prisma` only holds the tables that are
+// migrated (development-plan 2.1). Phases 4–9 move models from here into the
+// active schema, one migration per task, after the lab review (0.5).
+// Validated in CI with `pnpm db:validate:draft`. Keep it in sync when the active
+// schema changes (Tenant, User, Client, Project, ProjectTestConfiguration).
+//
+// Sources (analyses in docs/domain/analysis/):
+//   FPC01-01  Registro de campo para la recepción de concreto hidráulico
+//   FPC01-02  Bitácora electrónica de ensayos de concreto hidráulico (derived view)
+//   FPC06-01  Registro de resultados de resistencia a la compresión (cilindros)
+//   FPC06-04  Informe de pruebas de control de concreto hidráulico
+//
+// Columns cite the form they come from. Anything not printed on a form cites an
+// ASSUMPTION (docs/domain/assumptions.md) or a question (docs/domain/open-questions.md).
+// Calculated values (averages, area, stress, MPa, %, loading rate, unit weight,
+// cumulative volume) are NOT stored: formulas are unconfirmed (Q-59, Q-61, Q-67) and
+// the store-vs-derive decision is development-plan 7.5.
+//
+// Domain fields are nullable so a DRAFT can be saved incomplete. What "complete"
+// means is Q-33; it is enforced by the service, not by NOT NULL.
+//
+// Tenancy rules (docs/architecture/multi-tenancy.md, ADR-002):
+//   - every tenant-owned table has tenant_id
+//   - parents expose @@unique([id, tenantId]); children reference parents with
+//     the composite (parentId, tenantId), so a child can never point at another
+//     tenant's parent.
+//   - tenantId is always the leading column of composite indexes.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Prisma 7 generator: the client is generated into src/ (gitignored) and compiled with
+// the app. Regenerated on install (`postinstall`) and by `pnpm db:generate`.
+generator client {
+  provider     = "prisma-client"
+  output       = "../../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums: lifecycle (preliminary — docs/domain/lifecycle.md) ──────────────
+
+/// Placeholder roles. ASSUMPTION A-33 — roles seen on the forms are listed in Q-39.
+enum UserRole {
+  ADMIN
+  MEMBER
+}
+
+/// ASSUMPTION A-20
+enum FieldRecordStatus {
+  DRAFT
+  COMPLETED
+  CANCELLED
+}
+
+/// ASSUMPTION A-21 — "scheduled"/"tested" are derived from SpecimenTest rows.
+enum SpecimenStatus {
+  CREATED
+  CANCELLED
+}
+
+/// ASSUMPTION A-22 — no form shows an "in progress" state; may be dropped (Q-24).
+enum SpecimenTestStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+/// ASSUMPTION A-23
+enum ReportStatus {
+  DRAFT
+  GENERATED
+  FINAL
+}
+
+// ─── Enums: domain values printed on the forms ──────────────────────────────
+
+/// FPC01-01 "Datos de proyecto": f'c (compression) or MR (modulus of rupture).
+enum StrengthCriterion {
+  FC
+  MR
+}
+
+/// FPC01-02 columns "Hecho en obra" / "Premezclado". ASSUMPTION A-74 (per record).
+enum ConcreteProduction {
+  SITE_MIXED
+  READY_MIXED
+}
+
+/// FPC01-01 "Condiciones ambientales", first group. ASSUMPTION A-64 (single choice).
+enum SkyCondition {
+  SUNNY
+  CLOUDY
+  RAINY
+}
+
+/// FPC01-01 "Condiciones ambientales", second group. ASSUMPTION A-64.
+enum WindCondition {
+  WINDY
+  CALM
+}
+
+/// FPC01-01 "Condiciones ambientales", third group. ASSUMPTION A-64.
+enum LightingCondition {
+  NATURAL
+  ARTIFICIAL
+}
+
+/// FPC01-01 "Referencia de los especímenes — Tipo" (nominal size in cm).
+enum SpecimenType {
+  CYLINDER_15X30
+  CYLINDER_10X20
+  BEAM_15X60
+  BEAM_15X50
+  CUBE_15
+}
+
+// ─── Tenant ─────────────────────────────────────────────────────────────────
+
+model Tenant {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  /// IANA timezone used to compute "today" for scheduling. ASSUMPTION A-14.
+  timezone  String
+  /// Report header, e.g. "CONTROL DE CALIDAD Y PROYECTOS, S.A. DE C.V." (FPC06-04).
+  legalName String?  @map("legal_name")
+  /// Report footer address (FPC06-04).
+  address   String?
+  /// Report footer phone (FPC06-04).
+  phone     String?
+  // TBD: logos, accreditation data (Q-52). Signers: Q-37.
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  users                     User[]
+  clients                   Client[]
+  projects                  Project[]
+  projectTestConfigurations ProjectTestConfiguration[]
+  fieldRecords              FieldRecord[]
+  deliveries                Delivery[]
+  samples                   Sample[]
+  specimens                 Specimen[]
+  specimenTests             SpecimenTest[]
+  reports                   Report[]
+
+  @@map("tenants")
+}
+
+// ─── User ───────────────────────────────────────────────────────────────────
+// Auth tables (refresh tokens, password reset) are ported from
+// boilerplate-backend-core in Phase 2 — not drafted here.
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  /// Globally unique, stored lowercase. ASSUMPTION A-32.
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  fullName     String   @map("full_name")
+  role         UserRole @default(MEMBER)
+  isActive     Boolean  @default(true) @map("is_active")
+  // TBD: signature image, title prefix ("DCC", "Ing.") and position for report
+  //      signing (Q-37, Q-39)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([id, tenantId])
+  @@index([tenantId])
+  @@map("users")
+}
+
+// ─── Client ("Solicitante" FPC01-01 / "Contratista" FPC06-04) ───────────────
+
+model Client {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  /// Legal name, e.g. "MARECOMSA S.A. DE C.V.".
+  name         String
+  /// FPC06-04 "Contacto" (name). ASSUMPTION A-70 (per client, not per project).
+  contactName  String?  @map("contact_name")
+  /// FPC06-04 "Contacto" (phone). ASSUMPTION A-70.
+  contactPhone String?  @map("contact_phone")
+  // TBD: code used in report numbers ("MAR-…", Q-56)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  projects Project[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, name])
+  @@map("clients")
+}
+
+// ─── Project ("Obra") ───────────────────────────────────────────────────────
+
+model Project {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  clientId  String   @map("client_id") @db.Uuid
+  /// Official name as printed on the report (FPC06-04 "Proyecto"). Q-78.
+  name      String
+  /// FPC01-01 "Obra y ubicación", location part.
+  location  String?
+  // TBD: code used in report numbers ("…-PVLT-…", Q-56)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant             Tenant                     @relation(fields: [tenantId], references: [id])
+  client             Client                     @relation(fields: [clientId, tenantId], references: [id, tenantId])
+  testConfigurations ProjectTestConfiguration[]
+  fieldRecords       FieldRecord[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, clientId])
+  @@map("projects")
+}
+
+// ─── ProjectTestConfiguration ───────────────────────────────────────────────
+// One row per configured test age. ASSUMPTION A-10 (configured per project);
+// general_flow.png says ages are configurable ("normalmente 2-7 a 2-28 días").
+// Whether this is per project, per record, or a lab default is still Q-20.
+
+model ProjectTestConfiguration {
+  id            String   @id @default(uuid()) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  projectId     String   @map("project_id") @db.Uuid
+  /// Positive integer number of days. No hardcoded values anywhere.
+  ageDays       Int      @map("age_days")
+  /// Specimens to test at this age. Q-14.
+  specimenCount Int      @map("specimen_count")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  project Project @relation(fields: [projectId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([projectId, ageDays])
+  @@index([tenantId, projectId])
+  @@map("project_test_configurations")
+}
+
+// ─── FieldRecord (FPC01-01 "Registro de campo para la recepción de concreto
+//     hidráulico") ─────────────────────────────────────────────────────────
+// One record per pour (colado). Holds the header, the specified ("proyecto") and
+// delivery-ticket ("remisión") parameters, ambient conditions, equipment
+// traceability, unit weight and air content. Trucks are Delivery rows.
+
+model FieldRecord {
+  id        String            @id @default(uuid()) @db.Uuid
+  tenantId  String            @map("tenant_id") @db.Uuid
+  projectId String            @map("project_id") @db.Uuid
+  status    FieldRecordStatus @default(DRAFT)
+
+  /// "Registro", e.g. "MCH-068". Also the "Informe" column of FPC01-02.
+  /// Format, assigner and uniqueness scope: Q-55 (indexed, not unique, until then).
+  registryNumber String?             @map("registry_number")
+  /// "Fecha del colado". Date-only. Test-age reference date (A-11, A-12 CONFIRMED).
+  pourDate       DateTime            @map("pour_date") @db.Date
+  /// "Proveedor", e.g. "CEMEX". Free text until Q-06.
+  supplier       String?
+  /// FPC01-02 "Hecho en obra" / "Premezclado". ASSUMPTION A-74.
+  production     ConcreteProduction?
+
+  // "Datos de proyecto" — specified values. ASSUMPTION A-75 (per record, not project).
+  strengthCriterion         StrengthCriterion? @map("strength_criterion")
+  /// f'c or MR, kgf/cm².
+  specifiedStrengthKgCm2    Decimal?           @map("specified_strength_kg_cm2") @db.Decimal(6, 1)
+  /// "Revenimiento (cm)", nominal value of "14.0 ± 3.5".
+  specifiedSlumpCm          Decimal?           @map("specified_slump_cm") @db.Decimal(4, 1)
+  /// Tolerance part of "14.0 ± 3.5".
+  specifiedSlumpToleranceCm Decimal?           @map("specified_slump_tolerance_cm") @db.Decimal(4, 1)
+  /// "Tamaño máximo del agregado (mm)". FPC01-02 prints it in cm.
+  maxAggregateSizeMm        Decimal?           @map("max_aggregate_size_mm") @db.Decimal(5, 1)
+  /// "Tipo cemento", e.g. "CPC-40".
+  cementType                String?            @map("cement_type")
+  /// "Edad definitiva (días)". Relation to the configured test ages: Q-74.
+  designAgeDays             Int?               @map("design_age_days")
+
+  // "Datos de remisión" — same parameters as printed on the delivery ticket. Q-65.
+  ticketStrengthKgCm2    Decimal? @map("ticket_strength_kg_cm2") @db.Decimal(6, 1)
+  ticketSlumpCm          Decimal? @map("ticket_slump_cm") @db.Decimal(4, 1)
+  ticketSlumpToleranceCm Decimal? @map("ticket_slump_tolerance_cm") @db.Decimal(4, 1)
+  ticketMaxAggregateMm   Decimal? @map("ticket_max_aggregate_mm") @db.Decimal(5, 1)
+  ticketCementType       String?  @map("ticket_cement_type")
+  ticketDesignAgeDays    Int?     @map("ticket_design_age_days")
+
+  /// "Cribado: Sí / No". Meaning: Q-76.
+  screened   Boolean?
+  /// "Malla" (next to "Cribado"). Q-76.
+  screenMesh String?  @map("screen_mesh")
+
+  // "Condiciones ambientales"
+  skyCondition        SkyCondition?      @map("sky_condition")
+  windCondition       WindCondition?     @map("wind_condition")
+  lightingCondition   LightingCondition? @map("lighting_condition")
+  /// "Humedad (%)".
+  relativeHumidityPct Decimal?           @map("relative_humidity_pct") @db.Decimal(4, 1)
+
+  // "Trazabilidad (*calibrada, #verificada)" — equipment codes as written.
+  // Free text until an equipment catalog is decided. ASSUMPTION A-65, Q-29.
+  thermometerCode  String? @map("thermometer_code")
+  hygrometerCode   String? @map("hygrometer_code")
+  slumpConeCode    String? @map("slump_cone_code")
+  tapeMeasureCode  String? @map("tape_measure_code")
+  strikeOffBarCode String? @map("strike_off_bar_code")
+  slumpRodCode     String? @map("slump_rod_code")
+  samplingRodCode  String? @map("sampling_rod_code")
+  wheelbarrowCode  String? @map("wheelbarrow_code")
+
+  // Unit weight, NMX-C-162-ONNCCE-2014 box. The result is calculated (Q-67).
+  unitWeightScaleCode   String?  @map("unit_weight_scale_code")
+  unitWeightMoldCode    String?  @map("unit_weight_mold_code")
+  unitWeightTareG       Decimal? @map("unit_weight_tare_g") @db.Decimal(9, 1)
+  unitWeightTareSampleG Decimal? @map("unit_weight_tare_sample_g") @db.Decimal(9, 1)
+  unitWeightMoldFactor  Decimal? @map("unit_weight_mold_factor") @db.Decimal(10, 4)
+
+  // Air content, NMX-C-157-ONNCCE-2012 box (read from the meter).
+  airMeterCode  String?  @map("air_meter_code")
+  airContentPct Decimal? @map("air_content_pct") @db.Decimal(4, 1)
+
+  /// "Elemento(s) programado(s)".
+  programmedElement String? @map("programmed_element")
+  /// "Elemento(s) colado(s)". Printed on FPC01-02, FPC06-01 and FPC06-04.
+  castElement       String? @map("cast_element")
+  /// "Observaciones".
+  observations      String?
+  /// "Muestreador" (name as written). Whether it must be a User: Q-39.
+  samplerName       String? @map("sampler_name")
+  // TBD: "Visto bueno" signature (Q-73), "Croquis de colocación" (Q-72),
+  //      "Hoja _ de _" (Q-77).
+
+  // FPC06-04 fields with no box on FPC01-01. ASSUMPTION A-69, Q-64.
+  /// "Datos del proporcionamiento — Número y fecha" (N/A in the example).
+  mixDesignReference String? @map("mix_design_reference")
+  /// "Aditivo (marca, finalidad y cantidad usada)" (N/A in the example).
+  admixture          String?
+  /// "Equipo de mezclado", e.g. "CAMIÓN MEZCLADOR".
+  mixingEquipment    String? @map("mixing_equipment")
+  /// "Método de compactación", e.g. "VACIADO DIRECTO (VIBRADOR DE INMERSIÓN)".
+  compactionMethod   String? @map("compaction_method")
+
+  createdById String?  @map("created_by_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id])
+  project    Project    @relation(fields: [projectId, tenantId], references: [id, tenantId])
+  deliveries Delivery[]
+  reports    Report[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, projectId, pourDate])
+  @@index([tenantId, registryNumber])
+  @@index([tenantId, status])
+  @@map("field_records")
+}
+
+// ─── Delivery ("Entrega": one row of the FPC01-01 table) ────────────────────
+// One truck / batch. ASSUMPTION A-60. Cumulative volume ("acumulado") is derived.
+// Times are time-of-day on the record's pour date, stored as TIME (A-66).
+
+model Delivery {
+  id                   String    @id @default(uuid()) @db.Uuid
+  tenantId             String    @map("tenant_id") @db.Uuid
+  fieldRecordId        String    @map("field_record_id") @db.Uuid
+  /// "Número de la entrega" (1, 2, 3…).
+  sequence             Int
+  /// "Identificación del medio de entrega: remisión > placas < (número)".
+  ticketNumber         String?   @map("ticket_number")
+  /// "Volumen de la unidad (m³)".
+  volumeM3             Decimal?  @map("volume_m3") @db.Decimal(6, 2)
+  /// "Salida planta" (ready-mix) or "hechura" (site-mixed). ASSUMPTION A-66.
+  plantDepartureTime   DateTime? @map("plant_departure_time") @db.Time(0)
+  /// "Llegada obra" (ready-mix) or "disponible" (site-mixed). ASSUMPTION A-66.
+  siteArrivalTime      DateTime? @map("site_arrival_time") @db.Time(0)
+  /// "Colado — inicio".
+  pourStartTime        DateTime? @map("pour_start_time") @db.Time(0)
+  /// "Colado — término".
+  pourEndTime          DateTime? @map("pour_end_time") @db.Time(0)
+  /// "Temperatura ambiente (°C)".
+  ambientTemperatureC  Decimal?  @map("ambient_temperature_c") @db.Decimal(4, 1)
+  /// "Temperatura concreto (°C)".
+  concreteTemperatureC Decimal?  @map("concrete_temperature_c") @db.Decimal(4, 1)
+  /// "Revenimiento obtenido (cm)", reading 1.
+  slump1Cm             Decimal?  @map("slump_1_cm") @db.Decimal(4, 1)
+  /// "Revenimiento obtenido (cm)", reading 2.
+  slump2Cm             Decimal?  @map("slump_2_cm") @db.Decimal(4, 1)
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  fieldRecord FieldRecord @relation(fields: [fieldRecordId, tenantId], references: [id, tenantId])
+  samples     Sample[]
+
+  @@unique([id, tenantId])
+  @@unique([fieldRecordId, sequence])
+  @@index([tenantId, fieldRecordId])
+  @@map("deliveries")
+}
+
+// ─── Sample ("Muestra") ─────────────────────────────────────────────────────
+// Taken from one delivery: the "Referencia de los especímenes" cell of that row.
+// ASSUMPTION A-61. Deliveries without specimens have no sample.
+
+model Sample {
+  id           String        @id @default(uuid()) @db.Uuid
+  tenantId     String        @map("tenant_id") @db.Uuid
+  deliveryId   String        @map("delivery_id") @db.Uuid
+  /// "No. muestra" (FPC01-02) / "Número de muestra" (FPC06-04), e.g. "102".
+  /// Not on FPC01-01: who assigns it is Q-57.
+  sampleNumber String?       @map("sample_number")
+  /// "Tipo" 1–5. ASSUMPTION A-63 (one type per sample).
+  specimenType SpecimenType? @map("specimen_type")
+  /// "Hora de elaboración" of the specimens.
+  moldedAt     DateTime?     @map("molded_at") @db.Time(0)
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id])
+  delivery  Delivery   @relation(fields: [deliveryId, tenantId], references: [id, tenantId])
+  specimens Specimen[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, deliveryId])
+  @@index([tenantId, sampleNumber])
+  @@map("samples")
+}
+
+// ─── Specimen ("Espécimen": cylinder, beam or cube) ─────────────────────────
+
+model Specimen {
+  id             String         @id @default(uuid()) @db.Uuid
+  tenantId       String         @map("tenant_id") @db.Uuid
+  sampleId       String         @map("sample_id") @db.Uuid
+  status         SpecimenStatus @default(CREATED)
+  /// "Clave espécimen" / "Número de espécimen" / worksheet "Clave", e.g. "405".
+  /// Numbering scope: Q-58.
+  specimenNumber String?        @map("specimen_number")
+  /// "Clave molde", e.g. "020". Paired with the specimen by position (A-62).
+  moldCode       String?        @map("mold_code")
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant Tenant         @relation(fields: [tenantId], references: [id])
+  sample Sample         @relation(fields: [sampleId, tenantId], references: [id, tenantId])
+  tests  SpecimenTest[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, sampleId])
+  @@index([tenantId, specimenNumber])
+  @@map("specimens")
+}
+
+// ─── SpecimenTest (one row of FPC06-01 "Registro de resultados de resistencia
+//     a la compresión de especímenes ensayados (cilindros)") ─────────────────
+// Specimen → SpecimenTest is 1:N (ASSUMPTION A-05). The documents show every
+// specimen tested exactly once; 1:N stays so a cancelled test can be replanned.
+// The scheduled DATE is derived (pourDate + ageDays), not stored.
+// Derived, not stored: average height/diameter, area, load in N, stress
+// (kgf/cm² and MPa), % of specified strength, loading rate (Q-59, Q-61).
+
+model SpecimenTest {
+  id                 String             @id @default(uuid()) @db.Uuid
+  tenantId           String             @map("tenant_id") @db.Uuid
+  specimenId         String             @map("specimen_id") @db.Uuid
+  /// Planned age ("Edad (días)"), copied from ProjectTestConfiguration (A-15).
+  ageDays            Int                @map("age_days")
+  status             SpecimenTestStatus @default(SCHEDULED)
+  /// "Fecha de ensayos". Date-only; the actual age is derived from it.
+  testDate           DateTime?          @map("test_date") @db.Date
+  /// "Altura (cm)", reading 1.
+  height1Cm          Decimal?           @map("height_1_cm") @db.Decimal(4, 1)
+  /// "Altura (cm)", reading 2.
+  height2Cm          Decimal?           @map("height_2_cm") @db.Decimal(4, 1)
+  /// "Diámetro (cm)", reading 1.
+  diameter1Cm        Decimal?           @map("diameter_1_cm") @db.Decimal(4, 1)
+  /// "Diámetro (cm)", reading 2.
+  diameter2Cm        Decimal?           @map("diameter_2_cm") @db.Decimal(4, 1)
+  /// "Carga máxima registrada — kgf". The N column is derived (Q-61).
+  maxLoadKgf         Decimal?           @map("max_load_kgf") @db.Decimal(9, 1)
+  /// "Tiempo (s)" of load application. Only filled for some rows (Q-63).
+  loadDurationS      Int?               @map("load_duration_s")
+  /// "Tipo de falla" (NMX-C-083 failure pattern number). Q-60.
+  failureType        Int?               @map("failure_type") @db.SmallInt
+  /// "Tolerancia edad" (Sí / No), entered by hand. ASSUMPTION A-71, Q-62.
+  withinAgeTolerance Boolean?           @map("within_age_tolerance")
+  /// "Prensa", e.g. "CCP-PRE-05". Free text until Q-29 / Q-75.
+  pressCode          String?            @map("press_code")
+  /// "Dimensiones" instruments, e.g. "CCP-FLX-01, CCP-RME-02". Q-29.
+  dimensionEquipment String?            @map("dimension_equipment")
+  performedById      String?            @map("performed_by_id") @db.Uuid
+  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+  specimen Specimen @relation(fields: [specimenId, tenantId], references: [id, tenantId])
+
+  @@index([tenantId, status])
+  @@index([tenantId, specimenId])
+  @@index([tenantId, testDate])
+  @@map("specimen_tests")
+}
+
+// ─── Report (FPC06-04 "Informe de pruebas de control de concreto hidráulico";
+//     historical artifact — ADR-005) ───────────────────────────────────────
+
+model Report {
+  id                    String       @id @default(uuid()) @db.Uuid
+  tenantId              String       @map("tenant_id") @db.Uuid
+  /// Scope = one field record. ASSUMPTION A-68 (A-07 rejected). Q-71.
+  fieldRecordId         String       @map("field_record_id") @db.Uuid
+  /// e.g. "concrete-control". Selects assembler + template.
+  templateKey           String       @map("template_key")
+  templateVersion       String?      @map("template_version")
+  /// Incrementing per (field record, templateKey). A correction = new version (A-23).
+  version               Int
+  status                ReportStatus @default(DRAFT)
+  /// "No. informe", e.g. "MAR-PVLT-F1-CTO-REC-068". Rule: Q-56 (not unique yet).
+  reportNumber          String?      @map("report_number")
+  /// Frozen view model used to render the PDF (incl. "Fecha de informe").
+  /// Never edited after FINAL.
+  snapshot              Json?
+  snapshotSchemaVersion Int?         @map("snapshot_schema_version")
+  /// Object-storage key of the PDF (private bucket).
+  storageKey            String?      @map("storage_key")
+  contentSha256         String?      @map("content_sha256")
+  generatedAt           DateTime?    @map("generated_at") @db.Timestamptz
+  generatedById         String?      @map("generated_by_id") @db.Uuid
+  finalizedAt           DateTime?    @map("finalized_at") @db.Timestamptz
+  finalizedById         String?      @map("finalized_by_id") @db.Uuid
+  createdAt             DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  fieldRecord FieldRecord @relation(fields: [fieldRecordId, tenantId], references: [id, tenantId])
+
+  @@unique([tenantId, fieldRecordId, templateKey, version])
+  @@index([tenantId, status])
+  @@index([tenantId, reportNumber])
+  @@map("reports")
+}

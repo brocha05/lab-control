@@ -24,8 +24,9 @@ Last updated: 2026-10-14 (lab documents analyzed)
   FPC01-01 field record, FPC01-02 Bitácora, FPC06-01 compression worksheet (3 and 7
   days), FPC06-04 report, plus `docs/general_flow.png`. One real case end to end
   (registro MCH-068).
-- Draft Prisma schema now carries the domain columns from those forms, including the new
-  `Delivery` entity and the report scoped per field record. **Validated, not migrated.**
+- Database: first migration (`init`) with the Phase-2 tables. The full domain model from
+  the forms (incl. `Delivery`, report scoped per field record) waits in
+  `apps/backend/prisma/drafts/domain.prisma`, validated in CI, not migrated.
 - Frontend: login, app layout, API client. Backend auth endpoints don't exist yet (Phase 2),
   so login can't succeed end to end.
 - CI runs lint, typecheck, unit tests and build for both apps.
@@ -56,8 +57,7 @@ failure type of specimen 407 (Q-60), report number "CON" vs "CTO" (Q-56), obra n
 
 ## Next (not blocked)
 
-1. Phase 2: reduce the schema to Phase-2 tables and create the first migration (2.1), seed
-   (2.2), port auth from `saas-backend-boilerplate` (2.3–2.4), integration-test harness
+1. Phase 2: seed (2.2), port auth from `saas-backend-boilerplate` (2.3–2.4), integration-test harness
    with two tenants (2.5), `GET /me`.
 2. Phase 3: clients and projects CRUD (with contact and location fields) and
    cross-tenant tests, then the app shell (3.5).

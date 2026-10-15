@@ -30,7 +30,7 @@ cross-tenant test.
 
 ## Phase 2 — Core entities & auth (structure only)
 
-- [ ] 2.1 Reduce `schema.prisma` to Phase-2 tables (tenants, users, clients, projects, project_test_configurations). Create the first migration
+- [x] 2.1 ✅ Reduce `schema.prisma` to Phase-2 tables (tenants, users, clients, projects, project_test_configurations). Create the first migration. The full domain model stays in `prisma/drafts/domain.prisma`
 - [ ] 2.2 Seed / CLI: create tenant + admin user
 - [ ] 2.3 Port auth from boilerplate (login, refresh, logout, JWT strategy). JWT carries `sub`, `tenantId`, `role`
 - [ ] 2.4 Global JWT guard + `@Public()`. `@CurrentTenant()` reads from `request.user`
