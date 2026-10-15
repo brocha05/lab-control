@@ -29,7 +29,8 @@ Last updated: 2026-10-14 (lab documents analyzed)
   `apps/backend/prisma/drafts/domain.prisma`, validated in CI, not migrated.
 - Frontend: login, app layout, API client. Backend auth endpoints don't exist yet (Phase 2),
   so login can't succeed end to end.
-- CI runs lint, typecheck, unit tests and build for both apps.
+- CI runs lint, typecheck, unit tests and build for both apps, plus backend integration
+  tests against Postgres.
 
 ## Assumed
 
@@ -57,8 +58,7 @@ failure type of specimen 407 (Q-60), report number "CON" vs "CTO" (Q-56), obra n
 
 ## Next (not blocked)
 
-1. Phase 2: port auth from `saas-backend-boilerplate` (2.3–2.4), integration-test harness
-   with two tenants (2.5), `GET /me`.
+1. Phase 2: `GET /me` (2.6). Auth, global guard and the integration-test harness are done.
 2. Phase 3: clients and projects CRUD (with contact and location fields) and
    cross-tenant tests, then the app shell (3.5).
 

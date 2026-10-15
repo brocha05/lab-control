@@ -48,6 +48,7 @@ pnpm start:dev
 pnpm test                        # all unit tests (vitest, *.spec.ts next to the code)
 pnpm test src/specimen-tests     # one folder/file
 pnpm test -t "planTestAges"      # one test by name
+pnpm test:int                    # integration tests (*.int-spec.ts), needs Docker Postgres
 pnpm lint | typecheck | format:check | build
 pnpm db:validate | db:generate   # prisma generate also runs on pnpm install
 pnpm db:migrate                  # apply/create migrations (needs Postgres)
@@ -88,7 +89,9 @@ generic `BaseRepository`/`CrudService`.
 - Cross-tenant access returns **404**, not 403.
 - In the schema, every parent has `@@unique([id, tenantId])` and children use composite
   FKs `(parentId, tenantId)`. `tenantId` leads every composite index.
-- Each module gets an integration test with two tenants asserting 404 across tenants.
+- Each module gets an integration test with two tenants asserting 404 across tenants:
+  `*.int-spec.ts` next to the module, using `createTestApp()`, `truncateAll()` and
+  `createTwoTenants()` from `src/testing/`. They run on a separate `<db>_test` database.
 
 **HTTP conventions (`docs/api/conventions.md`)**: global `ValidationPipe` with
 `whitelist + forbidNonWhitelisted`; `ResponseInterceptor` wraps success as

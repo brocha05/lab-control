@@ -45,7 +45,7 @@ export default tseslint.config(
   },
   {
     // supertest response bodies are `any` by design.
-    files: ['**/*.spec.ts'],
+    files: ['**/*.spec.ts', '**/*.int-spec.ts', 'src/testing/**/*.ts'],
     rules: {
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',

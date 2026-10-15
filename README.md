@@ -46,6 +46,7 @@ pnpm dev
 ```bash
 # apps/backend
 pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build
+pnpm test:int   # integration tests: needs Postgres; uses <db>_test, created and migrated automatically
 # apps/frontend
 pnpm format:check && pnpm lint && pnpm typecheck && pnpm build
 ```
