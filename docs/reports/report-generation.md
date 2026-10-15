@@ -4,9 +4,9 @@
 
 ```
 User              API (ReportsService)          Assembler      Renderer     Storage     DB
- │ POST /projects/:id/reports {templateKey}
+ │ POST /field-records/:id/reports {templateKey}
  │────────────────▶│
- │                 │ load project (tenant-scoped) ─────────────────────────────────▶│
+ │                 │ load record + project (tenant-scoped) ────────────────────────▶│
  │                 │ readiness.check() → missing[]  🔒 Q-35
  │                 │   if missing → 422 { missing }
  │                 │ insert Report(DRAFT, version = max+1) ─────────────────────────▶│
@@ -29,7 +29,7 @@ Failure handling:
 
 ## Versioning
 
-- `version` increments per `(tenant, project, templateKey)`.
+- `version` increments per `(tenant, fieldRecord, templateKey)` (scope A-68).
 - Regenerating a non-final report overwrites its snapshot/PDF **in place** (same
   version).
 - After `FINAL`, a correction is a **new** report (version + 1). Whether the old one is

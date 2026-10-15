@@ -106,4 +106,13 @@ client asking for a partial report, a pour cancelled mid-way.
 
 | Doc ID | Name | Type | Received | Location | Analyzed | Analysis file |
 |--------|------|------|----------|----------|----------|---------------|
-| — | *(none received yet)* | | | | | |
+| FPC01-01 | Registro de campo para la recepción de concreto hidráulico (filled, MCH-068) | Scanned PDF | 2026-10-14 | `docs/lab-pdfs/001 REGISTRO DE COLADO (DE CAMPO).pdf` | 2026-10-14 | [analysis/FPC01-01.md](analysis/FPC01-01.md) |
+| FPC01-02 | Bitácora electrónica de ensayos de concreto hidráulico (one sample) | PDF export | 2026-10-14 | `docs/lab-pdfs/002 BITÁCORA DE ENSAYOS.pdf` | 2026-10-14 | [analysis/FPC01-02.md](analysis/FPC01-02.md) |
+| FPC06-01 | Registro de resultados de resistencia a la compresión (cilindros), 3 days and 7 days | Scanned PDF ×2 | 2026-10-14 | `docs/lab-pdfs/003 …A 3 DÍAS.pdf`, `004 …A 7 DÍAS.pdf` | 2026-10-14 | [analysis/FPC06-01.md](analysis/FPC06-01.md) |
+| FPC06-04 | Informe de pruebas de control de concreto hidráulico (MAR-PVLT-F1-CTO-REC-068) | PDF | 2026-10-14 | `docs/lab-pdfs/005 INFORME DE ENSAYOS (MAR-PVLT-F1-CON-REC-068).pdf` | 2026-10-14 | [analysis/FPC06-04.md](analysis/FPC06-04.md) |
+| — | Process diagram | PNG | 2026-10-14 | `docs/general_flow.png` | 2026-10-14 | [analysis/README.md](analysis/README.md#process-general_flowpng--documents) |
+
+> The PDFs contain client data (client and contact names, a mobile phone number) and
+> staff names/signatures, so they are **not in git** (§0). `docs/lab-pdfs/` is
+> gitignored: it exists only on the analyst's machine. Get the files from the product
+> owner if you need them.

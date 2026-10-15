@@ -2,8 +2,9 @@
  * Pure test-scheduling logic. No domain constants: ages come from configuration
  * (ProjectTestConfiguration, ASSUMPTION A-10). See docs/architecture/data-flow.md §2.
  *
- * ASSUMPTION A-11: scheduled date = reference date + ageDays.
- * ASSUMPTION A-12: the reference date is the FieldRecord date (Q-18).
+ * A-11 (confirmed, FPC06-04): scheduled date = reference date + ageDays.
+ * A-12 (confirmed, FPC06-04): the reference date is the record's "fecha del colado"
+ * (FieldRecord.pourDate).
  * ASSUMPTION A-13: calendar days, no weekend/holiday shifting (Q-21).
  */
 import {

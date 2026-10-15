@@ -33,6 +33,11 @@ Open: whether specimens/tests are created on completion, or as soon as specimens
 registered in DRAFT. Current proposal: tests are **planned on completion**, so drafts
 don't pollute the pending-tests list.
 
+FPC01-01 carries two signatures (Muestreador, Visto bueno) but no state. Whether
+"Visto bueno" is the completion step is Q-73. Deliveries, samples and specimens are
+edited as part of the record while it is `DRAFT`. They have no lifecycle of their own,
+except a Specimen's cancellation.
+
 ## Specimen [A-21]
 
 Stored: `CREATED`, `CANCELLED`.
@@ -65,10 +70,14 @@ tests in the same transaction.
 
 - `SCHEDULED → COMPLETED` directly is allowed if `IN_PROGRESS` turns out to be
   unnecessary (Q-24). Remove `IN_PROGRESS` entirely if the lab doesn't need it.
-- `complete()` requires the result measurements. **BLOCKED** on Q-24 … Q-26.
-- `performedAt` (when the test was actually performed) is entered by the user,
-  defaulting to now. The **actual age at test** is derived from it.
-- Late or missed tests: Q-23.
+- No form shows an "in progress" state. FPC06-01 records results directly, so
+  `IN_PROGRESS` is a candidate for removal.
+- `complete()` requires the FPC06-01 readings (heights, diameters, load in kgf, age
+  tolerance; load time and failure type only when given, Q-60, Q-63). Calculations are
+  **BLOCKED** on Q-59 and Q-61.
+- `testDate` ("fecha de ensayos", date only) is entered by the user, defaulting to today
+  in the tenant timezone. The **actual age at test** is derived from it and `pourDate`.
+- Late or missed tests: Q-23. Age tolerance: Q-62.
 
 ## Report [A-23]
 
@@ -85,8 +94,12 @@ tests in the same transaction.
   version** (Q-36). The old one stays retrievable.
 - Generation failure: the report stays `DRAFT` and the error is logged. If async
   generation is introduced later, add `FAILED`.
-- Readiness guard for `generate()`: **BLOCKED** on Q-35.
-- Who can finalize: Q-40. Signatures: Q-37.
+- Scope: one FieldRecord [A-68]. general_flow.png says the report is generated
+  automatically "once everything is filled". The candidate readiness guard for
+  `generate()` is: the record is `COMPLETED` and every non-cancelled test of its
+  specimens is `COMPLETED`. Still **BLOCKED** on Q-35.
+- Who can finalize: Q-40. Signatures: Q-37 (FPC06-04 has two: Jefe de laboratorio and
+  Jefe de control de calidad).
 
 ## Tenant / User
 

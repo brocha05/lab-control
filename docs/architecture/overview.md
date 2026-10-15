@@ -17,7 +17,7 @@ one (shared database, `tenant_id` column).
  NestJS modular monolith
     ├── auth · tenants · users              identity & tenancy
     ├── clients · projects                  who/what the work is for
-    ├── field-records                       field capture (records, samples, specimens)
+    ├── field-records                       field capture (records, deliveries, samples, specimens)
     ├── specimen-tests                      planning, scheduling, results
     ├── bitacora                            READ-ONLY composed view
     ├── reports                             snapshot → HTML → PDF → storage
@@ -54,7 +54,7 @@ tables.
 | `users` | `users` | tenants | |
 | `clients` | `clients` | — | |
 | `projects` | `projects`, `project_test_configurations` | clients | Test configuration lives here [A-10]. |
-| `field-records` | `field_records`, `samples`, `specimens` | projects | Samples and specimens are part of the field-record aggregate (they're captured together on one form). Split into separate modules only if they gain their own workflows. |
+| `field-records` | `field_records`, `deliveries`, `samples`, `specimens` | projects | Deliveries, samples and specimens are part of the field-record aggregate (they're captured together on FPC01-01). Split into separate modules only if they gain their own workflows. |
 | `specimen-tests` | `specimen_tests` | projects (config), field-records (reference date) | Scheduling logic is pure and unit-tested. |
 | `bitacora` | — (none) | reads all of the above | Query-only. See ADR-004. |
 | `reports` | `reports` | bitacora (data), storage | See [../reports/architecture.md](../reports/architecture.md). |

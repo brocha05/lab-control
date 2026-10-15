@@ -1,8 +1,9 @@
 # Domain Overview
 
-> Status: **discovery phase**. This describes the domain as we currently understand it
-> from a verbal description. No official laboratory documents have been analyzed yet.
-> See [assumptions.md](assumptions.md) and [open-questions.md](open-questions.md).
+> Status: **discovery phase**. The first lab documents (FPC01-01, FPC01-02, FPC06-01,
+> FPC06-04) and the process diagram `docs/general_flow.png` were analyzed on 2026-10-14:
+> [analysis/](analysis/README.md). Remaining unknowns: [assumptions.md](assumptions.md)
+> and [open-questions.md](open-questions.md).
 
 ## What the business does
 
@@ -12,16 +13,18 @@ concrete** (*concreto hidráulico*).
 
 Roughly:
 
-1. A client hires the lab to control the concrete on a **project**.
-2. On each pour, a field technician fills in a **Field Record** (sampling event): date,
-   concrete and truck/delivery information, samples taken, specimens (cylinders)
-   molded, and observations.
-3. The specimens are taken to the lab and tested at configured **ages** (for example
-   7 and 28 days after the reference date).
-4. Test results are recorded.
-5. All of this together makes up the project's **Bitácora** (log).
-6. Once enough information exists, the lab issues a formal **report**
-   (*Informe de pruebas de control de concreto hidráulico*) as a PDF.
+1. A client (*solicitante / contratista*) hires the lab to control the concrete on a
+   **project** (*obra*).
+2. On each pour (*colado*), the field technician (*muestreador*) fills in the **field
+   record** FPC01-01: specified concrete, ambient conditions, equipment used, one row
+   per **delivery** (truck) with times, temperatures and slump, and the **specimens**
+   molded from the sampled delivery.
+3. The specimens are tested in the lab at configured **ages** counted from the pour
+   date (3 and 7 days in the example; "normalmente 2-7 a 2-28 días"). Each test day
+   produces the compression worksheet FPC06-01.
+4. Field and test data together form the **Bitácora** FPC01-02, one row per specimen.
+5. Once every test of the sample is done, the lab issues the **report** FPC06-04
+   (*Informe de pruebas de control de concreto hidráulico*) as a PDF, one per sample.
 
 ## Core principle
 
@@ -51,14 +54,16 @@ Tenant (laboratory company)
  └── Client
       └── Project
            ├── ProjectTestConfiguration   (which ages / how many specimens)  [A-10]
-           ├── FieldRecord                (sampling event in the field)
-           │    └── Sample
-           │         └── Specimen         (cylinder)
-           │              └── Test        (lab test at a given age)
-           └── Report                     (historical, snapshotted artifact)
+           └── FieldRecord                (registro de campo FPC01-01: one pour)
+                ├── Delivery              (entrega: one truck / batch)        [A-60]
+                │    └── Sample           (muestra, from one delivery)        [A-61]
+                │         └── Specimen    (espécimen: cylinder, beam, cube)
+                │              └── SpecimenTest (ensaye at a given age, FPC06-01)
+                └── Report                (informe FPC06-04, snapshotted)     [A-68]
 
 Derived (not stored as source data):
-  Bitácora · Pending tests · Test schedule · Specimen age · Dashboard metrics
+  Bitácora (FPC01-02) · Compression worksheet (FPC06-01) · Pending tests ·
+  Test schedule · Specimen age · Calculated results · Dashboard metrics
 ```
 
 ## Bounded areas inside the monolith
@@ -77,16 +82,23 @@ Derived (not stored as source data):
 | Term | Meaning (current understanding) | Validated? |
 |------|---------------------------------|-----------|
 | **Tenant** | A laboratory company using the system. All its data is isolated from other tenants. | n/a (technical) |
-| **Client** (*cliente*) | The party the lab works for on a project. | No (Q-41) |
-| **Project** (*obra / proyecto*) | A construction project under quality control. | No |
-| **Field Record** (*registro de campo*) | The record of a sampling event in the field (one pour / delivery). | No (Q-01) |
-| **Trompo** | Concrete mixer truck. Delivery information may relate to it. | No (Q-05) |
-| **Sample** (*muestra*) | Material taken during a field event. | No (Q-10) |
-| **Specimen / Cylinder** (*espécimen / cilindro*) | A molded test piece made from a sample. | No (Q-10, Q-12) |
-| **Test age** (*edad de prueba*) | The number of days after the reference date when a specimen is tested. | No (Q-18, Q-19) |
-| **Test** (*ensaye / prueba*) | A laboratory test performed on a specimen at an age. Named `SpecimenTest` in code (see [entities.md](entities.md)). | No (Q-24) |
-| **Bitácora** | Consolidated log of a project's field records, samples, specimens, and tests. A **derived** view. | No (Q-27) |
-| **Report** (*informe*) | Formal PDF document issued to the client. A historical artifact. | No (Q-31, Q-32) |
+| **Client** (*solicitante* on FPC01-01, *contratista* on FPC06-04) | The party the lab works for on a project. | Yes (FPC01-01, FPC06-04) |
+| **Project** (*obra*) | A construction project under quality control, with a location. | Yes (FPC01-01) |
+| **Field Record** (*registro de campo*, FPC01-01) | The record of one pour (*colado*): specified concrete, conditions, equipment, deliveries, specimens. Numbered "MCH-068". | Yes (FPC01-01) |
+| **Colado** | A pour. Its date (*fecha del colado*) is the test-age reference date. | Yes (FPC06-04) |
+| **Delivery** (*entrega*) | One truck (*trompo*, ready-mix) or batch (site-mixed) received during the pour. A row of FPC01-01. | Yes (FPC01-01) |
+| **Remisión** | Delivery ticket. Its number identifies the delivery. | Yes (FPC01-01) |
+| **Revenimiento** | Slump (cm). Specified as "14.0 ± 3.5"; measured twice per delivery. | Yes (FPC01-01) |
+| **f'c / MR** | Specified compressive strength / modulus of rupture (kgf/cm²). | Yes (FPC01-01) |
+| **Edad definitiva** | Design age (days) on the record. Relation to test ages: Q-74. | Partly |
+| **Sample** (*muestra*) | Concrete taken from one delivery to mold specimens. Numbered "102". | Yes (FPC01-02, FPC06-04) |
+| **Specimen** (*espécimen*: cilindro, viga, cubo) | A molded test piece. Numbered "405"; made in a mold with its own key ("020"). | Yes (FPC01-01) |
+| **Test age** (*edad de ensayo*) | Days after the pour date when a specimen is tested. | Yes (FPC06-04) |
+| **Test** (*ensaye*) | Compression test of a specimen at an age (FPC06-01). Named `SpecimenTest` in code (see [entities.md](entities.md)). | Yes (FPC06-01) |
+| **Tipo de falla** | Failure pattern number observed after the break (NMX-C-083). | Partly (Q-60) |
+| **Bitácora** (FPC01-02) | Electronic log, one row per specimen, field data + result. A **derived** view. | Yes (FPC01-02); scope Q-68 |
+| **Report** (*informe*, FPC06-04) | Formal PDF issued to the client for one sample. A historical artifact. | Yes (FPC06-04) |
+| **SGC** | *Sistema de gestión de calidad*: the lab's quality system. Its coordinator signs FPC06-01. | Yes (FPC06-01) |
 
 ## Future materials (out of scope now)
 

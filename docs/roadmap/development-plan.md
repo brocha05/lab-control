@@ -8,9 +8,10 @@ cross-tenant test.
 
 - [ ] 0.1 Send the document request list ([discovery-checklist.md §3](../domain/discovery-checklist.md#3-documents-to-request-from-the-laboratory)) to the lab
 - [ ] 0.2 Schedule the end-to-end walkthrough interview (§4)
-- [ ] 0.3 For each document received: run the checklist and write `docs/domain/analysis/<doc>.md`
-- [ ] 0.4 Update assumptions / open-questions. Write a "proposed model changes" doc for review
-- [ ] 0.5 Review session. Approve the changes, then update entities.md / schema.md / lifecycle.md
+- [x] 0.3 ✅ For each document received: run the checklist and write `docs/domain/analysis/<doc>.md` (2026-10-14: FPC01-01, FPC01-02, FPC06-01, FPC06-04)
+- [x] 0.4 ✅ Update assumptions / open-questions. "Proposed model changes": [analysis/README.md](../domain/analysis/README.md)
+- [ ] 0.5 Review session with the lab: answer the P0 questions Q-55…Q-61, Q-74 and resolve the four document conflicts. entities.md / schema.md / lifecycle.md were already updated at the owner's request (2026-10-14). Adjust them after the review
+- [ ] 0.6 Request the remaining documents: specimen labels, procedures/standards list, org chart and signers, historical spreadsheets, accreditation, one corrected/re-issued report, one record with several samples ([checklist §3](../domain/discovery-checklist.md#3-documents-to-request-from-the-laboratory))
 
 ## Phase 1 — Architecture & skeleton
 
@@ -44,52 +45,52 @@ cross-tenant test.
 - [ ] 3.4 Frontend: projects list/detail/form
 - [ ] 3.5 Frontend: app shell with sections Dashboard, Clients, Projects, Field Records, Bitácora, Pending Tests, Reports (empty states for blocked sections)
 
-## Phase 4 — Field records 🔒 (Q-01…Q-09, Q-33)
+## Phase 4 — Field records (structure known from FPC01-01; 🔒 items: Q-33, Q-55)
 
-- [ ] 4.1 🔒 Add the validated field-record columns (migration)
-- [ ] 4.2 `field-records` module: create DRAFT, get, list by project, update while DRAFT
+- [ ] 4.1 Migration for `field_records` + `deliveries` (columns drafted in `schema.prisma`; after 0.5)
+- [ ] 4.2 `field-records` module: create DRAFT, get, list by project, nested `PUT` (header + deliveries + samples + specimens) while DRAFT
 - [ ] 4.3 Transition rules as a pure function + tests. `complete`/`cancel` endpoints
 - [ ] 4.4 🔒 Completeness rules (Q-33)
-- [ ] 4.5 Frontend: responsive (mobile-first) field record form, mirroring the official form's sections
+- [ ] 4.5 Frontend: responsive (mobile-first) field record form, mirroring FPC01-01's sections (header, datos de proyecto/remisión, condiciones, trazabilidad, entregas, especímenes, masa unitaria/aire, elementos, observaciones)
 
-## Phase 5 — Samples & specimens 🔒 (Q-10…Q-16)
+## Phase 5 — Samples & specimens (structure known; 🔒 items: Q-57, Q-58)
 
-- [ ] 5.1 🔒 Add validated columns. Decide on the 1:1 vs 1:N test cardinality (Q-16)
+- [ ] 5.1 Migration for `samples` / `specimens` columns. Confirm the 1:N test cardinality (forms show one test per specimen, A-05)
 - [ ] 5.2 Add/edit samples and specimens within a DRAFT record
-- [ ] 5.3 🔒 Specimen identifier generation (Q-13)
+- [ ] 5.3 🔒 Sample and specimen number generation (Q-57, Q-58)
 - [ ] 5.4 Cancel specimen (cascades to open tests)
 
 ## Phase 6 — Test scheduling (partly 🔒 Q-18…Q-23)
 
 - [ ] 6.1 Project test configuration endpoints + UI (validate `ageDays > 0`, `specimenCount > 0`, unique ages)
-- [ ] 6.2 🔒 Confirm the reference date (Q-18) and weekend rule (Q-21). Adjust `test-schedule.ts` if needed
-- [ ] 6.3 🔒 Specimen → age assignment rule (Q-14, Q-16)
+- [ ] 6.2 🔒 Reference date confirmed (`pourDate`, Q-18). Still confirm holidays (Q-21) and age tolerance (Q-62). Adjust `test-schedule.ts` if needed
+- [ ] 6.3 🔒 Specimen → age assignment rule (Q-14, Q-74). Observed: ascending specimen number → ascending age
 - [ ] 6.4 `planTestsForFieldRecord` on completion (single transaction with the status change)
 - [ ] 6.5 `GET /tests/pending` with derived `scheduledDate` + `dueStatus` (today in tenant TZ)
 - [ ] 6.6 Frontend: pending tests page (overdue / today / upcoming)
 
-## Phase 7 — Test results 🔒 (Q-24…Q-30)
+## Phase 7 — Test results (readings known from FPC06-01; 🔒 items: Q-59, Q-61)
 
-- [ ] 7.1 🔒 Result columns (migration)
-- [ ] 7.2 🔒 Calculation functions, verbatim from the documented formulas, with test vectors from real lab data. `TODO: VALIDATE WITH LAB DOCUMENTATION` removed only when the vectors pass
+- [ ] 7.1 Migration for the `specimen_tests` reading columns (drafted)
+- [ ] 7.2 🔒 Calculation functions (area, N, stress, MPa, %, averages, rate), with test vectors from real lab data (MCH-068 specimens 389–408 are the first set). `TODO: VALIDATE WITH LAB DOCUMENTATION` removed only when the formulas are confirmed (Q-59, Q-61) and the vectors pass
 - [ ] 7.3 Start / complete / cancel endpoints
-- [ ] 7.4 Frontend: test entry screen (shows the derived actual age)
+- [ ] 7.4 Frontend: test entry screen per project + test date, laid out like FPC06-01 (shows the derived actual age). Printable worksheet (Q-69)
 - [ ] 7.5 Decide (ADR) whether calculated values are stored for audit or computed on read
 
-## Phase 8 — Bitácora 🔒 (Q-27)
+## Phase 8 — Bitácora (columns known from FPC01-02; 🔒 items: Q-66, Q-68)
 
-- [ ] 8.1 `bitacora` module: tenant-scoped composed query, paginated
+- [ ] 8.1 `bitacora` module: tenant-scoped composed query, one row per specimen with the FPC01-02 columns, paginated. Scope 🔒 Q-68
 - [ ] 8.2 Frontend: Bitácora table (per project), print-friendly
 - [ ] 8.3 Optional: CSV/Excel export, if the lab currently works in Excel
 - [ ] 8.4 Dashboard summary counts
 
-## Phase 9 — PDF reports 🔒 (Q-31…Q-38, Q-51)
+## Phase 9 — PDF reports (layout known from FPC06-04; 🔒 items: Q-35, Q-37, Q-56, Q-71)
 
 - [ ] 9.1 `ReportStorage` (S3/MinIO) + signed URL download
 - [ ] 9.2 `ReportRenderer` (Playwright, shared browser, timeout)
-- [ ] 9.3 Reports module: create/generate/regenerate/finalize + version numbering + checksum
-- [ ] 9.4 🔒 `concrete-control` view model + assembler + readiness
-- [ ] 9.5 🔒 `concrete-control` HTML/CSS template matching the official report
+- [ ] 9.3 Reports module (scope: field record): create/generate/regenerate/finalize + version numbering + checksum
+- [ ] 9.4 🔒 `concrete-control` view model + assembler + readiness (numbering Q-56, calculations Q-59/Q-61, readiness Q-35)
+- [ ] 9.5 `concrete-control` HTML/CSS template matching FPC06-04 (signatures 🔒 Q-37)
 - [ ] 9.6 Frontend: report list/generate/download per project
 
 ## Phase 10 — Hardening

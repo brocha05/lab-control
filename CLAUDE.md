@@ -2,10 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Language:** always reply to the user in Spanish (chat only). Code, comments, docs and
+commit messages stay in English. UI text is Spanish (A-40).
+
 ## What this is
 
 Multi-tenant system for a construction-materials testing lab (hydraulic concrete first):
-Client → Project → FieldRecord → Sample → Specimen → SpecimenTest, plus a derived
+Client → Project → FieldRecord → Delivery → Sample → Specimen → SpecimenTest, plus a derived
 Bitácora and snapshotted PDF reports. Two independent apps in one repo, **no monorepo
 tooling**: `apps/backend` (NestJS 12 + Prisma 7) and `apps/frontend` (Next.js 16). Each is a
 standalone **pnpm** project (own `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`);
@@ -18,9 +21,11 @@ and what's blocked: `PROJECT_STATUS.md`. Tasks per phase: `docs/roadmap/developm
 
 The domain is still in discovery. Official lab documents are the source of truth.
 
-- Don't add domain fields (field-record content, sample/specimen data, measurements,
-  formulas, Bitácora columns, report layout) until the documents are analyzed. Phases
-  4, 5, 7, 8, 9 and tasks marked 🔒 are blocked. Don't start them.
+- Domain fields come only from analyzed documents (`docs/domain/analysis/`, first batch
+  2026-10-14: FPC01-01 field record, FPC01-02 Bitácora, FPC06-01 compression worksheet,
+  FPC06-04 report). Don't add fields beyond them. Formulas are **not** printed on any
+  form, so calculations stay blocked (Q-59, Q-61). Tasks marked 🔒 in
+  `docs/roadmap/development-plan.md` are blocked. Don't start them.
 - Code depending on an assumption cites it: `// ASSUMPTION A-12`. Open questions are
   `Q-xx`. IDs live in `docs/domain/assumptions.md` and `docs/domain/open-questions.md`.
   Never silently turn an assumption into a fact. Unknowns are marked `TBD` or
@@ -91,7 +96,7 @@ Transition rules live in one pure, unit-tested function per entity
 stored as `DATE`; arithmetic is on UTC midnights. "Today" is always
 `calendarDateInTimeZone(tenant.timezone)` (A-14). Timestamps are `timestamptz`.
 
-**Derived, not stored**: scheduled test date (`recordDate + ageDays`), due status,
+**Derived, not stored**: scheduled test date (`FieldRecord.pourDate + ageDays`), due status,
 specimen "scheduled/tested", the whole Bitácora (ADR-004, no table). `SpecimenTest.ageDays`
 is the one deliberate copy (A-15). Reports are the one sanctioned duplication: frozen
 `snapshot` + PDF + SHA-256; `FINAL` is immutable, corrections are a new version (ADR-005).

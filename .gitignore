@@ -30,3 +30,6 @@ Thumbs.db
 
 # Generated Prisma client (apps/backend, regenerated on install)
 apps/backend/src/generated/
+
+# Lab source documents: client/personal data, never in the repo (discovery-checklist §0)
+docs/lab-pdfs/

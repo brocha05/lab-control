@@ -57,7 +57,17 @@ reports/templates/
    returns a signed URL valid for ~5 minutes.
 5. Templates include a visible version/ID footer. Verification QR/signature: Q-38.
 
-## Unknown (🔒 Q-31 … Q-38, Q-51)
+## Known from FPC06-04 (2026-10-14)
 
-Report scope, layout, numbering, signatures, readiness rules, and whether partial
-reports (e.g. 7-day results only) are issued.
+- Scope: one field record / sample (A-68). Layout, sections, fixed notes and the
+  signature blocks are listed in [../domain/analysis/FPC06-04.md](../domain/analysis/FPC06-04.md).
+- Template key `concrete-control`. Portrait letter size, up to 6 specimen columns.
+  Unused columns are struck through.
+- The view model holds every printed value already formatted, including the
+  calculated ones (stress, MPa, %, averages). Rule 1 still applies.
+
+## Unknown (🔒)
+
+Numbering (Q-56), rounding and conversion factors (Q-59, Q-61), signatures (Q-37, Q-38),
+readiness (Q-35), more than 6 specimens or several samples per record (Q-71), revisions
+(Q-36), and whether partial reports (e.g. 3-day results only) are issued.

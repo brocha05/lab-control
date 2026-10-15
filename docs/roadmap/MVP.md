@@ -18,12 +18,12 @@ Out of MVP: offline/PWA, client portal, billing, other materials, RLS, async wor
 | **1** Architecture + skeleton | Repo, docs, backend skeleton, frontend bootstrap, local infra | No | ✅ docs, ✅ backend skeleton builds, tests pass, ✅ frontend bootstrap, ✅ CI. |
 | **2** Core entities + DB | First migration (tenancy, users, clients, projects), seed, minimal auth | No (structure only) | Migration applied. Login works. Cross-tenant test passes. |
 | **3** Clients / Projects | CRUD + UI | Partially (extra fields Q-41) | Lab can create clients/projects in the UI. |
-| **4** Field Records | Capture form, DRAFT/COMPLETE/CANCEL | **Yes**: Q-01…Q-09, Q-33 | Form matches the official field record. |
-| **5** Samples / Specimens | Registration within a record | **Yes**: Q-10…Q-16 | Specimen identification matches lab practice. |
-| **6** Test scheduling | Configuration per project, planning, pending list | **Partially**: Q-18…Q-23 (pure logic already exists) | Pending list matches the lab's real schedule for a sample week. |
-| **7** Test results | Record measurements, calculations, complete | **Yes**: Q-24…Q-30 | Calculated values match the lab's existing spreadsheets for N real cases. |
-| **8** Bitácora | Composed read view + export? | **Yes**: Q-27 | Lab confirms it replaces their current Bitácora. |
-| **9** PDF reports | Snapshot, template, storage, finalize | **Yes**: Q-31…Q-38, Q-51 | PDF accepted by the lab as equivalent to the official report. |
+| **4** Field Records | Capture form, DRAFT/COMPLETE/CANCEL | **Partially** (fields known from FPC01-01): Q-33, Q-55, Q-64, Q-65 | Form matches the official field record. |
+| **5** Samples / Specimens | Registration within a record | **Partially** (structure known): Q-57, Q-58 | Specimen identification matches lab practice. |
+| **6** Test scheduling | Configuration per project, planning, pending list | **Partially**: Q-14, Q-20, Q-74 (Q-18 answered; pure logic already exists) | Pending list matches the lab's real schedule for a sample week. |
+| **7** Test results | Record measurements, calculations, complete | **Partially** (readings known from FPC06-01): calculations Q-59, Q-61, Q-62 | Calculated values match the lab's existing spreadsheets for N real cases. |
+| **8** Bitácora | Composed read view + export? | **Partially** (columns known from FPC01-02): Q-66, Q-68 | Lab confirms it replaces their current Bitácora. |
+| **9** PDF reports | Snapshot, template, storage, finalize | **Partially** (layout known from FPC06-04): Q-35, Q-37, Q-56, Q-59, Q-61, Q-71 | PDF accepted by the lab as equivalent to the official report. |
 | **10** Auth / multi-tenant hardening | Real roles, audit events, exhaustive isolation tests, RLS decision | Q-39, Q-40, Q-54 | Security review passed. |
 | **11** Production deployment | Hosting, backups, monitoring, secrets | No | Restore drill done. Alerts configured. |
 | **12** Offline/PWA & advanced | Field offline capture, etc. | Q-49 | — |
@@ -34,9 +34,10 @@ The brief puts authentication in Phase 10. **Minimal authentication moves to Pha
 because tenant scoping needs an authenticated tenant from the very first endpoint, and
 the boilerplate already provides it. Phase 10 keeps role design, audit, and hardening.
 
-While waiting for documents, Phases 1–3 and the pure part of Phase 6 can proceed. Do
-**not** start Phases 4, 5, 7, 8, or 9 without their documents. Building them on guesses
-is the main risk of this project.
+The first documents arrived on 2026-10-14 ([analysis](../domain/analysis/README.md)).
+Phases 4, 5, 7, 8 and 9 now have their structure, but the tasks still marked 🔒 in the
+[development plan](development-plan.md) wait for the questions listed above. Building
+them on guesses is the main risk of this project.
 
 ## Milestones
 

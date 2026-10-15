@@ -1,6 +1,8 @@
 # Relationships & ERD
 
-> Preliminary. Cardinalities marked with an assumption ID are unvalidated.
+> Preliminary, based on the first lab documents ([../domain/analysis/](../domain/analysis/README.md)).
+> Cardinalities marked with an assumption ID are unvalidated. Only key columns are shown;
+> the full column list is in [schema.md](schema.md).
 
 ## ERD
 
@@ -11,16 +13,17 @@ erDiagram
     CLIENT ||--o{ PROJECT : "owns (A-02)"
     PROJECT ||--o{ PROJECT_TEST_CONFIGURATION : "configures ages (A-10)"
     PROJECT ||--o{ FIELD_RECORD : "has (A-03)"
-    FIELD_RECORD ||--o{ SAMPLE : "yields (A-04)"
-    SAMPLE ||--o{ SPECIMEN : "yields (A-04)"
-    SPECIMEN ||--o{ SPECIMEN_TEST : "tested by (A-05: maybe 1:1)"
-    PROJECT ||--o{ REPORT : "issues (A-07)"
+    FIELD_RECORD ||--o{ DELIVERY : "receives (A-60)"
+    DELIVERY ||--o{ SAMPLE : "is sampled (A-61)"
+    SAMPLE ||--o{ SPECIMEN : yields
+    SPECIMEN ||--o{ SPECIMEN_TEST : "tested by (A-05: once in practice)"
+    FIELD_RECORD ||--o{ REPORT : "issues (A-68)"
 
     TENANT {
         uuid id PK
-        text name
         text slug UK
         text timezone
+        text legal_name
     }
     USER {
         uuid id PK
@@ -32,12 +35,14 @@ erDiagram
         uuid id PK
         uuid tenant_id FK
         text name
+        text contact_name
     }
     PROJECT {
         uuid id PK
         uuid tenant_id FK
         uuid client_id FK
         text name
+        text location
     }
     PROJECT_TEST_CONFIGURATION {
         uuid id PK
@@ -51,18 +56,35 @@ erDiagram
         uuid tenant_id FK
         uuid project_id FK
         enum status
-        date record_date "A-12"
+        text registry_number "MCH-068"
+        date pour_date "age reference"
+        numeric specified_strength_kg_cm2
+        text cast_element
+    }
+    DELIVERY {
+        uuid id PK
+        uuid tenant_id FK
+        uuid field_record_id FK
+        int sequence
+        text ticket_number
+        numeric volume_m3
+        numeric concrete_temperature_c
     }
     SAMPLE {
         uuid id PK
         uuid tenant_id FK
-        uuid field_record_id FK
+        uuid delivery_id FK
+        text sample_number "102"
+        enum specimen_type
+        time molded_at
     }
     SPECIMEN {
         uuid id PK
         uuid tenant_id FK
         uuid sample_id FK
         enum status
+        text specimen_number "405"
+        text mold_code
     }
     SPECIMEN_TEST {
         uuid id PK
@@ -70,17 +92,18 @@ erDiagram
         uuid specimen_id FK
         int age_days
         enum status
-        timestamptz performed_at
+        date test_date
+        numeric max_load_kgf
     }
     REPORT {
         uuid id PK
         uuid tenant_id FK
-        uuid project_id FK
+        uuid field_record_id FK
         text template_key
         int version
         enum status
+        text report_number
         jsonb snapshot
-        text storage_key
     }
 ```
 
@@ -94,34 +117,34 @@ Each parent declares `UNIQUE (id, tenant_id)`. Each child references the parent 
 
 ```sql
 ALTER TABLE samples
-  ADD CONSTRAINT samples_field_record_fk
-  FOREIGN KEY (field_record_id, tenant_id)
-  REFERENCES field_records (id, tenant_id);
+  ADD CONSTRAINT samples_delivery_fk
+  FOREIGN KEY (delivery_id, tenant_id)
+  REFERENCES deliveries (id, tenant_id);
 ```
 
 In Prisma:
 
 ```prisma
-fieldRecord FieldRecord @relation(fields: [fieldRecordId, tenantId], references: [id, tenantId])
+delivery Delivery @relation(fields: [deliveryId, tenantId], references: [id, tenantId])
 ```
 
-Effect: inserting a Sample with tenant A's `tenant_id` and tenant B's
-`field_record_id` fails at the database level.
+Effect: inserting a Sample with tenant A's `tenant_id` and tenant B's `delivery_id`
+fails at the database level.
 
 ## Delete behaviour
 
 | Relation | On delete | Why |
 |----------|-----------|-----|
 | Project → ProjectTestConfiguration | Cascade | Pure configuration, owned by the project |
-| Everything else | Restrict (default) | Records are cancelled, not deleted (A-24). Prevents accidental loss of history. |
+| Everything else | Restrict (default) | Records are cancelled, not deleted (A-24). While a record is `DRAFT`, the service deletes its deliveries/samples/specimens explicitly. |
 
 ## Cardinalities to validate
 
 | Relation | Current | Possible after validation | Question |
 |----------|---------|---------------------------|----------|
-| Project → Client | N:1 | N:M (owner + contractor + supervisor?) | Q-41 |
-| FieldRecord → Project | N:1 | — | Q-04 |
-| FieldRecord → truck/delivery | (fields TBD) | 1:N separate entity | Q-05 |
-| Specimen → SpecimenTest | 1:N | 1:1 | Q-16 |
-| Report → Project | N:1 | Report → FieldRecord(s) / date range | Q-31 |
-| Age reference date | on FieldRecord | on Sample | Q-18 |
+| Project → Client | N:1 | N:M (owner + contractor + supervisor?) | Q-41 (only one party printed) |
+| FieldRecord → Delivery | 1:N | — (4 in the example) | Q-77 |
+| Delivery → Sample | 1:N | 1:1 | Q-71 |
+| Specimen → SpecimenTest | 1:N | 1:1 (each specimen tested once on the forms) | Q-16 |
+| Report → FieldRecord | N:1 | Report → Sample | Q-71 |
+| Test ages | per project | per record ("edad definitiva") / lab default | Q-20, Q-74 |
