@@ -7,7 +7,7 @@ Last updated: 2026-10-14 (lab documents analyzed)
 | 0 Domain discovery | 🟡 **First documents analyzed** (2026-10-14). Review with the lab pending (0.5) |
 | 1 Architecture + skeleton | ✅ Done (exit criteria met) |
 | 2 Core entities + auth | ✅ Done (2026-10-14): migrations, tenant CLI, auth, global guard, `/me`, integration tests |
-| 3 Clients / projects | **Next.** Fields known (FPC01-01, FPC06-04) |
+| 3 Clients / projects | ✅ Done (2026-10-14): API with cross-tenant tests, screens, app shell |
 | 4, 5 Field records, samples, specimens | Structure known and drafted in the schema. 🔒 items: completeness (Q-33), numbering (Q-55, Q-57, Q-58) |
 | 6 Test scheduling | Pure logic done (`test-schedule.ts`); reference date confirmed. 🔒 items: age assignment (Q-14, Q-74), holidays/tolerance (Q-21, Q-62) |
 | 7 Test results | Readings known and drafted. 🔒 calculations (Q-59 rounding, Q-61 factors) |
@@ -29,7 +29,9 @@ Last updated: 2026-10-14 (lab documents analyzed)
   `apps/backend/prisma/drafts/domain.prisma`, validated in CI, not migrated.
 - Auth: login / refresh (rotating, reuse detection) / logout, global JWT guard, `GET /me`.
   Labs and their first admin are created with `pnpm cli:create-tenant`.
-- Frontend: login, app layout, API client. Its auth types now match the backend.
+- Clients and projects: API (paginated, search, cross-tenant 404 tests) and screens.
+- Frontend: login, app shell with every section (blocked ones show "disponible
+  próximamente"), clients and projects screens, dashboard counts.
 - CI runs lint, typecheck, unit tests and build for both apps, plus backend integration
   tests against Postgres.
 
@@ -59,8 +61,9 @@ failure type of specimen 407 (Q-60), report number "CON" vs "CTO" (Q-56), obra n
 
 ## Next (not blocked)
 
-1. Phase 3: clients and projects CRUD (with contact and location fields) and
-   cross-tenant tests, then the app shell (3.5).
+1. Phase 6.1: project test-age configuration (endpoints + UI). Not blocked.
+2. Phases 4, 5, 7, 8, 9: structure is known, but their 🔒 items wait for the lab's
+   answers to the questionnaire (development-plan 0.5).
 
 ## Notes
 

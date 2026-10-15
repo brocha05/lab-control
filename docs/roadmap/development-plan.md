@@ -43,7 +43,7 @@ cross-tenant test.
 - [x] 3.2 ✅ `projects` module: list (search, `clientId` filter)/create/get/update. Client must belong to the tenant (composite FK + `ClientsService.assertExists`); client names via `ClientsService.namesByIds` (no cross-module table reads)
 - [x] 3.3 ✅ Frontend: clients list (search, pagination)/detail/form (create in a modal, edit on the detail page). Shared `Table`, `Pagination`, `SearchInput`, `FormField`, `useListState`
 - [x] 3.4 ✅ Frontend: projects list (search, client filter)/detail/form, `ClientSelect`, and the client page lists its projects with "Nuevo proyecto" pre-selecting the client
-- [ ] 3.5 Frontend: app shell with sections Dashboard, Clients, Projects, Field Records, Bitácora, Pending Tests, Reports (empty states for blocked sections)
+- [x] 3.5 ✅ Frontend: app shell with sections Dashboard (client/project counts), Clients, Projects, Field Records, Bitácora, Pending Tests, Reports ("disponible próximamente" pages via `UpcomingSection` for blocked sections)
 
 ## Phase 4 — Field records (structure known from FPC01-01; 🔒 items: Q-33, Q-55)
 

@@ -3,12 +3,16 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+  BookOpen,
   Building2,
-  FolderKanban,
-  LayoutDashboard,
+  CalendarClock,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
+  FileText,
   FlaskConical,
+  FolderKanban,
+  LayoutDashboard,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils/cn';
@@ -28,12 +32,21 @@ interface NavGroup {
   items: NavItem[];
 }
 
-// Sections (Clients, Projects, Field Records, Bitácora, Pending Tests, Reports) are added
-// with the app shell in development-plan 3.5.
+// App shell (development-plan 3.5). Sections whose phase is blocked show an
+// "upcoming" page until they are built.
 const NAV_GROUPS: NavGroup[] = [
   {
     label: 'General',
     items: [{ href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true }],
+  },
+  {
+    label: 'Laboratorio',
+    items: [
+      { href: '/field-records', label: 'Registros de campo', icon: ClipboardList },
+      { href: '/tests/pending', label: 'Pruebas pendientes', icon: CalendarClock },
+      { href: '/bitacora', label: 'Bitácora', icon: BookOpen },
+      { href: '/reports', label: 'Informes', icon: FileText },
+    ],
   },
   {
     label: 'Catálogos',
