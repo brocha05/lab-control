@@ -68,6 +68,16 @@ export class ClientsService {
     return this.get(tenantId, id);
   }
 
+  /** For other modules: id → name of the tenant's clients among `ids` (others are absent). */
+  async namesByIds(tenantId: string, ids: readonly string[]): Promise<Map<string, string>> {
+    if (ids.length === 0) return new Map();
+    const rows = await this.prisma.client.findMany({
+      where: { tenantId, id: { in: [...new Set(ids)] } },
+      select: { id: true, name: true },
+    });
+    return new Map(rows.map((r) => [r.id, r.name]));
+  }
+
   /** For other modules (projects): 404 unless the client belongs to the tenant. */
   async assertExists(tenantId: string, id: string): Promise<void> {
     const found = await this.prisma.client.count({ where: { id, tenantId } });

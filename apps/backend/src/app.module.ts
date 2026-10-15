@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module.js';
 import { ClientsModule } from './clients/clients.module.js';
+import { ProjectsModule } from './projects/projects.module.js';
 import { HealthController } from './health/health.controller.js';
 import { Env, validateEnv } from './shared/config/env.validation.js';
 import { resolveRequestId } from './shared/http/request-id.js';
@@ -34,6 +35,7 @@ import { PrismaModule } from './shared/prisma/prisma.module.js';
     PrismaModule,
     AuthModule,
     ClientsModule,
+    ProjectsModule,
   ],
   controllers: [HealthController],
 })
