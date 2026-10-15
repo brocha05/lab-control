@@ -1,0 +1,303 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// DRAFT SCHEMA — domain-discovery phase. NOT FINAL.
+//
+// This schema fixes identity, ownership, tenancy, relationships and lifecycle
+// states. Domain content (what is actually captured in a field record, sample,
+// specimen or test) is intentionally absent and marked TBD until the official
+// laboratory documents are analyzed. See docs/domain/open-questions.md.
+//
+// Tenancy rules (docs/architecture/multi-tenancy.md, ADR-002):
+//   - every tenant-owned table has tenant_id
+//   - parents expose @@unique([id, tenantId]); children reference parents with
+//     the composite (parentId, tenantId), so a child can never point at another
+//     tenant's parent.
+//   - tenantId is always the leading column of composite indexes.
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums (preliminary — docs/domain/lifecycle.md) ─────────────────────────
+
+/// Placeholder roles. ASSUMPTION A-33 — real lab roles are Q-39/Q-40.
+enum UserRole {
+  ADMIN
+  MEMBER
+}
+
+/// ASSUMPTION A-20
+enum FieldRecordStatus {
+  DRAFT
+  COMPLETED
+  CANCELLED
+}
+
+/// ASSUMPTION A-21 — "scheduled"/"tested" are derived from SpecimenTest rows.
+enum SpecimenStatus {
+  CREATED
+  CANCELLED
+}
+
+/// ASSUMPTION A-22 — IN_PROGRESS may be dropped after validation (Q-24).
+enum SpecimenTestStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+/// ASSUMPTION A-23
+enum ReportStatus {
+  DRAFT
+  GENERATED
+  FINAL
+}
+
+// ─── Tenant ─────────────────────────────────────────────────────────────────
+
+model Tenant {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  /// IANA timezone used to compute "today" for scheduling. ASSUMPTION A-14.
+  timezone  String
+  // TBD: legal name, logo, accreditation data for reports (Q-37, Q-52)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  users                     User[]
+  clients                   Client[]
+  projects                  Project[]
+  projectTestConfigurations ProjectTestConfiguration[]
+  fieldRecords              FieldRecord[]
+  samples                   Sample[]
+  specimens                 Specimen[]
+  specimenTests             SpecimenTest[]
+  reports                   Report[]
+
+  @@map("tenants")
+}
+
+// ─── User ───────────────────────────────────────────────────────────────────
+// Auth tables (refresh tokens, password reset) are ported from
+// boilerplate-backend-core in Phase 2 — not drafted here.
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  /// Globally unique. ASSUMPTION A-32.
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  fullName     String   @map("full_name")
+  role         UserRole @default(MEMBER)
+  isActive     Boolean  @default(true) @map("is_active")
+  // TBD: signature image / professional license for report signing (Q-37)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([id, tenantId])
+  @@index([tenantId])
+  @@map("users")
+}
+
+// ─── Client ─────────────────────────────────────────────────────────────────
+
+model Client {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  name      String
+  // TBD: all other client fields (Q-41). Do not add speculatively.
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  projects Project[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, name])
+  @@map("clients")
+}
+
+// ─── Project ────────────────────────────────────────────────────────────────
+
+model Project {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  clientId  String   @map("client_id") @db.Uuid
+  name      String
+  // TBD: location, structural element, specified properties, project code…
+  //      Only from official documents (Q-01, Q-32).
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant             Tenant                     @relation(fields: [tenantId], references: [id])
+  client             Client                     @relation(fields: [clientId, tenantId], references: [id, tenantId])
+  testConfigurations ProjectTestConfiguration[]
+  fieldRecords       FieldRecord[]
+  reports            Report[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, clientId])
+  @@map("projects")
+}
+
+// ─── ProjectTestConfiguration ───────────────────────────────────────────────
+// One row per configured test age. ASSUMPTION A-10 (configured per project);
+// may move to tenant defaults / material / client after Q-20.
+
+model ProjectTestConfiguration {
+  id            String   @id @default(uuid()) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  projectId     String   @map("project_id") @db.Uuid
+  /// Positive integer number of days. No hardcoded values anywhere.
+  ageDays       Int      @map("age_days")
+  /// Specimens to test at this age. Q-14.
+  specimenCount Int      @map("specimen_count")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  project Project @relation(fields: [projectId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([projectId, ageDays])
+  @@index([tenantId, projectId])
+  @@map("project_test_configurations")
+}
+
+// ─── FieldRecord ────────────────────────────────────────────────────────────
+
+model FieldRecord {
+  id          String            @id @default(uuid()) @db.Uuid
+  tenantId    String            @map("tenant_id") @db.Uuid
+  projectId   String            @map("project_id") @db.Uuid
+  status      FieldRecordStatus @default(DRAFT)
+  /// Date-only. Currently assumed to be the test-age reference date
+  /// (ASSUMPTION A-12, Q-18). Semantics TBD: pour date? sampling date?
+  recordDate  DateTime          @map("record_date") @db.Date
+  // TBD: official folio/number (Q-03)
+  // TBD: concrete / truck ("trompo") / delivery information (Q-05, Q-06, Q-07)
+  // TBD: observations, signatures, attachments (Q-08, Q-09)
+  createdById String?           @map("created_by_id") @db.Uuid
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id])
+  project Project  @relation(fields: [projectId, tenantId], references: [id, tenantId])
+  samples Sample[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, projectId, recordDate])
+  @@index([tenantId, status])
+  @@map("field_records")
+}
+
+// ─── Sample ─────────────────────────────────────────────────────────────────
+
+model Sample {
+  id            String   @id @default(uuid()) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  fieldRecordId String   @map("field_record_id") @db.Uuid
+  // TBD: everything captured per sample (Q-10, Q-11). If samples have their own
+  //      reference date, scheduling moves here (Q-18).
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  fieldRecord FieldRecord @relation(fields: [fieldRecordId, tenantId], references: [id, tenantId])
+  specimens   Specimen[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, fieldRecordId])
+  @@map("samples")
+}
+
+// ─── Specimen (cylinder) ────────────────────────────────────────────────────
+
+model Specimen {
+  id        String         @id @default(uuid()) @db.Uuid
+  tenantId  String         @map("tenant_id") @db.Uuid
+  sampleId  String         @map("sample_id") @db.Uuid
+  status    SpecimenStatus @default(CREATED)
+  // TBD: physical identifier/label (Q-13), type (Q-15), dimensions (Q-12)
+  createdAt DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant Tenant         @relation(fields: [tenantId], references: [id])
+  sample Sample         @relation(fields: [sampleId, tenantId], references: [id, tenantId])
+  tests  SpecimenTest[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, sampleId])
+  @@map("specimens")
+}
+
+// ─── SpecimenTest ("Test" in the brief; renamed to avoid clashing with
+//     test-framework vocabulary — docs/domain/entities.md) ──────────────────
+// Specimen → SpecimenTest is 1:N (ASSUMPTION A-05; may be 1:1 — Q-16).
+// The scheduled DATE is derived (reference date + ageDays), not stored.
+
+model SpecimenTest {
+  id            String             @id @default(uuid()) @db.Uuid
+  tenantId      String             @map("tenant_id") @db.Uuid
+  specimenId    String             @map("specimen_id") @db.Uuid
+  /// Planned age, copied from ProjectTestConfiguration at planning time (A-15).
+  ageDays       Int                @map("age_days")
+  status        SpecimenTestStatus @default(SCHEDULED)
+  /// When the test was actually performed (entered by user, defaults to now).
+  performedAt   DateTime?          @map("performed_at") @db.Timestamptz
+  performedById String?            @map("performed_by_id") @db.Uuid
+  // TBD: measured values (Q-24). BLOCKED on lab documentation.
+  // TBD: calculated values — formulas unknown (Q-25, Q-26).
+  //      TODO: VALIDATE WITH LAB DOCUMENTATION
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime           @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+  specimen Specimen @relation(fields: [specimenId, tenantId], references: [id, tenantId])
+
+  @@index([tenantId, status])
+  @@index([tenantId, specimenId])
+  @@map("specimen_tests")
+}
+
+// ─── Report (historical artifact — ADR-005) ─────────────────────────────────
+
+model Report {
+  id                    String       @id @default(uuid()) @db.Uuid
+  tenantId              String       @map("tenant_id") @db.Uuid
+  /// Scope = project. ASSUMPTION A-07 (Q-31 may change this).
+  projectId             String       @map("project_id") @db.Uuid
+  /// e.g. "concrete-control". Selects assembler + template.
+  templateKey           String       @map("template_key")
+  templateVersion       String?      @map("template_version")
+  /// Incrementing per (project, templateKey). A correction = new version (A-23).
+  version               Int
+  status                ReportStatus @default(DRAFT)
+  // TBD: official report number/folio (Q-51)
+  /// Frozen view model used to render the PDF. Never edited after FINAL.
+  snapshot              Json?
+  snapshotSchemaVersion Int?         @map("snapshot_schema_version")
+  /// Object-storage key of the PDF (private bucket).
+  storageKey            String?      @map("storage_key")
+  contentSha256         String?      @map("content_sha256")
+  generatedAt           DateTime?    @map("generated_at") @db.Timestamptz
+  generatedById         String?      @map("generated_by_id") @db.Uuid
+  finalizedAt           DateTime?    @map("finalized_at") @db.Timestamptz
+  finalizedById         String?      @map("finalized_by_id") @db.Uuid
+  createdAt             DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  project Project @relation(fields: [projectId, tenantId], references: [id, tenantId])
+
+  @@unique([tenantId, projectId, templateKey, version])
+  @@index([tenantId, status])
+  @@map("reports")
+}
