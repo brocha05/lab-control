@@ -9,9 +9,9 @@ Legend: **Phase** = roadmap phase · 🔒 = blocked on domain documents
 
 | Method | Path | Purpose | Phase |
 |--------|------|---------|-------|
-| POST | `/auth/login` | Email + password → access + refresh tokens | 2 |
-| POST | `/auth/refresh` | Rotate refresh token | 2 |
-| POST | `/auth/logout` | Revoke refresh token | 2 |
+| POST | `/auth/login` | `{ email, password }` → `{ user, tokens: { accessToken, refreshToken } }` | 2 ✅ |
+| POST | `/auth/refresh` | `{ refreshToken }` → `{ accessToken, refreshToken }` (rotated) | 2 ✅ |
+| POST | `/auth/logout` | `{ refreshToken }` → 204. Idempotent | 2 ✅ |
 | GET | `/me` | Current user + tenant (incl. timezone) | 2 |
 | GET / POST / PATCH | `/users`, `/users/:id` | Tenant admin manages users | 10 |
 

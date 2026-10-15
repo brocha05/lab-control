@@ -38,6 +38,11 @@ holds all tenants, and every tenant-owned row has `tenant_id`.
    a platform-admin metric) lives in an explicitly named service and is reviewed
    separately.
 
+   The only exceptions are in `AuthService`, before a tenant is known: login looks the
+   user up by email (globally unique, A-32), and refresh/logout look the token up by
+   the SHA-256 of an unguessable secret. The tenant then comes from that row, and every
+   write that follows is scoped by it.
+
 ## Why explicit, not magic
 
 We considered a Prisma client extension or `AsyncLocalStorage` that injects `tenantId`
@@ -59,10 +64,19 @@ Explicit scoping alone can still be forgotten. Compensating controls:
 ## Tenant-level settings
 
 `Tenant.timezone` (IANA, e.g. `America/Mexico_City`) is used to compute "today" for
-pending/overdue tests [A-14]. Other tenant settings (logo, legal name, report numbering)
-are added only when the report documents require them.
+pending/overdue tests [A-14]. `legalName`, `address` and `phone` feed the report header
+and footer (FPC06-04). Logos and report numbering wait for Q-52 / Q-56.
 
 ## Provisioning
 
-Phase 1–9: tenants and their first admin user are created by a seed script / CLI
-command. No self-service signup (it's not needed for a single customer).
+Tenants and their first admin user are created with `pnpm cli:create-tenant`
+(development-plan 2.2, usage in the README). No self-service signup (it's not needed
+for a single customer).
+
+## Authentication
+
+The access token (JWT, HS256, `JWT_ACCESS_TTL_SECONDS`, default 15 min) carries `sub`,
+`tenantId` and `role`. Refresh tokens are opaque, stored only as SHA-256, rotated on
+every use and valid for `REFRESH_TOKEN_TTL_DAYS` (default 7). Presenting an already
+used token revokes every token of that user (theft detection). Logout revokes the given
+refresh token and works with an expired access token.

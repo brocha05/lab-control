@@ -138,6 +138,7 @@ model Tenant {
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   users                     User[]
+  refreshTokens             RefreshToken[]
   clients                   Client[]
   projects                  Project[]
   projectTestConfigurations ProjectTestConfiguration[]
@@ -152,8 +153,6 @@ model Tenant {
 }
 
 // ─── User ───────────────────────────────────────────────────────────────────
-// Auth tables (refresh tokens, password reset) are ported from
-// boilerplate-backend-core in Phase 2 — not drafted here.
 
 model User {
   id           String   @id @default(uuid()) @db.Uuid
@@ -169,11 +168,33 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  tenant        Tenant         @relation(fields: [tenantId], references: [id])
+  refreshTokens RefreshToken[]
 
   @@unique([id, tenantId])
   @@index([tenantId])
   @@map("users")
+}
+
+// ─── RefreshToken (development-plan 2.3) ────────────────────────────────────
+// Opaque random token handed to the client; only its SHA-256 is stored. Rotated on
+// every refresh; reusing a revoked token revokes all of the user's tokens.
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  tenantId  String    @map("tenant_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  /// hex SHA-256 of the token. The token itself is never stored.
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@index([tenantId, userId])
+  @@map("refresh_tokens")
 }
 
 // ─── Client ("Solicitante" FPC01-01 / "Contratista" FPC06-04) ───────────────

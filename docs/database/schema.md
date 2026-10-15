@@ -1,7 +1,7 @@
 # Preliminary Database Schema
 
-> Two sources. **Migrated** (Phase 2): `tenants`, `users`, `clients`, `projects`,
-> `project_test_configurations` in [`apps/backend/prisma/schema.prisma`](../../apps/backend/prisma/schema.prisma)
+> Two sources. **Migrated** (Phase 2): `tenants`, `users`, `refresh_tokens`, `clients`,
+> `projects`, `project_test_configurations` in [`apps/backend/prisma/schema.prisma`](../../apps/backend/prisma/schema.prisma)
 > (first migration `20261015022343_init`). **Draft, not migrated**: every other table below,
 > in [`apps/backend/prisma/drafts/domain.prisma`](../../apps/backend/prisma/drafts/domain.prisma),
 > moved into the active schema by the phase that needs it. Domain columns come
@@ -65,8 +65,16 @@
 | is_active | bool | deactivate, never delete |
 | *TBD* | | signature, title, position (Q-37, Q-39) |
 
-Auth support tables (refresh tokens, password reset) are ported from the boilerplate in
-Phase 2.
+`password_hash` uses Node scrypt (`scrypt$N$r$p$salt$hash`).
+
+### `refresh_tokens` (migrated, 2.3)
+| Column | Type | Notes |
+|--------|------|-------|
+| id, tenant_id, user_id | uuid | composite FK `(user_id, tenant_id)` → users, cascade |
+| token_hash | text unique | hex SHA-256; the token itself is never stored |
+| expires_at, revoked_at | timestamptz | revoked on rotation, logout or reuse detection |
+
+No password-reset table yet: an admin resets passwords until Q-40 says otherwise.
 
 ### `clients`
 `id`, `tenant_id`, `name` (legal name), `contact_name`, `contact_phone` (A-70),

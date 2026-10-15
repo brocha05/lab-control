@@ -10,10 +10,7 @@ export interface AuthTokens {
   refreshToken: string;
 }
 
-/**
- * `POST /auth/login` response. Provisional: the contract is fixed when auth is
- * ported from the backend boilerplate (development-plan 2.3).
- */
+/** `POST /auth/login` response (apps/backend/src/auth/auth.service.ts `LoginResult`). */
 export interface AuthResponse {
   user: User;
   tokens: AuthTokens;
