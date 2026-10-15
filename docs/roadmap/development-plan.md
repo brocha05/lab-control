@@ -19,10 +19,13 @@ cross-tenant test.
 - [x] 1.3 ✅ `CalendarDate` utilities + pure test-schedule functions with unit tests
 - [x] 1.4 ✅ Draft Prisma schema (validated, not migrated)
 - [x] 1.5 ✅ `docker-compose.yml` (Postgres + MinIO)
-- [ ] 1.6 Bootstrap `apps/frontend` from `boilerplate-frontend`. Remove billing/subscription modules. Keep auth, API client, layout
-- [ ] 1.7 ESLint + Prettier config for the backend (copy from the boilerplate)
-- [ ] 1.8 CI: install, lint, typecheck, unit tests (GitHub Actions or equivalent)
-- [ ] 1.9 Decide Node version (Prisma 7 tooling warns on Node 20, recommends ≥ 22). Add `.nvmrc`
+
+> 2026-10-14: the source for 1.2–1.5 was missing from the repository (only a compiled
+> `dist/` was present). It was reconstructed from that build output and re-verified.
+- [x] 1.6 ✅ Bootstrap `apps/frontend` from `boilerplate-frontend` (`saas-frontend-boilerplate`). Removed billing/subscription, admin, company selector, files, usage, users, register/password-reset pages. Kept auth (login only, no self-signup), API client (unwraps the envelope, refresh on 401, no tenant header), layout. UI in Spanish (A-40)
+- [x] 1.7 ✅ ESLint + Prettier config for the backend (from the boilerplate, with the `no-unsafe-*` and `no-explicit-any` rules kept on)
+- [x] 1.8 ✅ CI: `.github/workflows/ci.yml` (GitHub Actions). Backend: prisma validate/generate, format check, lint, typecheck, unit tests, build. Frontend: format check, lint, typecheck, build
+- [x] 1.9 ✅ Node **24 LTS** (`.nvmrc`, `engines.node >= 24`). Meets Prisma 7's ≥ 22 recommendation with the longest support window. Package manager: **pnpm 12** (one standalone project per app)
 
 ## Phase 2 — Core entities & auth (structure only)
 

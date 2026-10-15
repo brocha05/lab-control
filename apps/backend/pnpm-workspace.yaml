@@ -1,0 +1,15 @@
+# Standalone pnpm project (no monorepo tooling: docs/architecture/repository-structure.md).
+# Install scripts are opt-in. Denied entries ship prebuilt native binaries; their
+# scripts are only a build-from-source fallback.
+allowBuilds:
+  prisma: true
+  '@prisma/engines': true
+  '@parcel/watcher': false
+  unrs-resolver: false
+
+# Security: patched mysql2 (same major) for the Prisma CLI's transitive dependency.
+minimumReleaseAgeExclude:
+  - dotenv@18.0.8
+
+overrides:
+  mysql2: ^3.23.1

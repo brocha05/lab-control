@@ -1,0 +1,44 @@
+# Local infrastructure only (docs/reports/report-generation.md#local-development).
+#   docker compose up -d
+# The apps run on the host (npm run start:dev / npm run dev).
+
+services:
+  postgres:
+    # ADR-003: PostgreSQL 16+.
+    image: postgres:17-alpine
+    container_name: lab-control-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-lab}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lab}
+      POSTGRES_DB: ${POSTGRES_DB:-lab_control}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    # S3-compatible private storage for generated PDFs (ADR-005/006, A-51). Used from Phase 9.
+    # MinIO stopped publishing community images to Docker Hub (minio/minio), so this uses
+    # Chainguard's maintained build. Entrypoint is the minio binary itself.
+    image: cgr.dev/chainguard/minio:latest
+    container_name: lab-control-minio
+    restart: unless-stopped
+    command: ['server', '/data', '--console-address', ':9001']
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - '${MINIO_API_PORT:-9000}:9000' # S3 API
+      - '${MINIO_CONSOLE_PORT:-9001}:9001' # web console
+    volumes:
+      - minio_data:/data
+
+volumes:
+  postgres_data:
+  minio_data:

@@ -15,7 +15,7 @@ Out of MVP: offline/PWA, client portal, billing, other materials, RLS, async wor
 | Phase | Goal | Blocked on documents? | Exit criteria |
 |-------|------|-----------------------|---------------|
 | **0** Domain discovery | Get and analyze the official documents | — (this *is* the unblocker) | Every P0 question in open-questions.md answered. Discovery analyses written. |
-| **1** Architecture + skeleton | Repo, docs, backend skeleton, frontend bootstrap, local infra | No | ✅ docs, ✅ backend skeleton builds, tests pass. ⏳ frontend bootstrap, CI. |
+| **1** Architecture + skeleton | Repo, docs, backend skeleton, frontend bootstrap, local infra | No | ✅ docs, ✅ backend skeleton builds, tests pass, ✅ frontend bootstrap, ✅ CI. |
 | **2** Core entities + DB | First migration (tenancy, users, clients, projects), seed, minimal auth | No (structure only) | Migration applied. Login works. Cross-tenant test passes. |
 | **3** Clients / Projects | CRUD + UI | Partially (extra fields Q-41) | Lab can create clients/projects in the UI. |
 | **4** Field Records | Capture form, DRAFT/COMPLETE/CANCEL | **Yes**: Q-01…Q-09, Q-33 | Form matches the official field record. |

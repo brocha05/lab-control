@@ -1,0 +1,8 @@
+# Normalize to LF in the repo and in working copies, so Prettier/CI behave the same
+# on Windows and Linux regardless of core.autocrlf.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.pdf binary
+*.ico binary

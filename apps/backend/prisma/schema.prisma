@@ -14,8 +14,12 @@
 //   - tenantId is always the leading column of composite indexes.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Prisma 7 generator: the client is generated into src/ (gitignored) and compiled with
+// the app. Regenerated on install (`postinstall`) and by `pnpm db:generate`.
 generator client {
-  provider = "prisma-client-js"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
 }
 
 datasource db {

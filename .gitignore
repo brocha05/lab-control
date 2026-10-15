@@ -1,11 +1,17 @@
-# Dependencias
+# Dependencies
 node_modules/
 
-# Build
+# Build output
 dist/
+.next/
+out/
 *.tsbuildinfo
+next-env.d.ts
 
-# Entorno
+# Test output
+coverage/
+
+# Environment (commit only .env.example)
 .env
 .env.*
 !.env.example
@@ -13,11 +19,14 @@ dist/
 # Logs
 *.log
 
-# OS / editores
+# OS / editors
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
 
-# Config local de Claude Code
+# Local Claude Code settings
 .claude/settings.local.json
+
+# Generated Prisma client (apps/backend, regenerated on install)
+apps/backend/src/generated/

@@ -1,0 +1,5 @@
+# Standalone pnpm project (no monorepo tooling: docs/architecture/repository-structure.md).
+# Install scripts are opt-in. Denied entries ship prebuilt native binaries; their
+# scripts are only a build-from-source fallback.
+allowBuilds:
+  unrs-resolver: false
