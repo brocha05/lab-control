@@ -39,7 +39,7 @@ cross-tenant test.
 
 ## Phase 3 — Clients & projects
 
-- [ ] 3.1 `clients` module: list/create/get/update (tenant-scoped) + cross-tenant tests
+- [x] 3.1 ✅ `clients` module: list (paginated, search)/create/get/update (tenant-scoped) + cross-tenant tests. Shared `ListQueryDto` / `paginated()` in `src/shared/http/pagination.ts`
 - [ ] 3.2 `projects` module: list/create/get/update. Client must belong to the tenant (composite FK + service check)
 - [ ] 3.3 Frontend: clients list/detail/form
 - [ ] 3.4 Frontend: projects list/detail/form

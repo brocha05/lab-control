@@ -19,9 +19,9 @@ Legend: **Phase** = roadmap phase · 🔒 = blocked on domain documents
 
 | Method | Path | Purpose | Phase |
 |--------|------|---------|-------|
-| GET | `/clients` | List (search by name) | 3 |
-| POST | `/clients` | Create (`name`, `contactName`, `contactPhone`) | 3 |
-| GET / PATCH | `/clients/:id` | Read / update | 3 |
+| GET | `/clients` | `?page&limit&q` (q = name, case-insensitive), sorted by name | 3 ✅ |
+| POST | `/clients` | Create (`name`, `contactName?`, `contactPhone?`) | 3 ✅ |
+| GET / PATCH | `/clients/:id` | Read / update (`null` or `""` clears an optional field). No delete (A-24) | 3 ✅ |
 | GET | `/projects` | List (`?clientId=`) | 3 |
 | POST | `/projects` | Create (`clientId`, `name`, `location`) | 3 |
 | GET / PATCH | `/projects/:id` | Read / update | 3 |
