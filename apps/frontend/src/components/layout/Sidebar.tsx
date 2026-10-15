@@ -2,7 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Building2, LayoutDashboard, ChevronLeft, ChevronRight, FlaskConical } from 'lucide-react';
+import {
+  Building2,
+  FolderKanban,
+  LayoutDashboard,
+  ChevronLeft,
+  ChevronRight,
+  FlaskConical,
+} from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button';
@@ -30,7 +37,10 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: 'Catálogos',
-    items: [{ href: '/clients', label: 'Clientes', icon: Building2 }],
+    items: [
+      { href: '/clients', label: 'Clientes', icon: Building2 },
+      { href: '/projects', label: 'Proyectos', icon: FolderKanban },
+    ],
   },
 ];
 

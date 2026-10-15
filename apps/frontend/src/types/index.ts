@@ -29,6 +29,9 @@ export interface PaginatedResponse<T> {
   pages: number;
 }
 
+/** Backend maximum for `limit` (apps/backend/src/shared/http/pagination.ts). */
+export const MAX_PAGE_SIZE = 100;
+
 export type PaginationParams = {
   page?: number;
   limit?: number;
