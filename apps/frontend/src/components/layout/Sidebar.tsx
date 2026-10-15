@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, ChevronLeft, ChevronRight, FlaskConical } from 'lucide-react';
+import { Building2, LayoutDashboard, ChevronLeft, ChevronRight, FlaskConical } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,10 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'General',
     items: [{ href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true }],
+  },
+  {
+    label: 'Catálogos',
+    items: [{ href: '/clients', label: 'Clientes', icon: Building2 }],
   },
 ];
 
