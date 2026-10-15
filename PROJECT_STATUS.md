@@ -57,7 +57,7 @@ failure type of specimen 407 (Q-60), report number "CON" vs "CTO" (Q-56), obra n
 
 ## Next (not blocked)
 
-1. Phase 2: seed (2.2), port auth from `saas-backend-boilerplate` (2.3–2.4), integration-test harness
+1. Phase 2: port auth from `saas-backend-boilerplate` (2.3–2.4), integration-test harness
    with two tenants (2.5), `GET /me`.
 2. Phase 3: clients and projects CRUD (with contact and location fields) and
    cross-tenant tests, then the app shell (3.5).

@@ -51,6 +51,7 @@ pnpm test -t "planTestAges"      # one test by name
 pnpm lint | typecheck | format:check | build
 pnpm db:validate | db:generate   # prisma generate also runs on pnpm install
 pnpm db:migrate                  # apply/create migrations (needs Postgres)
+pnpm cli:create-tenant …         # create a lab + its ADMIN (usage: README; pnpm build first)
 
 # apps/frontend  (on :3000)
 pnpm dev

@@ -24,11 +24,14 @@ reports.
 nvm use                 # Node 24 (nvm-windows: `nvm use 24`)
 npm install -g pnpm@12  # or: corepack enable
 docker compose up -d    # Postgres on :5432, MinIO on :9000 (console :9001)
+                        # 5432 taken? POSTGRES_PORT=5433 docker compose up -d, and use 5433 in .env
 
 # Backend: http://localhost:3001/api/v1
 cd apps/backend
 cp .env.example .env
 pnpm install            # also runs `prisma generate`
+pnpm db:migrate         # apply migrations
+pnpm build && ADMIN_PASSWORD=change-me-please pnpm cli:create-tenant   --name "Laboratorio demo" --slug demo --timezone America/Mexico_City   --admin-email admin@demo.local --admin-name "Admin Demo"
 pnpm start:dev          # GET /api/v1/health
 
 # Frontend: http://localhost:3000
@@ -37,9 +40,6 @@ cp .env.example .env.local
 pnpm install
 pnpm dev
 ```
-
-There are no database migrations yet; the first one arrives in Phase 2 (development-plan
-2.1). Until then `/health` reports the database connection only.
 
 ## Checks (same as CI)
 

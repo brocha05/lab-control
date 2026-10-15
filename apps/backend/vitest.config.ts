@@ -8,7 +8,7 @@ export default defineConfig({
     include: ['src/**/*.spec.ts'],
     coverage: {
       include: ['src/**/*.ts'],
-      exclude: ['src/main.ts', 'src/generated/**', 'src/**/*.spec.ts'],
+      exclude: ['src/main.ts', 'src/cli/run-*.ts', 'src/generated/**', 'src/**/*.spec.ts'],
     },
   },
 });
