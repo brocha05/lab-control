@@ -6,8 +6,8 @@ hooks can be reused.
 ## Basics
 
 - REST + JSON over HTTPS. Base path `/api/v1`.
-- Auth: `Authorization: Bearer <access token>`. Every endpoint is authenticated except
-  `/health` and `/auth/*`.
+- Auth: `Authorization: Bearer <access token>`. Every endpoint is authenticated by the
+  global `JwtAuthGuard` except those marked `@Public()`: `/health` and `/auth/*`.
 - **Tenant is never in the URL or body.** It comes from the token (ADR-002).
 - IDs are UUIDs. Cross-tenant or missing IDs → `404`.
 - Resource names are plural kebab-case: `/field-records`, `/tests`.

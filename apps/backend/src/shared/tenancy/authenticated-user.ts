@@ -1,5 +1,5 @@
 /**
- * What the JWT strategy (Phase 2) puts on `request.user`.
+ * What the global JwtAuthGuard (src/auth/jwt-auth.guard.ts) puts on `request.user`.
  * The tenant comes ONLY from here, never from the URL or body (ADR-002).
  */
 export interface AuthenticatedUser {
