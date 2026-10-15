@@ -35,7 +35,7 @@ cross-tenant test.
 - [x] 2.3 ✅ Auth ported from the boilerplate and simplified: login, refresh (rotation + reuse detection), logout, access-token verification. JWT carries `sub`, `tenantId`, `role`. Only `@nestjs/jwt` (no passport). Refresh tokens stored hashed (migration `refresh_tokens`)
 - [x] 2.4 ✅ Global JWT guard (`APP_GUARD`) + `@Public()` (auth endpoints, `/health`). `@CurrentTenant()` reads from `request.user`
 - [x] 2.5 ✅ Integration-test harness: `pnpm test:int` (`*.int-spec.ts`), `<db>_test` database created + migrated automatically, `truncateAll()`, `createTwoTenants()`. First suites: auth, create-tenant. CI job `backend-integration` with a Postgres service
-- [ ] 2.6 `GET /me`
+- [x] 2.6 ✅ `GET /me` (user + tenant), with integration tests: forged/expired tokens, cross-tenant claims, deactivated user
 
 ## Phase 3 — Clients & projects
 

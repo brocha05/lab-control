@@ -55,7 +55,7 @@ export interface Tenant {
   timezone: string;
 }
 
-/** `GET /me` (Phase 2.6): current user + tenant. */
+/** `GET /me`: current user + tenant (apps/backend/src/auth/auth.service.ts `MeView`). */
 export interface Me {
   user: User;
   tenant: Tenant;

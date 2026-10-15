@@ -31,6 +31,20 @@ export interface LoginResult {
   tokens: TokenPair;
 }
 
+export interface TenantView {
+  id: string;
+  name: string;
+  slug: string;
+  /** IANA timezone used for "today" (ASSUMPTION A-14). */
+  timezone: string;
+}
+
+/** `GET /me`. */
+export interface MeView {
+  user: AuthUserView;
+  tenant: TenantView;
+}
+
 /** Claims of the access token. The tenant comes ONLY from here (ADR-002). */
 interface AccessTokenClaims {
   sub: string;
@@ -101,6 +115,25 @@ export class AuthService {
       where: { tokenHash: hashRefreshToken(refreshToken), revokedAt: null },
       data: { revokedAt: new Date() },
     });
+  }
+
+  /**
+   * The principal's own user and tenant. A user deactivated after the token was issued
+   * gets 401, the same as an invalid token.
+   */
+  async me(tenantId: string, userId: string): Promise<MeView> {
+    const user = await this.prisma.user.findFirst({
+      where: { id: userId, tenantId, isActive: true },
+      include: { tenant: true },
+    });
+    if (!user) {
+      throw new UnauthorizedException('User not found or inactive');
+    }
+    const { tenant } = user;
+    return {
+      user: toView(user),
+      tenant: { id: tenant.id, name: tenant.name, slug: tenant.slug, timezone: tenant.timezone },
+    };
   }
 
   /** Used by the JWT guard. Throws 401 for any invalid, expired or malformed token. */

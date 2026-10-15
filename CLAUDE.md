@@ -139,7 +139,7 @@ callers get `data` directly), and refreshes on 401. It sends no tenant header.
 `src/proxy.ts` is the Next 16 route guard (cookie `access-token`), a UX redirect only.
 Zustand is for auth/UI state; server data goes through TanStack Query. UI text is Spanish
 (A-40). Format domain dates with `formatCalendarDate`, never `new Date('YYYY-MM-DD')`.
-Auth/`/me` response types are provisional until backend auth lands (development-plan 2.3).
+Auth and `/me` types mirror the backend (`LoginResult`, `MeView` in `apps/backend/src/auth/auth.service.ts`).
 
 ## Repo conventions
 

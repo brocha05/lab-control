@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
+import { MeController } from './me.controller.js';
 
 /**
  * Owns `users` (credentials) and `refresh_tokens`. Secrets are passed per call from config.
@@ -11,7 +12,7 @@ import { JwtAuthGuard } from './jwt-auth.guard.js';
  */
 @Module({
   imports: [JwtModule.register({})],
-  controllers: [AuthController],
+  controllers: [AuthController, MeController],
   providers: [AuthService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
   exports: [AuthService],
 })
