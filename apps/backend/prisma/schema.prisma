@@ -71,6 +71,7 @@ model Tenant {
   specimens                 Specimen[]
   specimenTests             SpecimenTest[]
   reports                   Report[]
+  auditEvents               AuditEvent[]
 
   @@map("tenants")
 }
@@ -641,4 +642,30 @@ enum ReportStatus {
   DRAFT
   GENERATED
   FINAL
+}
+
+// ─── Audit trail (ADR-010, Q-54): one row per successful change through the API ───
+
+model AuditEvent {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  /// Who made the change.
+  actorUserId String?  @map("actor_user_id") @db.Uuid
+  /// The route, e.g. "PUT /field-records/:id".
+  action      String
+  /// The resource, e.g. "field-records".
+  entityType  String   @map("entity_type")
+  /// The route's id, or the id of what the request created.
+  entityId    String?  @map("entity_id")
+  statusCode  Int      @map("status_code")
+  requestId   String?  @map("request_id")
+  /// The request body, passwords redacted (ADR-010 amends ADR-003).
+  payload     Json?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, entityId])
+  @@map("audit_events")
 }

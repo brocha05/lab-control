@@ -34,7 +34,8 @@ The domain is still in discovery. Official lab documents are the source of truth
   (`ProjectTestConfiguration`), editable per test until it is tested (Q-20, Q-22).
 - Registro, sample and specimen numbers are consecutive **per project** (Q-55, Q-57,
   Q-58). Roles are the lab's (`UserRole`, Q-39); only `QUALITY_MANAGER` issues reports.
-- No `jsonb` for unknown domain fields. JSON is only for `reports.snapshot` (ADR-003).
+- No `jsonb` for unknown domain fields. JSON is only for `reports.snapshot` (ADR-005) and
+  the request body kept in `audit_events.payload` (ADR-010).
 - Architectural change = new ADR in `docs/decisions/` that supersedes the old one.
 - When a lab document arrives, follow `docs/domain/discovery-checklist.md`: analyze and
   propose first, implement only after review.

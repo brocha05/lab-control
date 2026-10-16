@@ -94,6 +94,15 @@ permission of the matrix in docs/domain/entities.md#roles; a missing permission 
 
 `GET /me` also returns `permissions` (the role's list).
 
+## Audit trail (Phase 10.2, ADR-010)
+
+Every successful `POST`/`PUT`/`PATCH`/`DELETE` by a signed-in user (except `/auth/*`) leaves
+one row: author, route (`action`), resource (`entityType`), `entityId`, status, body.
+
+| Method | Path | Purpose | Phase |
+|--------|------|---------|-------|
+| GET | `/audit-events` | `?entityId=…&entityId=…&before=ISO&limit=50` → newest first, with the author's name. `audit.read` | 10 ✅ |
+
 ## Dashboard
 
 | Method | Path | Purpose | Phase |

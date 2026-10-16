@@ -1,4 +1,5 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import helmet from 'helmet';
 import { GlobalExceptionFilter } from './shared/http/global-exception.filter.js';
 import { ResponseInterceptor } from './shared/http/response.interceptor.js';
 
@@ -7,6 +8,8 @@ import { ResponseInterceptor } from './shared/http/response.interceptor.js';
  * exact same pipeline (docs/api/conventions.md).
  */
 export function configureApp(app: INestApplication): void {
+  // Security headers (10.5). Same-site so the frontend (another port) can load files.
+  app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
   app.setGlobalPrefix('api/v1');
   // docs/api/conventions.md#validation
   app.useGlobalPipes(

@@ -1,6 +1,7 @@
 import { Module, RequestMethod } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
+import { AuditModule } from './audit/audit.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { BitacoraModule } from './bitacora/bitacora.module.js';
 import { CatalogsModule } from './catalogs/catalogs.module.js';
@@ -46,6 +47,7 @@ import { PrismaModule } from './shared/prisma/prisma.module.js';
     SpecimenTestsModule,
     BitacoraModule,
     ReportsModule,
+    AuditModule,
   ],
   controllers: [HealthController],
 })

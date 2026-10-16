@@ -151,6 +151,16 @@ export class AuthService {
     return calendarDateInTimeZone(tenant.timezone, now);
   }
 
+  /** For other modules (audit): display names of some of the lab's users. */
+  async userNames(tenantId: string, ids: readonly string[]): Promise<Map<string, string>> {
+    if (ids.length === 0) return new Map();
+    const rows = await this.prisma.user.findMany({
+      where: { tenantId, id: { in: [...ids] } },
+      select: { id: true, fullName: true },
+    });
+    return new Map(rows.map((r) => [r.id, r.fullName]));
+  }
+
   /** For other modules (reports): the lab's name and contact data, and its "today". */
   async tenantProfile(tenantId: string): Promise<{
     name: string;

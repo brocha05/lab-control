@@ -101,10 +101,10 @@ cross-tenant test.
 ## Phase 10 — Hardening
 
 - [x] 10.1 ✅ Permissions per role (`PermissionsGuard`, matrix in [entities.md](../domain/entities.md#roles), A-100/A-101) and user management (A-81, Q-83)
-- [ ] 10.2 `audit_events`: **required** by the accreditation (Q-54). ADR for its shape; move earlier if corrections after issuing (Q-34) ship first
+- [x] 10.2 ✅ `audit_events` (ADR-010): one row per successful change through the API (author, route, entity, body with passwords redacted), `GET /audit-events` for `audit.read`
 - [ ] 10.3 Exhaustive cross-tenant test suite (every endpoint)
 - [ ] 10.4 RLS spike + ADR (enable or not)
-- [ ] 10.5 Rate limiting, security headers, dependency audit
+- [x] 10.5 ✅ helmet security headers, sign-in rate limit (10/min per IP), `pnpm audit --prod` clean
 
 ## Phase 11 — Production
 
