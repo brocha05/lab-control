@@ -71,7 +71,7 @@ cross-tenant test.
 - [x] 6.4 ✅ Migration `specimen_tests`; `complete` plans one SCHEDULED test per specimen with the project's default ages in the same transaction (422 if the project has no ages); the record view shows each specimen's test
 - [x] 6.4b ✅ `PATCH /tests/:id/schedule`: change a test's age / exact-date flag until it is tested (Q-21, Q-22); completed or cancelled → 409
 - [x] 6.5 ✅ `GET /tests/pending?until&projectId`: open tests with derived nominal/scheduled date (Sunday/holiday shift), `dueStatus` against today in the lab's timezone, overdue included
-- [x] 6.6 ✅ Frontend: "Pruebas pendientes" (overdue / today / upcoming, project and period filters, shifted-date marker, "Cambiar edad"), planned tests on the completed record (change age, cancel damaged specimen), dashboard count of tests due today and overdue
+- [x] 6.6 ✅ Frontend: "Ensayos pendientes" (overdue / today / upcoming, project and period filters, shifted-date marker, "Cambiar edad"), planned tests on the completed record (change age, cancel damaged specimen), dashboard count of tests due today and overdue
 
 ## Phase 7 — Test results (readings and formulas known)
 

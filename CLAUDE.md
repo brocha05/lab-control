@@ -141,8 +141,12 @@ Feature code goes in `src/modules/<domain>/{api,hooks,types,components,schemas}`
 `src/lib/api/client.ts` (axios) adds the bearer token, unwraps the backend envelope (so
 callers get `data` directly), and refreshes on 401. It sends no tenant header.
 `src/proxy.ts` is the Next 16 route guard (cookie `access-token`), a UX redirect only.
-Zustand is for auth/UI state; server data goes through TanStack Query. UI text is Spanish
-(A-40). Format domain dates with `formatCalendarDate`, never `new Date('YYYY-MM-DD')`.
+Zustand is for auth/UI state (`store/uiStore.ts`: top-bar project, breadcrumbs set with
+`useBreadcrumbs`, "Nuevo registro" dialog); server data goes through TanStack Query. UI
+text is Spanish (A-40). Visual system (tokens, status chips, light only):
+`docs/design/README.md`; domain status → chip in `src/lib/status.ts`. Field records live
+under their project (no global list); a DRAFT opens as the step wizard. Format domain dates with the `formatDate*` helpers in
+`lib/utils/formatters.ts`, never `new Date('YYYY-MM-DD')`.
 Auth and `/me` types mirror the backend (`LoginResult`, `MeView` in `apps/backend/src/auth/auth.service.ts`).
 
 ## Repo conventions

@@ -33,8 +33,10 @@ Last updated: 2026-10-15 (lab questionnaire answered)
   Roles: Jefe de Control de Calidad, Coordinador del SGC, Jefe de Laboratorio, Jefe de
   Brigada de Campo. Labs are created with `pnpm cli:create-tenant`.
 - Clients and projects (with 3–4 letter codes): API and screens.
-- Frontend: login, app shell with every section (pending ones show "disponible
-  próximamente"), clients and projects screens, dashboard counts.
+- Frontend: the "Laboratorio" visual design (`docs/design/README.md`, 2026-10-16): app
+  shell with breadcrumbs and project picker, dashboard, clients, projects with tabs
+  (summary, records, tests, configuration), field records as a 5-step wizard, pending
+  tests. Sections of later phases show "disponible próximamente".
 - CI runs lint, typecheck, unit tests and build for both apps, plus backend integration
   tests against Postgres.
 - Regulatory: accredited under NMX-EC-17025-ONNCCE-2018 (ema); records kept 4 years; an
