@@ -54,6 +54,7 @@ tables.
 | `users` | `users` | tenants | |
 | `clients` | `clients` | — | |
 | `projects` | `projects`, `project_test_configurations` | clients | Test configuration lives here [A-10]. |
+| `catalogs` | `concrete_suppliers`, `cement_types`, `holidays` | — | Lab-level lists picked from on records (Q-06) and the holiday calendar used by scheduling (Q-21). |
 | `field-records` | `field_records`, `deliveries`, `samples`, `specimens` | projects | Deliveries, samples and specimens are part of the field-record aggregate (they're captured together on FPC01-01). Split into separate modules only if they gain their own workflows. |
 | `specimen-tests` | `specimen_tests` | projects (config), field-records (reference date) | Scheduling logic is pure and unit-tested. |
 | `bitacora` | — (none) | reads all of the above | Query-only. See ADR-004. |

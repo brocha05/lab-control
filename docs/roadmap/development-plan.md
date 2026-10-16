@@ -48,7 +48,7 @@ cross-tenant test.
 
 ## Phase 4 — Field records (FPC01-01 + questionnaire; 🔒 item: Q-79)
 
-- [ ] 4.0 Catalogs `concrete_suppliers` / `cement_types` (pick or add, Q-06) and `holidays` (Q-21, Q-81): migration, endpoints, small admin UI
+- [x] 4.0 ✅ `catalogs` module: `concrete_suppliers` / `cement_types` (pick or add, names unique ignoring case, Q-06) and `holidays` (Q-21, Q-81): migration, endpoints, cross-tenant tests, "Configuración" screen
 - [ ] 4.1 Migration for `field_records` + `deliveries` (columns drafted in `drafts/domain.prisma`; ticket values per delivery, Q-65)
 - [ ] 4.2 `field-records` module: create DRAFT, get, list by project, nested `PUT` (header + deliveries + samples + specimens) while DRAFT
 - [ ] 4.3 Transition rules as a pure function + tests. `complete`/`cancel` endpoints

@@ -13,6 +13,7 @@ import {
   FlaskConical,
   FolderKanban,
   LayoutDashboard,
+  Settings,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils/cn';
@@ -53,6 +54,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/clients', label: 'Clientes', icon: Building2 },
       { href: '/projects', label: 'Proyectos', icon: FolderKanban },
+      { href: '/settings', label: 'Configuración', icon: Settings },
     ],
   },
 ];

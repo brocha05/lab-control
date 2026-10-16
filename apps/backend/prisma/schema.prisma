@@ -61,6 +61,9 @@ model Tenant {
   clients                   Client[]
   projects                  Project[]
   projectTestConfigurations ProjectTestConfiguration[]
+  holidays                  Holiday[]
+  concreteSuppliers         ConcreteSupplier[]
+  cementTypes               CementType[]
 
   @@map("tenants")
 }
@@ -183,4 +186,48 @@ model ProjectTestConfiguration {
   @@unique([projectId, ageDays])
   @@index([tenantId, projectId])
   @@map("project_test_configurations")
+}
+
+// ─── Holiday (development-plan 4.0) ─────────────────────────────────────────
+// A test date on a Sunday or holiday moves to the next day (Q-21). Which holidays
+// apply is the lab's own list (Q-81, A-78).
+
+model Holiday {
+  id       String   @id @default(uuid()) @db.Uuid
+  tenantId String   @map("tenant_id") @db.Uuid
+  date     DateTime @db.Date
+  name     String
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, date])
+  @@map("holidays")
+}
+
+// ─── Catalogs (development-plan 4.0; Q-06: pick from a list users can extend) ─
+
+model ConcreteSupplier {
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @map("tenant_id") @db.Uuid
+  /// e.g. "CEMEX".
+  name     String
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, name])
+  @@map("concrete_suppliers")
+}
+
+model CementType {
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @map("tenant_id") @db.Uuid
+  /// e.g. "CPC-40".
+  name     String
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([id, tenantId])
+  @@unique([tenantId, name])
+  @@map("cement_types")
 }

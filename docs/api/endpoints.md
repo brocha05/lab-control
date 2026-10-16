@@ -40,8 +40,8 @@ Bodies follow FPC01-01 ([analysis](../domain/analysis/FPC01-01.md)). Column list
 | GET | `/field-records/:id` | Record with deliveries → samples → specimens | 4 |
 | PUT | `/field-records/:id` | Replace the whole form while `DRAFT`: header + nested deliveries, samples, specimens | 4/5 |
 | POST | `/field-records/:id/complete` | `DRAFT → COMPLETED` (completeness, Q-33), plans tests with the project's default ages | 4/6 |
-| GET / POST | `/catalogs/suppliers`, `/catalogs/cement-types` | List / add catalog entries (Q-06) | 4 |
-| GET / PUT | `/holidays?year=` | The lab's holiday calendar (Q-21, Q-81) | 6 |
+| GET / POST / PATCH | `/catalogs/suppliers`, `/catalogs/cement-types`, `…/:id` | List / add / rename catalog entries; duplicate name (any case) → 409 (Q-06). No delete: records reference them | 4 ✅ |
+| GET / POST / DELETE | `/holidays?year=`, `/holidays`, `/holidays/:id` | The lab's holiday calendar (Q-21, Q-81). Duplicate date → 409 | 4 ✅ |
 | POST | `/field-records/:id/cancel` | `→ CANCELLED` | 4 |
 | POST | `/specimens/:id/cancel` | Cancel specimen + open tests | 5 |
 
