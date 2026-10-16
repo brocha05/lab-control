@@ -50,17 +50,17 @@ cross-tenant test.
 
 - [x] 4.0 ✅ `catalogs` module: `concrete_suppliers` / `cement_types` (pick or add, names unique ignoring case, Q-06) and `holidays` (Q-21, Q-81): migration, endpoints, cross-tenant tests, "Configuración" screen
 - [x] 4.1 ✅ Migration `field_records`: `field_records`, `deliveries`, `samples`, `specimens` (also 5.1) with per-project unique numbers and positive CHECKs; ticket values per delivery (Q-65)
-- [ ] 4.2 `field-records` module: create DRAFT, get, list by project, nested `PUT` (header + deliveries + samples + specimens) while DRAFT
+- [x] 4.2 ✅ `field-records` module: create DRAFT, get, list by project (newest pour first, counts), nested `PUT` (header + deliveries + samples + specimens) while DRAFT; derived registro label, sheets and cumulative volume. Also 5.2
 - [ ] 4.3 Transition rules as a pure function + tests. `complete`/`cancel` endpoints
 - [ ] 4.4 Completeness rule: everything filled in on the lab's example + visto bueno (Q-33, Q-73)
 - [ ] 4.5 Frontend: **desktop-first** transcription form (records are filled on paper first, Q-49), mirroring FPC01-01's sections (header, datos de proyecto, condiciones, trazabilidad, entregas with their remisión data, especímenes, masa unitaria/aire, elementos, observaciones, visto bueno)
-- [ ] 4.6 Registro number: propose the project's next `registry_sequence`, editable, unique per project (Q-55; per front 🔒 Q-79)
+- [x] 4.6 ✅ Registro number: next `registry_sequence` assigned on create unless given, unique per project (409), `GET …/next-numbers` (Q-55; per front 🔒 Q-79)
 
 ## Phase 5 — Samples & specimens (structure and numbering known)
 
 - [x] 5.1 ✅ Migrated with 4.1
-- [ ] 5.2 Add/edit samples and specimens within a DRAFT record
-- [ ] 5.3 Sample and specimen numbers: consecutive per project, proposed automatically, editable (Q-57, Q-58); molds paired by position (A-62)
+- [x] 5.2 ✅ Samples and specimens are edited inside the record's `PUT` (4.2)
+- [x] 5.3 ✅ Sample and specimen numbers: unique per project, next numbers proposed by `GET …/next-numbers`, repeated numbers in one form → 400 (Q-57, Q-58)
 - [ ] 5.4 Cancel specimen (cascades to open tests)
 
 ## Phase 6 — Test scheduling (rules known)

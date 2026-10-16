@@ -35,10 +35,11 @@ Bodies follow FPC01-01 ([analysis](../domain/analysis/FPC01-01.md)). Column list
 
 | Method | Path | Purpose | Phase |
 |--------|------|---------|-------|
-| GET | `/projects/:id/field-records` | List for project | 4 |
-| POST | `/projects/:id/field-records` | Create `DRAFT` (`pourDate` + header fields). `registrySequence` proposed as the project's next number, editable (Q-55) | 4 |
-| GET | `/field-records/:id` | Record with deliveries → samples → specimens | 4 |
-| PUT | `/field-records/:id` | Replace the whole form while `DRAFT`: header + nested deliveries, samples, specimens | 4/5 |
+| GET | `/projects/:id/field-records` | `?page&limit&q&status` (q = elements), newest pour first, with delivery/sample/specimen counts | 4 ✅ |
+| GET | `/projects/:id/field-records/next-numbers` | Next registro, sample and specimen numbers of the project (Q-55, Q-57, Q-58) | 4 ✅ |
+| POST | `/projects/:id/field-records` | Create `DRAFT` (`pourDate`, `registrySequence?` = next number if omitted, `frontNumber?`). Taken number → 409 | 4 ✅ |
+| GET | `/field-records/:id` | Record with deliveries → samples → specimens; derived `registryNumber`, `sheet`, `sheetCount`, `cumulativeVolumeM3` | 4 ✅ |
+| PUT | `/field-records/:id` | Replace the whole form while `DRAFT` (otherwise 409): header + nested deliveries (numbered by position), samples, specimens. Repeated numbers → 400, numbers used elsewhere in the project → 409 | 4 ✅ |
 | POST | `/field-records/:id/complete` | `DRAFT → COMPLETED` (completeness, Q-33), plans tests with the project's default ages | 4/6 |
 | GET / POST / PATCH | `/catalogs/suppliers`, `/catalogs/cement-types`, `…/:id` | List / add / rename catalog entries; duplicate name (any case) → 409 (Q-06). No delete: records reference them | 4 ✅ |
 | GET / POST / DELETE | `/holidays?year=`, `/holidays`, `/holidays/:id` | The lab's holiday calendar (Q-21, Q-81). Duplicate date → 409 | 4 ✅ |

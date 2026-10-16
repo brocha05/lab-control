@@ -102,6 +102,21 @@ export class ProjectsService {
     return this.get(tenantId, id);
   }
 
+  /** For other modules (field records): 404 unless the project belongs to the tenant. */
+  async assertExists(tenantId: string, id: string): Promise<void> {
+    const found = await this.prisma.project.count({ where: { id, tenantId } });
+    if (found !== 1) throw new NotFoundException('Project not found');
+  }
+
+  /** For other modules: name and codes of one of the tenant's projects (404 otherwise). */
+  async summary(
+    tenantId: string,
+    id: string,
+  ): Promise<{ id: string; name: string; code: string | null; client: ProjectView['client'] }> {
+    const { name, code, client } = await this.get(tenantId, id);
+    return { id, name, code, client };
+  }
+
   private async toViews(tenantId: string, rows: Project[]): Promise<ProjectView[]> {
     const names = await this.clients.namesByIds(
       tenantId,

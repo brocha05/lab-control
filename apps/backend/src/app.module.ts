@@ -4,6 +4,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module.js';
 import { CatalogsModule } from './catalogs/catalogs.module.js';
 import { ClientsModule } from './clients/clients.module.js';
+import { FieldRecordsModule } from './field-records/field-records.module.js';
 import { ProjectsModule } from './projects/projects.module.js';
 import { HealthController } from './health/health.controller.js';
 import { Env, validateEnv } from './shared/config/env.validation.js';
@@ -38,6 +39,7 @@ import { PrismaModule } from './shared/prisma/prisma.module.js';
     ClientsModule,
     ProjectsModule,
     CatalogsModule,
+    FieldRecordsModule,
   ],
   controllers: [HealthController],
 })
