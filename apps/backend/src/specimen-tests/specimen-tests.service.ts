@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { AuthService } from '../auth/auth.service.js';
 import { HolidaysService } from '../catalogs/holidays.service.js';
 import type { Prisma, SpecimenTestStatus } from '../generated/prisma/client.js';
@@ -14,6 +19,7 @@ import { timeOfDayFromDb } from '../shared/dates/time-of-day.js';
 import { PrismaService } from '../shared/prisma/prisma.service.js';
 import { assignSpecimensToAges, type TestAgeRule } from './domain/test-schedule.js';
 import type { PendingTestsQueryDto } from './dto/pending-tests.dto.js';
+import type { RescheduleTestDto } from './dto/reschedule-test.dto.js';
 import { buildPendingList, type PendingCandidate, type PendingTest } from './pending-tests.js';
 
 const DEFAULT_WINDOW_DAYS = 7;
@@ -152,6 +158,53 @@ export class SpecimenTestsService {
     if (data.length === 0) return 0;
     const { count } = await tx.specimenTest.createMany({ data });
     return count;
+  }
+
+  /**
+   * Changes a test's age or exact-date flag while it isn't completed or cancelled
+   * (Q-22). The scheduled date follows, since it is derived.
+   */
+  async reschedule(
+    tenantId: string,
+    id: string,
+    dto: RescheduleTestDto,
+  ): Promise<SpecimenTestBrief> {
+    const test = await this.prisma.specimenTest.findFirst({
+      where: { id, tenantId },
+      select: { status: true },
+    });
+    if (!test) throw new NotFoundException('Test not found');
+    const { count } = await this.prisma.specimenTest.updateMany({
+      where: { id, tenantId, status: { in: ['SCHEDULED', 'IN_PROGRESS'] } },
+      data: { ageDays: dto.ageDays, keepExactDate: dto.keepExactDate },
+    });
+    if (count !== 1) {
+      throw new ConflictException(`A ${test.status} test can't be rescheduled`);
+    }
+    return this.prisma.specimenTest.findFirstOrThrow({
+      where: { id, tenantId },
+      select: { id: true, specimenId: true, ageDays: true, keepExactDate: true, status: true },
+    });
+  }
+
+  /**
+   * For the field-records module, inside its transaction: cancels the open tests of a
+   * cancelled specimen. Returns false when the specimen was already tested.
+   */
+  async cancelOpenTestsOfSpecimen(
+    tx: Prisma.TransactionClient,
+    tenantId: string,
+    specimenId: string,
+  ): Promise<boolean> {
+    const tested = await tx.specimenTest.count({
+      where: { tenantId, specimenId, status: 'COMPLETED' },
+    });
+    if (tested > 0) return false;
+    await tx.specimenTest.updateMany({
+      where: { tenantId, specimenId, status: { in: ['SCHEDULED', 'IN_PROGRESS'] } },
+      data: { status: 'CANCELLED' },
+    });
+    return true;
   }
 
   /** For the field-records module: the tests of some specimens (cancelled ones too). */

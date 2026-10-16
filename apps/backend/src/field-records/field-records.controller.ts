@@ -86,4 +86,14 @@ export class FieldRecordsController {
   ): Promise<FieldRecordDetail> {
     return this.fieldRecords.cancel(tenantId, id);
   }
+
+  /** Damaged specimen: cancels it and its open tests (5.4). */
+  @Post('specimens/:id/cancel')
+  @HttpCode(HttpStatus.OK)
+  cancelSpecimen(
+    @CurrentTenant() tenantId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<FieldRecordDetail> {
+    return this.fieldRecords.cancelSpecimen(tenantId, id);
+  }
 }

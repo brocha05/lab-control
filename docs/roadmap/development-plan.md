@@ -61,7 +61,7 @@ cross-tenant test.
 - [x] 5.1 ✅ Migrated with 4.1
 - [x] 5.2 ✅ Samples and specimens are edited inside the record's `PUT` (4.2)
 - [x] 5.3 ✅ Sample and specimen numbers: unique per project, next numbers proposed by `GET …/next-numbers`, repeated numbers in one form → 400 (Q-57, Q-58)
-- [ ] 5.4 Cancel specimen (cascades to open tests)
+- [x] 5.4 ✅ `POST /specimens/:id/cancel`: cancels the specimen and its open tests in one transaction; already tested → 409
 
 ## Phase 6 — Test scheduling (rules known)
 
@@ -69,7 +69,7 @@ cross-tenant test.
 - [x] 6.2 ✅ Scheduling rules in `test-schedule.ts`: pour date + age, Sunday/holiday shift unless `keepExactDate` (Q-21); `age-tolerance.ts` per NMX-C-083 (Q-62). Open: Q-81, Q-84, Q-86
 - [x] 6.3 ✅ `assignSpecimensToAges`: ascending specimen numbers → ascending ages (Q-14)
 - [x] 6.4 ✅ Migration `specimen_tests`; `complete` plans one SCHEDULED test per specimen with the project's default ages in the same transaction (422 if the project has no ages); the record view shows each specimen's test
-- [ ] 6.4b `PATCH /tests/:id/schedule`: change a test's age / exact-date flag until it is tested (Q-22)
+- [x] 6.4b ✅ `PATCH /tests/:id/schedule`: change a test's age / exact-date flag until it is tested (Q-21, Q-22); completed or cancelled → 409
 - [x] 6.5 ✅ `GET /tests/pending?until&projectId`: open tests with derived nominal/scheduled date (Sunday/holiday shift), `dueStatus` against today in the lab's timezone, overdue included
 - [ ] 6.6 Frontend: pending tests page (overdue / today / upcoming)
 

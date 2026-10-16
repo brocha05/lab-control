@@ -145,4 +145,53 @@ describe('tests (integration)', () => {
     await as(a).get('/tests/pending?until=2026-13-01').expect(400);
     await as(a).get('/tests/pending?projectId=nope').expect(400);
   });
+
+  it('reschedules a test until it is done (Q-22) and keeps exact dates (Q-21)', async () => {
+    await completedRecord(a, projectId, '2026-09-03');
+    const list = await as(a).get('/tests/pending?until=2026-12-31');
+    const first = (list.body.data as { id: string; scheduledDate: string }[])[0];
+    // 2026-09-03 + 3 = Sunday 09-06, tested Monday 09-07.
+    expect(first.scheduledDate).toBe('2026-09-07');
+
+    const patch = (who: TenantFixture, body: object) =>
+      request(t.http)
+        .patch(api('/tests/' + first.id + '/schedule'))
+        .set('Authorization', who.auth)
+        .send(body);
+    await patch(a, { keepExactDate: true }).expect(200);
+    await patch(a, { ageDays: 14 }).expect(200);
+    const after = await as(a).get('/tests/pending?until=2026-12-31');
+    const moved = (
+      after.body.data as { id: string; ageDays: number; scheduledDate: string }[]
+    ).find((i) => i.id === first.id);
+    expect(moved).toMatchObject({ ageDays: 14, scheduledDate: '2026-09-17' });
+
+    await patch(b, { ageDays: 7 }).expect(404);
+    await patch(a, { ageDays: 0 }).expect(400);
+  });
+
+  it('cancels a damaged specimen and its open test (5.4)', async () => {
+    const recordId = await completedRecord(a, projectId, '2026-09-02');
+    const record = await as(a).get('/field-records/' + recordId);
+    const specimens = record.body.data.deliveries[0].samples[0].specimens as { id: string }[];
+    const specimenId = specimens[0].id;
+
+    await as(b)
+      .post('/specimens/' + specimenId + '/cancel', {})
+      .expect(404);
+    const res = await as(a)
+      .post('/specimens/' + specimenId + '/cancel', {})
+      .expect(200);
+    expect(res.body.data.deliveries[0].samples[0].specimens[0]).toMatchObject({
+      status: 'CANCELLED',
+      test: null,
+    });
+
+    const pending = await as(a).get('/tests/pending?until=2026-12-31');
+    expect(pending.body.data).toHaveLength(3);
+    await as(a)
+      .post('/specimens/' + specimenId + '/cancel', {})
+      .expect(409);
+    await expect(t.prisma.specimenTest.count({ where: { status: 'CANCELLED' } })).resolves.toBe(1);
+  });
 });

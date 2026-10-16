@@ -44,7 +44,7 @@ Bodies follow FPC01-01 ([analysis](../domain/analysis/FPC01-01.md)). Column list
 | GET / POST / PATCH | `/catalogs/suppliers`, `/catalogs/cement-types`, `…/:id` | List / add / rename catalog entries; duplicate name (any case) → 409 (Q-06). No delete: records reference them | 4 ✅ |
 | GET / POST / DELETE | `/holidays?year=`, `/holidays`, `/holidays/:id` | The lab's holiday calendar (Q-21, Q-81). Duplicate date → 409 | 4 ✅ |
 | POST | `/field-records/:id/cancel` | `DRAFT → CANCELLED`; other states → 409 | 4 ✅ |
-| POST | `/specimens/:id/cancel` | Cancel specimen + open tests | 5 |
+| POST | `/specimens/:id/cancel` | Cancel a damaged specimen + its open tests; returns the record. Already tested → 409 | 5 ✅ |
 
 > FPC01-01 is filled in as one sheet (header + delivery table + specimen references), so
 > the record is edited as a whole with one nested `PUT` while `DRAFT`. Delivery
@@ -59,7 +59,7 @@ Bodies follow FPC01-01 ([analysis](../domain/analysis/FPC01-01.md)). Column list
 | GET | `/tests/pending` | `?until=YYYY-MM-DD` (default today + 7) `&projectId=` → open tests with `nominalDate`, `scheduledDate` (Sunday/holiday shift), `dueStatus`, specimen/sample/record/project context; overdue included, sorted by date | 6 ✅ |
 | GET | `/projects/:id/tests?testDate=YYYY-MM-DD` | Compression worksheet FPC06-01 (derived, A-72) | 7 |
 | GET | `/tests/:id` | Detail incl. specimen/record context | 7 |
-| PATCH | `/tests/:id/schedule` | Change `ageDays` / `keepExactDate` while not completed (Q-21, Q-22) | 6 |
+| PATCH | `/tests/:id/schedule` | `{ ageDays?, keepExactDate? }` while SCHEDULED / IN_PROGRESS (Q-21, Q-22); otherwise 409 | 6 ✅ |
 | POST | `/tests/:id/start` | `SCHEDULED → IN_PROGRESS` (if the state is kept, A-22) | 7 |
 | POST | `/tests/:id/complete` | Record FPC06-01 readings (`testDate`, `testTime`, heights, diameters, `maxLoadKgf`, `failureType`, …). Results from `compression.ts` | 7 |
 | POST | `/tests/:id/cancel` | Cancel | 7 |

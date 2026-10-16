@@ -307,6 +307,36 @@ export class FieldRecordsService {
     return this.get(tenantId, id);
   }
 
+  /**
+   * Cancels one specimen of a completed record (e.g. damaged in transport) and its
+   * open tests, in one transaction. A specimen already tested can't be cancelled.
+   * Returns the record it belongs to.
+   */
+  async cancelSpecimen(tenantId: string, specimenId: string): Promise<FieldRecordDetail> {
+    const specimen = await this.prisma.specimen.findFirst({
+      where: { id: specimenId, tenantId },
+      select: {
+        status: true,
+        sample: { select: { delivery: { select: { fieldRecordId: true } } } },
+      },
+    });
+    if (!specimen) throw new NotFoundException('Specimen not found');
+    if (specimen.status === 'CANCELLED') {
+      throw new ConflictException('The specimen is already cancelled');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      const ok = await this.specimenTests.cancelOpenTestsOfSpecimen(tx, tenantId, specimenId);
+      if (!ok) throw new ConflictException('The specimen was already tested');
+      const { count } = await tx.specimen.updateMany({
+        where: { id: specimenId, tenantId, status: 'CREATED' },
+        data: { status: 'CANCELLED' },
+      });
+      if (count !== 1) throw new ConflictException('The specimen changed; reload it');
+    });
+    return this.get(tenantId, specimen.sample.delivery.fieldRecordId);
+  }
+
   private assertTransition(from: FieldRecordStatus, to: FieldRecordStatus): void {
     try {
       assertFieldRecordTransition(from, to);
