@@ -10,8 +10,8 @@ Last updated: 2026-10-15 (lab questionnaire answered)
 | 3 Clients / projects | ✅ Done: API with cross-tenant tests, screens, app shell; client/project codes for report numbers |
 | 4, 5 Field records, samples, specimens | ✅ Done: catalogs + holidays, migration, API (create, nested save, complete/cancel, cancel specimen), transcription screen. Front numbering (Q-79) open |
 | 6 Test scheduling | ✅ Done (2026-10-16): project default ages, tests planned on completion, pending list with Sunday/holiday shift, per-test age changes, screens |
-| 7 Test results | **Next.** Formulas implemented and checked against the lab's worksheets. Results endpoint, worksheet screen and print pending |
-| 8 Bitácora | Columns and scope (per project) known |
+| 7 Test results | ✅ Done (2026-10-16): FPC06-01 worksheet per project and date, results saved per sheet and derived on read (ADR-008), printable sheet. Test time, corrections and scope assumed (A-83 … A-91) |
+| 8 Bitácora | **Next.** Columns and scope (per project) known |
 | 9 Reports | Layout, numbering, versions, signatures known. Partial-report numbering open (Q-82) |
 | 10 Hardening | Real roles migrated; permissions and the **required** audit trail (Q-54) pending |
 
@@ -57,10 +57,9 @@ historical Excel (Q-85), age printed after a Sunday shift (Q-86).
 
 ## Next
 
-1. Phase 7: record results (`POST /tests/:id/complete`) with `compression.ts`, the
-   FPC06-01 entry screen per project and test date, printable worksheet.
-2. Phase 8: the Bitácora per project.
-3. Ask the lab for Q-79 … Q-86 and the historical Excel.
+1. Phase 8: the Bitácora per project (read model over records and results), Excel export.
+2. Phase 9: the FPC06-04 report PDF with snapshots.
+3. Ask the lab for Q-79 … Q-99 (section 9 of the questionnaire) and the historical Excel.
 
 ## Notes
 

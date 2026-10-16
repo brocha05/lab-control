@@ -18,6 +18,7 @@ import type {
   SpecimenView,
 } from '@/modules/field-records/types/fieldRecord.types';
 import { TEST_STATUS } from '@/lib/status';
+import { formatDateShort } from '@/lib/utils/formatters';
 import { useCancelSpecimen } from '../hooks/useSpecimenTests';
 import { RescheduleForm } from './RescheduleForm';
 
@@ -47,10 +48,11 @@ export function PlannedTestsSection({ record }: { record: FieldRecordDetail }) {
       <header className="border-b px-4 py-3.5">
         <h2 className="text-[15px] font-semibold">Ensayos programados</h2>
         <p className="mt-0.5 text-[13px] text-muted-foreground">
-          La fecha de cada ensayo está en Ensayos pendientes, ya recorrida por domingos y festivos.
+          La fecha de cada ensayo está en Ensayos pendientes; los resultados se capturan en la hoja
+          de ensayos.
         </p>
       </header>
-      <Table className="min-w-[640px]">
+      <Table className="min-w-[860px]">
         <TableHeader>
           <TableRow>
             <TableHead className="w-24">Muestra</TableHead>
@@ -58,6 +60,8 @@ export function PlannedTestsSection({ record }: { record: FieldRecordDetail }) {
             <TableHead className="w-24">Molde</TableHead>
             <TableHead className="w-24">Edad</TableHead>
             <TableHead>Estado</TableHead>
+            <TableHead className="w-28">Ensayado</TableHead>
+            <TableHead className="w-36 text-right">Resistencia</TableHead>
             <TableHead className="w-56" />
           </TableRow>
         </TableHeader>
@@ -88,6 +92,21 @@ export function PlannedTestsSection({ record }: { record: FieldRecordDetail }) {
                     <Badge tone={TEST_STATUS[test.status].tone}>
                       {TEST_STATUS[test.status].label}
                     </Badge>
+                  ) : (
+                    '—'
+                  )}
+                </TableCell>
+                <TableCell className="tabular-nums">
+                  {test?.testDate ? formatDateShort(test.testDate) : '—'}
+                </TableCell>
+                <TableCell className="text-right">
+                  {test?.stressKgCm2 != null ? (
+                    <>
+                      <span className="font-mono font-semibold">{test.stressKgCm2}</span>{' '}
+                      <span className="text-xs text-[#6A6E73]">
+                        kg/cm² · {test.percentOfDesign?.toFixed(1)}%
+                      </span>
+                    </>
                   ) : (
                     '—'
                   )}

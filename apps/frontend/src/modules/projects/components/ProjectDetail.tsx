@@ -144,6 +144,11 @@ export function ProjectDetail({ id }: { id: string }) {
       {tab === 'registros' && <RecordsTab projectId={project.id} onNewRecord={newRecord} />}
       {tab === 'ensayos' && (
         <div className="flex flex-col gap-4">
+          <div className="flex justify-end">
+            <Button variant="outline" asChild>
+              <Link href={`/tests/worksheet?projectId=${project.id}`}>Hoja de ensayos</Link>
+            </Button>
+          </div>
           <PendingTestsView projectId={project.id} />
         </div>
       )}

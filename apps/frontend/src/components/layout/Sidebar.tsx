@@ -130,7 +130,7 @@ export function Sidebar() {
       )}
       <aside
         className={cn(
-          'z-40 flex h-full w-[244px] shrink-0 flex-col border-r bg-sidebar',
+          'z-40 flex h-full w-[244px] shrink-0 flex-col border-r bg-sidebar print:hidden',
           'fixed inset-y-0 left-0 md:static',
           drawerOpen ? 'flex' : 'hidden md:flex'
         )}

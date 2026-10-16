@@ -79,7 +79,7 @@ export function Topbar() {
   const setNewRecordOpen = useUiStore((s) => s.setNewRecordOpen);
 
   return (
-    <header className="flex h-[60px] shrink-0 items-center gap-3 border-b bg-card px-[clamp(14px,3vw,32px)]">
+    <header className="flex h-[60px] shrink-0 items-center gap-3 border-b bg-card px-[clamp(14px,3vw,32px)] print:hidden">
       <Button
         variant="outline"
         size="icon"

@@ -78,7 +78,11 @@ export function PendingTestsPage() {
       <PageHeader
         title="Ensayos pendientes"
         description="Especímenes por ensayar, con la fecha ya recorrida por domingos y días festivos"
-      />
+      >
+        <Button asChild>
+          <Link href="/tests/worksheet">Hoja de ensayos</Link>
+        </Button>
+      </PageHeader>
       <PendingTestsView />
     </div>
   );
@@ -225,11 +229,16 @@ export function PendingTestsView({ projectId: fixedProject }: { projectId?: stri
         ) : (
           <>
             <div className="hidden md:block">
-              <PendingTable rows={rows} showProject={!fixedProject} onReschedule={setEditing} />
+              <PendingTable
+                rows={rows}
+                today={today}
+                showProject={!fixedProject}
+                onReschedule={setEditing}
+              />
             </div>
             <div className="md:hidden">
               {rows.map((t) => (
-                <PendingCard key={t.id} test={t} onReschedule={setEditing} />
+                <PendingCard key={t.id} test={t} today={today} onReschedule={setEditing} />
               ))}
             </div>
           </>
@@ -281,12 +290,21 @@ function ScheduledDate({ test }: { test: PendingTest }) {
   );
 }
 
+/** Due tests are recorded on today's worksheet; later ones can only be looked at. */
+function worksheetHref(t: PendingTest, today: string): string | null {
+  return t.dueStatus === 'UPCOMING'
+    ? null
+    : `/tests/worksheet?projectId=${t.project.id}&date=${today}`;
+}
+
 function PendingTable({
   rows,
+  today,
   showProject,
   onReschedule,
 }: {
   rows: PendingTest[];
+  today: string;
   showProject: boolean;
   onReschedule: (test: PendingTest) => void;
 }) {
@@ -341,9 +359,15 @@ function PendingTable({
                   <Button variant="ghost" size="xs" onClick={() => onReschedule(t)}>
                     Cambiar edad
                   </Button>
-                  <Button variant="outline" size="xs" asChild>
-                    <Link href={`/field-records/${t.fieldRecord.id}`}>Ver registro</Link>
-                  </Button>
+                  {worksheetHref(t, today) ? (
+                    <Button size="xs" asChild>
+                      <Link href={worksheetHref(t, today) as string}>Registrar ensayo</Link>
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="xs" asChild>
+                      <Link href={`/field-records/${t.fieldRecord.id}`}>Ver registro</Link>
+                    </Button>
+                  )}
                 </span>
               </TableCell>
             </TableRow>
@@ -356,9 +380,11 @@ function PendingTable({
 
 function PendingCard({
   test: t,
+  today,
   onReschedule,
 }: {
   test: PendingTest;
+  today: string;
   onReschedule: (test: PendingTest) => void;
 }) {
   const look = DUE_STATUS[t.dueStatus];
@@ -388,11 +414,17 @@ function PendingCard({
           <Button variant="ghost" size="sm" onClick={() => onReschedule(t)}>
             Cambiar edad
           </Button>
-          <Button variant="outline" size="icon" asChild aria-label="Ver registro">
-            <Link href={`/field-records/${t.fieldRecord.id}`}>
-              <ChevronRight />
-            </Link>
-          </Button>
+          {worksheetHref(t, today) ? (
+            <Button size="sm" asChild>
+              <Link href={worksheetHref(t, today) as string}>Registrar</Link>
+            </Button>
+          ) : (
+            <Button variant="outline" size="icon" asChild aria-label="Ver registro">
+              <Link href={`/field-records/${t.fieldRecord.id}`}>
+                <ChevronRight />
+              </Link>
+            </Button>
+          )}
         </span>
       </div>
     </div>

@@ -4,11 +4,41 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { toast } from 'sonner';
 import { toastApiError } from '@/lib/utils/apiError';
 import { specimenTestsApi } from '../api/specimenTestsApi';
-import type { PendingTestsParams, RescheduleInput } from '../types/specimenTest.types';
+import type {
+  PendingTestsParams,
+  RescheduleInput,
+  SaveTestResultsInput,
+} from '../types/specimenTest.types';
 
 export const specimenTestKeys = {
   pending: (params: PendingTestsParams) => ['tests', 'pending', params] as const,
+  worksheet: (projectId: string, testDate: string) =>
+    ['tests', 'worksheet', projectId, testDate] as const,
 };
+
+/** The FPC06-01 sheet of a project and test date (7.4). */
+export function useWorksheet(projectId: string, testDate: string) {
+  return useQuery({
+    queryKey: specimenTestKeys.worksheet(projectId, testDate),
+    queryFn: async () => (await specimenTestsApi.worksheet(projectId, testDate)).data,
+    enabled: !!projectId && !!testDate,
+  });
+}
+
+/** Saves a sheet's press readings; each row completes (or corrects) its test. */
+export function useSaveTestResults() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: SaveTestResultsInput) =>
+      (await specimenTestsApi.saveResults(data)).data,
+    onSuccess: ({ saved }) => {
+      void queryClient.invalidateQueries({ queryKey: ['tests'] });
+      void queryClient.invalidateQueries({ queryKey: ['field-records', 'detail'] });
+      toast.success(saved === 1 ? '1 resultado guardado' : `${saved} resultados guardados`);
+    },
+    onError: (error) => toastApiError(error, 'No se pudieron guardar los resultados.'),
+  });
+}
 
 /** Open tests up to a date, with derived dates and due status (6.5). */
 export function usePendingTests(params: PendingTestsParams) {

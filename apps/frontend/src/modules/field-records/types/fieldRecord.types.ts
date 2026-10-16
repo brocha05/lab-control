@@ -41,6 +41,10 @@ export interface SpecimenView {
     ageDays: number;
     keepExactDate: boolean;
     status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+    testDate: string | null;
+    /** Derived from the readings once tested (ADR-008). */
+    stressKgCm2: number | null;
+    percentOfDesign: number | null;
   } | null;
 }
 

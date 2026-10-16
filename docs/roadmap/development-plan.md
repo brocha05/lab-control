@@ -73,13 +73,13 @@ cross-tenant test.
 - [x] 6.5 ✅ `GET /tests/pending?until&projectId`: open tests with derived nominal/scheduled date (Sunday/holiday shift), `dueStatus` against today in the lab's timezone, overdue included
 - [x] 6.6 ✅ Frontend: "Ensayos pendientes" (overdue / today / upcoming, project and period filters, shifted-date marker, "Cambiar edad"), planned tests on the completed record (change age, cancel damaged specimen), dashboard count of tests due today and overdue
 
-## Phase 7 — Test results (readings and formulas known)
+## Phase 7 — Test results ✅
 
-- [ ] 7.1 Migration for the `specimen_tests` reading columns, incl. `test_time` (drafted)
+- [x] 7.1 ✅ `specimen_tests` reading columns, incl. `test_time` (migrated with 6.4)
 - [x] 7.2 ✅ Calculation functions in `compression.ts` (area, N, stress, MPa, %, averages, rate, unit weight), confirmed by the lab (Q-26, Q-59, Q-61); the MCH-068 worksheets (specimens 389–408) are the test vectors. Open: Q-80 (MPa input, average decimals)
-- [ ] 7.3 Start / complete / cancel endpoints
-- [ ] 7.4 Frontend: test entry screen per project + test date, laid out like FPC06-01 (derived actual age, age tolerance, load-time spot check 1 in 10, Q-63). Printable worksheet, kept signed on paper (Q-69)
-- [ ] 7.5 Decide (ADR) whether calculated values are stored for audit or computed on read
+- [x] 7.3 ✅ `GET /tests/worksheet` + `PUT /tests/results` (one transaction per sheet, corrections by saving again, A-85). No start step (A-90); damaged specimens use `POST /specimens/:id/cancel`
+- [x] 7.4 ✅ "Hoja de ensayos": per project + test date, laid out like FPC06-01 (actual age, overdue marker, test time, age tolerance, load-time spot check 1 in 10, Q-63), results from the server; print view with the form header and signature lines (Q-69). Results on the record page. Open: Q-89, Q-94 … Q-99
+- [x] 7.5 ✅ ADR-008: computed on read, frozen by the report snapshot
 
 ## Phase 8 — Bitácora (columns and scope known)
 
