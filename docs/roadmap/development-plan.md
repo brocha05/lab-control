@@ -49,7 +49,7 @@ cross-tenant test.
 ## Phase 4 — Field records (FPC01-01 + questionnaire; 🔒 item: Q-79)
 
 - [x] 4.0 ✅ `catalogs` module: `concrete_suppliers` / `cement_types` (pick or add, names unique ignoring case, Q-06) and `holidays` (Q-21, Q-81): migration, endpoints, cross-tenant tests, "Configuración" screen
-- [ ] 4.1 Migration for `field_records` + `deliveries` (columns drafted in `drafts/domain.prisma`; ticket values per delivery, Q-65)
+- [x] 4.1 ✅ Migration `field_records`: `field_records`, `deliveries`, `samples`, `specimens` (also 5.1) with per-project unique numbers and positive CHECKs; ticket values per delivery (Q-65)
 - [ ] 4.2 `field-records` module: create DRAFT, get, list by project, nested `PUT` (header + deliveries + samples + specimens) while DRAFT
 - [ ] 4.3 Transition rules as a pure function + tests. `complete`/`cancel` endpoints
 - [ ] 4.4 Completeness rule: everything filled in on the lab's example + visto bueno (Q-33, Q-73)
@@ -58,7 +58,7 @@ cross-tenant test.
 
 ## Phase 5 — Samples & specimens (structure and numbering known)
 
-- [ ] 5.1 Migration for `samples` / `specimens` columns. Confirm the 1:N test cardinality (forms show one test per specimen, A-05)
+- [x] 5.1 ✅ Migrated with 4.1
 - [ ] 5.2 Add/edit samples and specimens within a DRAFT record
 - [ ] 5.3 Sample and specimen numbers: consecutive per project, proposed automatically, editable (Q-57, Q-58); molds paired by position (A-62)
 - [ ] 5.4 Cancel specimen (cascades to open tests)

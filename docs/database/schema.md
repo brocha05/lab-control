@@ -1,8 +1,10 @@
 # Database Schema
 
 > Two sources. **Migrated**: `tenants`, `users`, `refresh_tokens`, `clients`,
-> `projects`, `project_test_configurations` in [`apps/backend/prisma/schema.prisma`](../../apps/backend/prisma/schema.prisma).
-> **Draft, not migrated**: every other table below, in
+> `projects`, `project_test_configurations`, `holidays`, `concrete_suppliers`,
+> `cement_types`, `field_records`, `deliveries`, `samples`, `specimens` in
+> [`apps/backend/prisma/schema.prisma`](../../apps/backend/prisma/schema.prisma).
+> **Draft, not migrated**: `specimen_tests`, `reports`, in
 > [`apps/backend/prisma/drafts/domain.prisma`](../../apps/backend/prisma/drafts/domain.prisma),
 > moved into the active schema by the phase that needs it. Domain columns come from the
 > lab forms (FPC01-01, FPC06-01, FPC06-04) and the questionnaire answers of 2026-10-15
@@ -100,7 +102,10 @@ No password-reset table: the Jefe de Control de Calidad resets passwords (A-81, 
 | specimen_count | int, `CHECK > 0` | Usually 2 per age (Q-14) |
 | unique | (project_id, age_days) | Project **defaults**; each test's age stays editable (Q-20, Q-22) |
 
-## Draft tables
+## Field capture and draft tables
+
+Migrated in 4.0/4.1: `holidays`, catalogs, `field_records`, `deliveries`, `samples`,
+`specimens`. Still draft: `specimen_tests`, `reports`.
 
 ### `holidays` and catalogs
 | Table | Columns | Notes |
