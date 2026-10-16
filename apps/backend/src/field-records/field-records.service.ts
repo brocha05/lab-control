@@ -124,7 +124,11 @@ export class FieldRecordsService {
     const specimenIds = record.deliveries.flatMap((d) =>
       d.samples.flatMap((s) => s.specimens.map((sp) => sp.id)),
     );
-    const tests = await this.specimenTests.briefsForSpecimens(tenantId, specimenIds);
+    const tests = await this.specimenTests.briefsForSpecimens(
+      tenantId,
+      specimenIds,
+      record.specifiedStrengthKgCm2?.toNumber() ?? null,
+    );
     return toDetail(record, project, tests);
   }
 

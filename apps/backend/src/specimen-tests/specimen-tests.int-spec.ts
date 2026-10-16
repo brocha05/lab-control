@@ -194,4 +194,61 @@ describe('tests (integration)', () => {
       .expect(409);
     await expect(t.prisma.specimenTest.count({ where: { status: 'CANCELLED' } })).resolves.toBe(1);
   });
+
+  it('records a worksheet (FPC06-01) and derives the results (7.3, 7.4)', async () => {
+    await completedRecord(a, projectId, '2026-09-02');
+    const sheetUrl = `/tests/worksheet?projectId=${projectId}&testDate=2026-09-05`;
+    const sheet = await as(a).get(sheetUrl).expect(200);
+    const rows = sheet.body.data.groups[0].rows as {
+      id: string;
+      specimen: { specimenNumber: number };
+    }[];
+    expect(sheet.body.data.groups[0].fieldRecord.registryNumber).toBe('MCH-068');
+    expect(rows.map((r) => r.specimen.specimenNumber)).toEqual([405, 406]);
+
+    const reading = {
+      height1Cm: 29.7,
+      height2Cm: 29.8,
+      diameter1Cm: 14.9,
+      diameter2Cm: 14.9,
+      maxLoadKgf: 36470,
+    };
+    const body = {
+      testDate: '2026-09-05',
+      pressCode: 'CCP-PRE-05',
+      rows: [{ testId: rows[0].id, testTime: '10:00', failureType: 3, ...reading }],
+    };
+    await as(b).put('/tests/results', body).expect(404);
+    await as(a)
+      .put('/tests/results', { ...body, testDate: '2026-09-01' })
+      .expect(400);
+    await as(a)
+      .put('/tests/results', { ...body, rows: [{ ...body.rows[0], failureType: 7 }] })
+      .expect(400);
+    await as(a).put('/tests/results', body).expect(200);
+
+    const after = await as(a).get(sheetUrl).expect(200);
+    const [r405, r406] = after.body.data.groups[0].rows;
+    expect(r405).toMatchObject({
+      status: 'COMPLETED',
+      testTime: '10:00',
+      readings: { maxLoadKgf: 36470, failureType: 3 },
+      result: { areaCm2: 174.4, stressKgCm2: 209, percentOfDesign: 83.6, maxLoadN: 357771 },
+      ageTolerance: { status: 'WITHIN' },
+    });
+    expect(r406.result).toBeNull();
+    expect(after.body.data.pressCode).toBe('CCP-PRE-05');
+
+    // Tested: off the pending list; corrections are saved again (A-85).
+    const pending = await as(a).get('/tests/pending?until=2026-12-31');
+    expect(pending.body.data).toHaveLength(3);
+    await as(a)
+      .put('/tests/results', { ...body, rows: [{ ...body.rows[0], maxLoadKgf: 37000 }] })
+      .expect(200);
+    const corrected = await as(a).get(sheetUrl);
+    expect(corrected.body.data.groups[0].rows[0].result.stressKgCm2).toBe(212);
+
+    await as(b).get(sheetUrl).expect(404);
+    await as(a).get(`/tests/worksheet?projectId=${projectId}&testDate=nope`).expect(400);
+  });
 });

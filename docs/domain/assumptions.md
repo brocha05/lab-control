@@ -109,3 +109,12 @@ Introduced while modelling FPC01-01, FPC01-02, FPC06-01 and FPC06-04
 | A-80 | Per-age averages are computed from the rounded values and printed with one decimal. | Q-26 ("con valores redondeados") + the report layout (one decimal). | OPEN | Q-80 |
 | A-82 | When a sample's specimens don't match the project's default ages (e.g. 5 specimens for 2 + 2), extra specimens go to the last age and missing ones shorten the last ages. The user then edits single tests. | Q-14 says splits vary; planning shouldn't block completion. | OPEN | Q-14, Q-22, Q-87 |
 | A-81 | The Jefe de Control de Calidad (`QUALITY_MANAGER`) administers users. | Top of the hierarchy and sole report authorizer (Q-39/Q-40). | OPEN | Q-83 |
+| A-83 | The time of each break is optional. Without it the age tolerance shows "sin hora" instead of Sí/No. | FPC06-01 has no time column (Q-89). | OPEN | Q-89 |
+| A-84 | The worksheet of a date lists the open tests due on or before it (overdue ones included) and the tests completed on it. | An overdue specimen is broken on the day it is actually tested. | OPEN | Q-94 |
+| A-85 | Saved results can be corrected by saving the sheet again, by any role, until an issued report includes them. | The lab corrects the paper sheet; permissions come in Phase 10.1. | OPEN | Q-95 |
+| A-86 | A test date can't be in the future or before the pour date; a test outside its age tolerance is still recorded. | Q-23 (recorded and noted on the report). | OPEN | Q-96 |
+| A-87 | The compression worksheet covers cylinders (15×30, 10×20, or no type given). Beams and cubes wait for their own forms. | Q-70: flexural tests are a short-term future; the area formula is for cylinders. | OPEN | Q-70, Q-97 |
+| A-88 | Press and dimension instruments are typed once per sheet and stored on each test. No equipment catalog yet. | One press, direct readings (Q-75); equipment list is Q-29. | OPEN | Q-29, Q-75 |
+| A-89 | The failure type (1–6, NMX-C-083 patterns) is optional per specimen. | Q-60: the worksheet is authoritative but often leaves it blank. | OPEN | Q-60, Q-98 |
+| A-90 | There is no "start" (IN_PROGRESS) step: entering the readings completes the test. | No form shows an in-progress state (A-22). | OPEN | Q-24 |
+| A-91 | The sheet's signatures and observaciones stay on paper; the system prints blank signature lines for the Jefe de laboratorio and the Coordinador del SGC. | Q-69: printable any time, kept signed on paper. | OPEN | Q-99 |

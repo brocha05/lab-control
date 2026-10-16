@@ -57,12 +57,9 @@ Bodies follow FPC01-01 ([analysis](../domain/analysis/FPC01-01.md)). Column list
 | Method | Path | Purpose | Phase |
 |--------|------|---------|-------|
 | GET | `/tests/pending` | `?until=YYYY-MM-DD` (default today + 7) `&projectId=` → open tests with `nominalDate`, `scheduledDate` (Sunday/holiday shift), `dueStatus`, specimen/sample/record/project context; overdue included, sorted by date | 6 ✅ |
-| GET | `/projects/:id/tests?testDate=YYYY-MM-DD` | Compression worksheet FPC06-01 (derived, A-72) | 7 |
-| GET | `/tests/:id` | Detail incl. specimen/record context | 7 |
+| GET | `/tests/worksheet` | `?projectId=&testDate=YYYY-MM-DD` → FPC06-01 sheet: project, groups per record + sample, rows (open tests due on or before the date + tests completed on it, A-84) with readings, derived `result` and `ageTolerance` (ADR-008), shared `pressCode` / `dimensionEquipment`, `loadTimeChecks` (Q-63). Cylinders only (A-87). Other lab's project → 404 | 7 ✅ |
 | PATCH | `/tests/:id/schedule` | `{ ageDays?, keepExactDate? }` while SCHEDULED / IN_PROGRESS (Q-21, Q-22); otherwise 409 | 6 ✅ |
-| POST | `/tests/:id/start` | `SCHEDULED → IN_PROGRESS` (if the state is kept, A-22) | 7 |
-| POST | `/tests/:id/complete` | Record FPC06-01 readings (`testDate`, `testTime`, heights, diameters, `maxLoadKgf`, `failureType`, …). Results from `compression.ts` | 7 |
-| POST | `/tests/:id/cancel` | Cancel | 7 |
+| PUT | `/tests/results` | `{ testDate, pressCode?, dimensionEquipment?, rows: [{ testId, testTime?, height1Cm, height2Cm, diameter1Cm, diameter2Cm, maxLoadKgf, loadDurationS?, failureType? (1–6) }] }` → completes (or corrects, A-85) every row in one transaction. Future date or before the pour → 400; cancelled → 409; other lab → 404. No start step (A-90); a damaged specimen is cancelled with `POST /specimens/:id/cancel` | 7 ✅ |
 
 ## Bitácora (read-only)
 

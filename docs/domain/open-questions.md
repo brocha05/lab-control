@@ -152,3 +152,14 @@ Sources and context: [analysis/](analysis/README.md).
 | Q-91 | P1 | Should the Bitácora export match their current Excel (FPC01-02 columns, one tab per project)? | | | Phase 8.3 |
 | Q-92 | P2 | How many days ahead do they plan breaks? Is a printed list of the day's tests useful? | | | Pending tests (7 days by default) |
 | Q-93 | P1 | Who may change a test's age or cancel a damaged specimen: only the Coordinador del SGC, or the Jefe de Laboratorio too? | | | Permissions (Phase 10.1) |
+
+## 10. Raised by test results (Phase 7, 2026-10-16)
+
+| ID | Pri | Question | Answer | Source | Impact |
+|----|-----|----------|--------|--------|--------|
+| Q-94 | P1 | When a specimen is broken after its date (overdue), does it go on the sheet of the day it is actually broken? | | | Worksheet rows (A-84) |
+| Q-95 | P1 | Can a recorded result be corrected? Who may do it, and must the change be justified (audit trail)? | | | Corrections (A-85), Phase 10 |
+| Q-96 | P1 | May a specimen be broken before its scheduled date (e.g. the client asks for an early result)? What happens when it falls outside the age tolerance? | | | Validation (A-86) |
+| Q-97 | P2 | 10×20 cylinders: same worksheet and formulas as 15×30? Cubes: which area? | | | A-87 |
+| Q-98 | P2 | Is the failure type required for every specimen, or only when observed? | | | A-89 |
+| Q-99 | P2 | Should the system keep the sheet's observaciones and the names of who signed it, or is paper enough? | | | Printable worksheet (A-91) |
