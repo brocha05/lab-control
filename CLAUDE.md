@@ -21,16 +21,19 @@ and what's blocked: `PROJECT_STATUS.md`. Tasks per phase: `docs/roadmap/developm
 
 The domain is still in discovery. Official lab documents are the source of truth.
 
-- Domain fields come only from analyzed documents (`docs/domain/analysis/`, first batch
-  2026-10-14: FPC01-01 field record, FPC01-02 Bitácora, FPC06-01 compression worksheet,
-  FPC06-04 report). Don't add fields beyond them. Formulas are **not** printed on any
-  form, so calculations stay blocked (Q-59, Q-61). Tasks marked 🔒 in
-  `docs/roadmap/development-plan.md` are blocked. Don't start them.
+- Domain fields come only from analyzed sources (`docs/domain/analysis/`: the forms
+  FPC01-01, FPC01-02, FPC06-01, FPC06-04 and the lab's questionnaire answers of
+  2026-10-15). Don't add fields beyond them. Calculations follow NMX-C-083 as confirmed
+  by the lab and live in `src/specimen-tests/domain/compression.ts`; don't re-derive them.
+  Tasks marked 🔒 in `docs/roadmap/development-plan.md` are blocked. Don't start them.
 - Code depending on an assumption cites it: `// ASSUMPTION A-12`. Open questions are
   `Q-xx`. IDs live in `docs/domain/assumptions.md` and `docs/domain/open-questions.md`.
   Never silently turn an assumption into a fact. Unknowns are marked `TBD` or
   `TODO: VALIDATE WITH LAB DOCUMENTATION`.
-- No hardcoded test ages (7/28 days): ages come from `ProjectTestConfiguration` (A-10).
+- No hardcoded test ages (7/28 days): ages are the project's defaults
+  (`ProjectTestConfiguration`), editable per test until it is tested (Q-20, Q-22).
+- Registro, sample and specimen numbers are consecutive **per project** (Q-55, Q-57,
+  Q-58). Roles are the lab's (`UserRole`, Q-39); only `QUALITY_MANAGER` issues reports.
 - No `jsonb` for unknown domain fields. JSON is only for `reports.snapshot` (ADR-003).
 - Architectural change = new ADR in `docs/decisions/` that supersedes the old one.
 - When a lab document arrives, follow `docs/domain/discovery-checklist.md`: analyze and
@@ -106,7 +109,8 @@ Transition rules live in one pure, unit-tested function per entity
 stored as `DATE`; arithmetic is on UTC midnights. "Today" is always
 `calendarDateInTimeZone(tenant.timezone)` (A-14). Timestamps are `timestamptz`.
 
-**Derived, not stored**: scheduled test date (`FieldRecord.pourDate + ageDays`), due status,
+**Derived, not stored**: scheduled test date (`pourDate + ageDays`, moved past Sundays and
+holidays, `test-schedule.ts`), age tolerance, calculated results, due status,
 specimen "scheduled/tested", the whole Bitácora (ADR-004, no table). `SpecimenTest.ageDays`
 is the one deliberate copy (A-15). Reports are the one sanctioned duplication: frozen
 `snapshot` + PDF + SHA-256; `FINAL` is immutable, corrections are a new version (ADR-005).

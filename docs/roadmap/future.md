@@ -24,7 +24,9 @@ What we're doing now to keep that open:
 
 ## Offline / PWA field capture (Phase 12)
 
-Field connectivity may be poor (A-42, Q-49). Options, from simplest:
+Confirmed (Q-49): internet is hard to get on site, and the lab prefers to capture on
+paper and transcribe later. Offline capture is therefore not needed for the MVP.
+Options if that changes, from simplest:
 
 1. **Draft-first UX** (cheap, could even be MVP): autosave the form to local storage
    and submit when online. No sync conflicts, because a draft belongs to one device.
@@ -37,14 +39,20 @@ explicit state transitions (replayable commands), no server-generated sequential
 on records. Note: official folios (Q-03) may need server assignment, which affects
 option 2.
 
+## Requested by the lab (questionnaire 2026-10-15)
+
+| Feature | Lab's words | Question |
+|---------|-------------|----------|
+| Other specimens and tests: beams (MR, 50 and 60 cm), 10×20 cylinders, 15 and 10 cm cubes | "mejora a futuro, en el corto plazo" | Q-70 |
+| Client portal to download reports | "sería muy útil" | Q-43 |
+| Verification QR on the PDF | "si no es muy complicado" | Q-38 |
+| Equipment control with calibration/verification dates | "mejora a futuro" | Q-29 |
+| Quotes and billing | "como mejora" | Q-42 |
+
 ## Other candidates
 
-- Client portal (read-only reports): Q-43
 - PostgreSQL Row Level Security (Phase 10)
-- Full audit trail / entity history (Q-54)
-- Digital signatures / QR verification on PDFs (Q-38)
 - Async report worker (ADR-006 trigger)
 - Notifications (tests due tomorrow)
-- Data import from historical spreadsheets (Q-53)
-- Dashboard metrics (pass/fail trends: **only** once acceptance criteria are known)
-- Billing / quoting (Q-42)
+- Dashboard metrics. The report is informative only, with no conformity statement
+  (Q-28), so no pass/fail metrics unless the lab asks for them.

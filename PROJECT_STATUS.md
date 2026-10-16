@@ -1,69 +1,65 @@
 # Project Status
 
-Last updated: 2026-10-14 (lab documents analyzed)
+Last updated: 2026-10-15 (lab questionnaire answered)
 
 | Phase | State |
 |-------|-------|
-| 0 Domain discovery | 🟡 **First documents analyzed** (2026-10-14). Review with the lab pending (0.5) |
-| 1 Architecture + skeleton | ✅ Done (exit criteria met) |
-| 2 Core entities + auth | ✅ Done (2026-10-14): migrations, tenant CLI, auth, global guard, `/me`, integration tests |
-| 3 Clients / projects | ✅ Done (2026-10-14): API with cross-tenant tests, screens, app shell |
-| 4, 5 Field records, samples, specimens | Structure known and drafted in the schema. 🔒 items: completeness (Q-33), numbering (Q-55, Q-57, Q-58) |
-| 6 Test scheduling | Pure logic done (`test-schedule.ts`); reference date confirmed. 🔒 items: age assignment (Q-14, Q-74), holidays/tolerance (Q-21, Q-62) |
-| 7 Test results | Readings known and drafted. 🔒 calculations (Q-59 rounding, Q-61 factors) |
-| 8 Bitácora | Columns known. 🔒 scope (Q-68) |
-| 9 Reports | Layout known; scope = field record. 🔒 numbering (Q-56), readiness (Q-35), signatures (Q-37) |
+| 0 Domain discovery | ✅ Documents analyzed (2026-10-14) and questionnaire answered (2026-10-15). Follow-ups Q-79 … Q-86 open |
+| 1 Architecture + skeleton | ✅ Done |
+| 2 Core entities + auth | ✅ Done: migrations, tenant CLI, auth, global guard, `/me`, integration tests |
+| 3 Clients / projects | ✅ Done: API with cross-tenant tests, screens, app shell; client/project codes for report numbers |
+| 4, 5 Field records, samples, specimens | **Next.** Model complete in `drafts/domain.prisma`. Only front numbering (Q-79) is open |
+| 6 Test scheduling | Rules implemented (Sunday/holiday shift, ascending assignment, age tolerance). Endpoints/UI pending |
+| 7 Test results | Formulas implemented and checked against the lab's worksheets. Endpoints/UI pending |
+| 8 Bitácora | Columns and scope (per project) known |
+| 9 Reports | Layout, numbering, versions, signatures known. Partial-report numbering open (Q-82) |
+| 10 Hardening | Real roles migrated; permissions and the **required** audit trail (Q-54) pending |
 
 ## Known
 
 - Architecture decisions: ADR-001…007 ([docs/architecture/decisions.md](docs/architecture/decisions.md)).
 - Backend skeleton: config validation, pino logging with request IDs, Prisma 7 service,
   global error filter + response envelope, `/api/v1/health`, `@CurrentTenant()`.
-- Pure domain code: `CalendarDate` utilities and test-schedule functions, unit-tested.
-- **Lab documents analyzed** ([docs/domain/analysis/](docs/domain/analysis/README.md)):
-  FPC01-01 field record, FPC01-02 Bitácora, FPC06-01 compression worksheet (3 and 7
-  days), FPC06-04 report, plus `docs/general_flow.png`. One real case end to end
-  (registro MCH-068).
-- Database: first migration (`init`) with the Phase-2 tables. The full domain model from
-  the forms (incl. `Delivery`, report scoped per field record) waits in
-  `apps/backend/prisma/drafts/domain.prisma`, validated in CI, not migrated.
+- Domain analysis ([docs/domain/analysis/](docs/domain/analysis/README.md)): FPC01-01,
+  FPC01-02, FPC06-01, FPC06-04, the process diagram, and the lab's questionnaire answers
+  (numbering, formulas, scheduling, roles, regulatory). The answered Word file stays out
+  of git.
+- Database: migrations `init`, `refresh_tokens`, `client_project_codes`, `lab_roles`. The
+  rest of the model waits in `apps/backend/prisma/drafts/domain.prisma`, validated in CI.
+- Pure domain code with tests: `CalendarDate`/`TimeOfDay`, test scheduling
+  (`test-schedule.ts`), age tolerance (`age-tolerance.ts`), compressive-strength
+  calculations (`compression.ts`, vectors from the MCH-068 worksheets).
 - Auth: login / refresh (rotating, reuse detection) / logout, global JWT guard, `GET /me`.
-  Labs and their first admin are created with `pnpm cli:create-tenant`.
-- Clients and projects: API (paginated, search, cross-tenant 404 tests) and screens.
-- Frontend: login, app shell with every section (blocked ones show "disponible
+  Roles: Jefe de Control de Calidad, Coordinador del SGC, Jefe de Laboratorio, Jefe de
+  Brigada de Campo. Labs are created with `pnpm cli:create-tenant`.
+- Clients and projects (with 3–4 letter codes): API and screens.
+- Frontend: login, app shell with every section (pending ones show "disponible
   próximamente"), clients and projects screens, dashboard counts.
 - CI runs lint, typecheck, unit tests and build for both apps, plus backend integration
   tests against Postgres.
+- Regulatory: accredited under NMX-EC-17025-ONNCCE-2018 (ema); records kept 4 years; an
+  audit trail of changes is required.
 
 ## Assumed
 
-Everything in [docs/domain/assumptions.md](docs/domain/assumptions.md). Confirmed by the
-documents: A-03, A-11, A-12, A-40, A-41. Rejected: A-07 (reports are per field record,
-not per project). New assumptions A-60…A-75 fill gaps the forms leave open.
+[docs/domain/assumptions.md](docs/domain/assumptions.md). Most structural assumptions
+are now confirmed. Rejected by the lab: A-07, A-13, A-33, A-69, A-71. Open gaps: A-76 …
+A-81 (codes, MPa input, holidays, fronts, averages, user admin).
 
 ## Unknown
 
-[docs/domain/open-questions.md](docs/domain/open-questions.md). Most P0 questions about
-content are answered. Still-open P0s: registro/report/sample/specimen numbering (Q-55…Q-58),
-calculation rounding and factors (Q-59, Q-61), "edad definitiva" vs test ages (Q-74),
-completeness (Q-33), readiness (Q-35), regulatory (Q-52).
+[docs/domain/open-questions.md](docs/domain/open-questions.md), section 9: front
+numbering (Q-79), MPa input and average decimals (Q-80), holidays (Q-81), partial-report
+numbering (Q-82), who manages users (Q-83), tolerance for unlisted ages (Q-84), the
+historical Excel (Q-85), age printed after a Sunday shift (Q-86).
 
-Conflicts between documents that the lab must resolve: % resistance rounding (Q-59),
-failure type of specimen 407 (Q-60), report number "CON" vs "CTO" (Q-56), obra name
-(Q-78).
+## Next
 
-## Phase 0: what's left
-
-1. **0.5** Review session with the lab: the P0 questions and conflicts above.
-2. **0.6** Request the remaining documents: specimen labels, procedures/standards,
-   signers, historical spreadsheets, accreditation, a re-issued report, a record with
-   several samples.
-
-## Next (not blocked)
-
-1. Phase 6.1: project test-age configuration (endpoints + UI). Not blocked.
-2. Phases 4, 5, 7, 8, 9: structure is known, but their 🔒 items wait for the lab's
-   answers to the questionnaire (development-plan 0.5).
+1. Phase 4: catalogs and holidays (4.0), field-record migration and module (4.1–4.6),
+   desktop-first transcription form.
+2. Phase 5–7: samples/specimens with per-project numbers, test planning on completion,
+   test entry screen using `compression.ts`.
+3. Ask the lab for Q-79 … Q-86 and the historical Excel.
 
 ## Notes
 
@@ -81,3 +77,6 @@ failure type of specimen 407 (Q-60), report number "CON" vs "CTO" (Q-56), obra n
 - 2026-10-14: first lab documents analyzed. At the owner's request, the model changes
   were applied to the draft schema and docs in the same pass, instead of after a
   separate review (checklist step 13). The lab review (0.5) can still change them.
+- 2026-10-15: the lab answered the questionnaire. Recorded in the docs, the draft model
+  updated, and code added for client/project codes, real roles, scheduling rules, age
+  tolerance and the strength calculations.
