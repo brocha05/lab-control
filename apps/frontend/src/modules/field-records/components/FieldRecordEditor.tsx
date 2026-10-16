@@ -35,8 +35,14 @@ import { NumberField, optionsOf, Section, SelectField, TextField } from './FormB
 
 export function FieldRecordEditor({ id }: { id: string }) {
   const { data: record, isLoading, error } = useFieldRecord(id);
+  // The catalog selects must have their options before the form mounts, or a saved
+  // supplier / cement type shows as empty (a <select> can't hold a value it doesn't list).
+  const suppliers = useCatalog('suppliers');
+  const cements = useCatalog('cement-types');
 
-  if (isLoading) return <Skeleton className="h-96 w-full" />;
+  if (isLoading || suppliers.isLoading || cements.isLoading) {
+    return <Skeleton className="h-96 w-full" />;
+  }
   if (!record) {
     return (
       <p className="text-sm text-destructive">
@@ -296,7 +302,9 @@ function MissingPanel({ missing }: { missing: string[] }) {
     <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm dark:border-amber-900 dark:bg-amber-950/30">
       <p className="flex items-center font-medium text-amber-800 dark:text-amber-300">
         <AlertCircle className="mr-2 h-4 w-4" />
-        Para completar el registro faltan {missing.length} datos (según el último guardado)
+        Para completar el registro{' '}
+        {missing.length === 1 ? 'falta 1 dato' : `faltan ${missing.length} datos`} (según el último
+        guardado)
       </p>
       <ul className="mt-2 list-inside list-disc text-amber-900 dark:text-amber-200">
         {shown.map((m) => (
