@@ -25,6 +25,7 @@ import type {
   Worksheet,
   WorksheetRow,
 } from '../types/specimenTest.types';
+import { usePermission } from '@/lib/hooks/usePermission';
 
 const READING_KEYS = [
   'height1Cm',
@@ -80,6 +81,7 @@ export function WorksheetPage() {
   const projectId = params.get('projectId') ?? currentProjectId;
   const testDate = params.get('date') ?? today;
   const sheet = useWorksheet(projectId, testDate);
+  const canCapture = usePermission('records.capture');
 
   useBreadcrumbs([
     { label: 'Ensayos pendientes', href: '/tests/pending' },
@@ -146,7 +148,7 @@ export function WorksheetPage() {
         <WorksheetEditor
           key={`${projectId}:${testDate}:${sheet.dataUpdatedAt}`}
           sheet={sheet.data}
-          editable={testDate <= today}
+          editable={testDate <= today && canCapture}
         />
       )}
     </div>
@@ -311,8 +313,8 @@ function WorksheetEditor({ sheet, editable }: { sheet: Worksheet; editable: bool
 
       {!editable && (
         <p className="rounded-md border border-st-today-bd bg-st-today px-3.5 py-2.5 text-sm text-st-today-fg print:hidden">
-          Es una fecha futura: la hoja se puede consultar e imprimir, pero los resultados se
-          capturan el día del ensayo.
+          Solo consulta e impresión: los resultados se capturan el día del ensayo, por un puesto que
+          capture ensayos.
         </p>
       )}
 

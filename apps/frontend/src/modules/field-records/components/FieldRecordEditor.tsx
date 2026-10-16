@@ -46,6 +46,7 @@ import {
   TextField,
 } from './FormBits';
 import { RecordSummary } from './RecordSummary';
+import { usePermission } from '@/lib/hooks/usePermission';
 
 export function FieldRecordEditor({ id }: { id: string }) {
   const { data: record, isLoading, error } = useFieldRecord(id);
@@ -55,6 +56,7 @@ export function FieldRecordEditor({ id }: { id: string }) {
   const cements = useCatalog('cement-types');
   // Lives above the keyed form so a save (which remounts it) keeps the step.
   const [step, setStep] = useState<StepNumber>(1);
+  const canCapture = usePermission('records.capture');
 
   useBreadcrumbs([
     { label: 'Proyectos', href: '/projects' },
@@ -77,7 +79,8 @@ export function FieldRecordEditor({ id }: { id: string }) {
       </p>
     );
   }
-  if (record.status !== 'DRAFT') return <RecordView record={record} />;
+  // Roles that don't capture see a draft read only (A-101).
+  if (record.status !== 'DRAFT' || !canCapture) return <RecordView record={record} />;
   // key: reset the form to the saved values after each save.
   return <Wizard key={record.updatedAt} record={record} step={step} setStep={setStep} />;
 }
@@ -128,6 +131,11 @@ function RecordView({ record }: { record: FieldRecordDetail }) {
           <Link href={`/projects/${record.project.id}?tab=registros`}>Registros del proyecto</Link>
         </Button>
       </RecordHeader>
+      {record.status === 'DRAFT' && (
+        <div className="rounded-lg border border-dashed border-st-draft-bd bg-surface px-3.5 py-3 text-sm text-sidebar-foreground">
+          Este registro está en borrador; lo completa quien captura los registros de campo.
+        </div>
+      )}
       {record.status === 'CANCELLED' && (
         <div className="rounded-lg border border-dashed border-st-draft-bd bg-surface px-3.5 py-3 text-sm text-sidebar-foreground">
           Este registro está cancelado: no se programan ni se ensayan sus especímenes.

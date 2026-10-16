@@ -23,6 +23,7 @@ import { useListState } from '@/lib/hooks/useListState';
 import { useClients, useCreateClient, useUpdateClient } from '../hooks/useClients';
 import type { Client } from '../types/client.types';
 import { ClientForm } from './ClientForm';
+import { Can } from '@/components/shared/Can';
 
 export function ClientsPage() {
   useBreadcrumbs([{ label: 'Clientes' }]);
@@ -41,10 +42,12 @@ export function ClientsPage() {
         title="Clientes"
         description="Empresas constructoras y desarrolladoras atendidas por el laboratorio"
       >
-        <Button onClick={() => setCreating(true)}>
-          <Plus strokeWidth={2} />
-          Nuevo cliente
-        </Button>
+        <Can permission="catalogs.manage">
+          <Button onClick={() => setCreating(true)}>
+            <Plus strokeWidth={2} />
+            Nuevo cliente
+          </Button>
+        </Can>
       </PageHeader>
 
       <div className="overflow-hidden rounded-lg border bg-card">
@@ -81,10 +84,12 @@ export function ClientsPage() {
                     Limpiar búsqueda
                   </Button>
                 )}
-                <Button size="sm" onClick={() => setCreating(true)}>
-                  <Plus strokeWidth={2} />
-                  Nuevo cliente
-                </Button>
+                <Can permission="catalogs.manage">
+                  <Button size="sm" onClick={() => setCreating(true)}>
+                    <Plus strokeWidth={2} />
+                    Nuevo cliente
+                  </Button>
+                </Can>
               </>
             }
           />
@@ -130,9 +135,11 @@ export function ClientsPage() {
                       >
                         Ver
                       </Button>
-                      <Button variant="ghost" size="xs" onClick={() => setEditing(client)}>
-                        Editar
-                      </Button>
+                      <Can permission="catalogs.manage">
+                        <Button variant="ghost" size="xs" onClick={() => setEditing(client)}>
+                          Editar
+                        </Button>
+                      </Can>
                       <Button
                         variant="ghost"
                         size="xs"

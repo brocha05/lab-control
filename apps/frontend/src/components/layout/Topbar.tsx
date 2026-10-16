@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useProjects } from '@/modules/projects/hooks/useProjects';
 import { useUiStore } from '@/store/uiStore';
 import { MAX_PAGE_SIZE } from '@/types';
+import { Can } from '@/components/shared/Can';
 
 function Breadcrumbs() {
   const crumbs = useUiStore((s) => s.crumbs);
@@ -91,10 +92,12 @@ export function Topbar() {
       </Button>
       <Breadcrumbs />
       <ProjectPicker />
-      <Button onClick={() => setNewRecordOpen(true)} aria-label="Nuevo registro">
-        <Plus strokeWidth={2} />
-        <span className="hidden md:inline">Nuevo registro</span>
-      </Button>
+      <Can permission="records.capture">
+        <Button onClick={() => setNewRecordOpen(true)} aria-label="Nuevo registro">
+          <Plus strokeWidth={2} />
+          <span className="hidden md:inline">Nuevo registro</span>
+        </Button>
+      </Can>
     </header>
   );
 }

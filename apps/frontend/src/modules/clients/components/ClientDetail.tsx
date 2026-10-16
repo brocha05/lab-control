@@ -15,6 +15,7 @@ import { ProjectsTable } from '@/modules/projects/components/ProjectsTable';
 import { useCreateProject } from '@/modules/projects/hooks/useProjects';
 import { useClient, useUpdateClient } from '../hooks/useClients';
 import { ClientForm } from './ClientForm';
+import { Can } from '@/components/shared/Can';
 
 export function ClientDetail({ id }: { id: string }) {
   const { data: client, isLoading, error } = useClient(id);
@@ -52,9 +53,11 @@ export function ClientDetail({ id }: { id: string }) {
         }
         description="Cliente del laboratorio"
       >
-        <Button variant="outline" onClick={() => setEditing(true)}>
-          Editar
-        </Button>
+        <Can permission="catalogs.manage">
+          <Button variant="outline" onClick={() => setEditing(true)}>
+            Editar
+          </Button>
+        </Can>
       </PageHeader>
 
       <section className="max-w-[860px] rounded-lg border bg-card">
@@ -74,10 +77,12 @@ export function ClientDetail({ id }: { id: string }) {
       <section className="overflow-hidden rounded-lg border bg-card">
         <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
           <h2 className="text-[15px] font-semibold">Proyectos</h2>
-          <Button size="sm" variant="outline" onClick={() => setCreatingProject(true)}>
-            <Plus />
-            Nuevo proyecto
-          </Button>
+          <Can permission="catalogs.manage">
+            <Button size="sm" variant="outline" onClick={() => setCreatingProject(true)}>
+              <Plus />
+              Nuevo proyecto
+            </Button>
+          </Can>
         </div>
         <ProjectsTable
           params={{ page: projectsPage, limit: 10, clientId: id }}

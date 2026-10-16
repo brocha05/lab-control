@@ -21,6 +21,7 @@ import { TEST_STATUS } from '@/lib/status';
 import { formatDateShort } from '@/lib/utils/formatters';
 import { useCancelSpecimen } from '../hooks/useSpecimenTests';
 import { RescheduleForm } from './RescheduleForm';
+import { usePermission } from '@/lib/hooks/usePermission';
 
 interface Row {
   sampleNumber: number | null;
@@ -34,6 +35,7 @@ interface Row {
  */
 export function PlannedTestsSection({ record }: { record: FieldRecordDetail }) {
   const cancelSpecimen = useCancelSpecimen();
+  const canCapture = usePermission('records.capture');
   const [editing, setEditing] = useState<Row | null>(null);
   const [cancelling, setCancelling] = useState<Row | null>(null);
 
@@ -112,7 +114,7 @@ export function PlannedTestsSection({ record }: { record: FieldRecordDetail }) {
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  {open && (
+                  {open && canCapture && (
                     <>
                       <Button variant="ghost" size="xs" onClick={() => setEditing(row)}>
                         Cambiar edad

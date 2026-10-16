@@ -24,6 +24,7 @@ import { useProjects } from '@/modules/projects/hooks/useProjects';
 import { usePendingTests } from '@/modules/specimen-tests/hooks/useSpecimenTests';
 import { useUiStore } from '@/store/uiStore';
 import { MAX_PAGE_SIZE } from '@/types';
+import { Can } from '@/components/shared/Can';
 
 /**
  * Counts from the list endpoints. A dedicated GET /dashboard/summary can replace them
@@ -53,10 +54,12 @@ export function DashboardPage() {
         title="Dashboard"
         description={`Resumen de actividad del laboratorio · ${formatDateWithWeekday(today)}`}
       >
-        <Button onClick={() => setNewRecordOpen(true)}>
-          <Plus strokeWidth={2} />
-          Nuevo registro
-        </Button>
+        <Can permission="records.capture">
+          <Button onClick={() => setNewRecordOpen(true)}>
+            <Plus strokeWidth={2} />
+            Nuevo registro
+          </Button>
+        </Can>
       </PageHeader>
 
       {late + dueToday > 0 && (

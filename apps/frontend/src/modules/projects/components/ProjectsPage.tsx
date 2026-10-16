@@ -13,6 +13,7 @@ import { ClientSelect } from '@/modules/clients/components/ClientSelect';
 import { useCreateProject } from '../hooks/useProjects';
 import { ProjectForm } from './ProjectForm';
 import { ProjectsTable } from './ProjectsTable';
+import { Can } from '@/components/shared/Can';
 
 /** Projects, optionally filtered by `?clientId=` (from a client's "Proyectos" action). */
 export function ProjectsPage() {
@@ -36,10 +37,12 @@ export function ProjectsPage() {
         title="Proyectos"
         description="Obras con control de calidad de concreto hidráulico"
       >
-        <Button onClick={() => setCreating(true)}>
-          <Plus strokeWidth={2} />
-          Nuevo proyecto
-        </Button>
+        <Can permission="catalogs.manage">
+          <Button onClick={() => setCreating(true)}>
+            <Plus strokeWidth={2} />
+            Nuevo proyecto
+          </Button>
+        </Can>
       </PageHeader>
 
       <div className="overflow-hidden rounded-lg border bg-card">

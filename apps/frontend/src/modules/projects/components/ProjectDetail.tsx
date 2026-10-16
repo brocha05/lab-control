@@ -25,6 +25,8 @@ import { useProject, useUpdateProject } from '../hooks/useProjects';
 import type { Project } from '../types/project.types';
 import { ProjectForm } from './ProjectForm';
 import { TestAgesCard } from './TestAgesCard';
+import { Can } from '@/components/shared/Can';
+import { usePermission } from '@/lib/hooks/usePermission';
 
 const TABS = [
   { key: 'resumen', label: 'Resumen' },
@@ -102,10 +104,12 @@ export function ProjectDetail({ id }: { id: string }) {
               </div>
             </div>
           </div>
-          <Button size="lg" onClick={newRecord}>
-            <Plus strokeWidth={2} />
-            Nuevo registro de campo
-          </Button>
+          <Can permission="records.capture">
+            <Button size="lg" onClick={newRecord}>
+              <Plus strokeWidth={2} />
+              Nuevo registro de campo
+            </Button>
+          </Can>
         </div>
 
         <div role="tablist" className="mt-5 flex gap-1 overflow-x-auto overflow-y-hidden border-b">
@@ -148,9 +152,11 @@ export function ProjectDetail({ id }: { id: string }) {
       {tab === 'ensayos' && (
         <div className="flex flex-col gap-4">
           <div className="flex justify-end">
-            <Button variant="outline" asChild>
-              <Link href={`/tests/worksheet?projectId=${project.id}`}>Hoja de ensayos</Link>
-            </Button>
+            <Can permission="records.capture">
+              <Button variant="outline" asChild>
+                <Link href={`/tests/worksheet?projectId=${project.id}`}>Hoja de ensayos</Link>
+              </Button>
+            </Can>
           </div>
           <PendingTestsView projectId={project.id} />
         </div>
@@ -262,10 +268,12 @@ function Summary({
           projectId={project.id}
           params={{ page: 1, limit: 5 }}
           emptyActions={
-            <Button size="sm" onClick={onNewRecord}>
-              <Plus strokeWidth={2} />
-              Nuevo registro de campo
-            </Button>
+            <Can permission="records.capture">
+              <Button size="sm" onClick={onNewRecord}>
+                <Plus strokeWidth={2} />
+                Nuevo registro de campo
+              </Button>
+            </Can>
           }
         />
       </section>
@@ -282,10 +290,12 @@ function RecordsTab({ projectId, onNewRecord }: { projectId: string; onNewRecord
         params={{ page, limit: 20 }}
         onPageChange={setPage}
         emptyActions={
-          <Button size="sm" onClick={onNewRecord}>
-            <Plus strokeWidth={2} />
-            Nuevo registro de campo
-          </Button>
+          <Can permission="records.capture">
+            <Button size="sm" onClick={onNewRecord}>
+              <Plus strokeWidth={2} />
+              Nuevo registro de campo
+            </Button>
+          </Can>
         }
       />
     </section>
@@ -294,8 +304,14 @@ function RecordsTab({ projectId, onNewRecord }: { projectId: string; onNewRecord
 
 function ConfigTab({ project }: { project: Project }) {
   const update = useUpdateProject(project.id);
+  const canManage = usePermission('catalogs.manage');
   return (
-    <div className="flex flex-col gap-5">
+    <fieldset disabled={!canManage} className="flex flex-col gap-5">
+      {!canManage && (
+        <p className="text-[13px] text-muted-foreground">
+          Solo consulta: tu puesto no modifica la configuración de los proyectos.
+        </p>
+      )}
       <TestAgesCard projectId={project.id} />
       <section className="max-w-[860px] rounded-lg border bg-card">
         <header className="border-b px-5 py-4">
@@ -315,6 +331,6 @@ function ConfigTab({ project }: { project: Project }) {
           />
         </div>
       </section>
-    </div>
+    </fieldset>
   );
 }

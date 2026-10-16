@@ -7,7 +7,7 @@ import { Modal } from '@/components/shared/Modal';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDateTime } from '@/lib/utils/formatters';
-import { useCurrentUser } from '@/modules/auth/hooks/useAuth';
+import { usePermission } from '@/lib/hooks/usePermission';
 import {
   describeReportMissing,
   useCreateReport,
@@ -43,8 +43,8 @@ const pick = (r: Report): ReportFields => ({
  */
 export function RecordReportsSection({ fieldRecordId }: { fieldRecordId: string }) {
   const { data, isLoading } = useRecordReports(fieldRecordId);
-  const me = useCurrentUser();
-  const canIssue = me.data?.user.role === 'QUALITY_MANAGER';
+  const canIssue = usePermission('reports.issue');
+  const canPrepare = usePermission('reports.prepare');
   const create = useCreateReport(fieldRecordId);
   const update = useUpdateReport();
   const generate = useGenerateReport();
@@ -68,7 +68,7 @@ export function RecordReportsSection({ fieldRecordId }: { fieldRecordId: string 
             con el mismo número.
           </p>
         </div>
-        {(!latest || latest.status === 'FINAL') && (
+        {canPrepare && (!latest || latest.status === 'FINAL') && (
           <Button onClick={() => setEditing('new')} disabled={busy}>
             <FileText />
             {latest ? 'Nueva versión (corrección)' : 'Crear informe'}
@@ -120,7 +120,7 @@ export function RecordReportsSection({ fieldRecordId }: { fieldRecordId: string 
                     </td>
                     <td className="px-4">
                       <span className="flex flex-wrap justify-end gap-1">
-                        {open && (
+                        {open && canPrepare && (
                           <Button
                             variant="ghost"
                             size="xs"
@@ -130,7 +130,7 @@ export function RecordReportsSection({ fieldRecordId }: { fieldRecordId: string 
                             Datos del informe
                           </Button>
                         )}
-                        {open && (
+                        {open && canPrepare && (
                           <Button
                             variant="outline"
                             size="xs"

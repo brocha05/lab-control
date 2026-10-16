@@ -28,6 +28,8 @@ import { ProjectSelect } from '@/modules/projects/components/ProjectSelect';
 import { usePendingTests } from '../hooks/useSpecimenTests';
 import type { DueStatus, PendingTest } from '../types/specimenTest.types';
 import { RescheduleForm } from './RescheduleForm';
+import { Can } from '@/components/shared/Can';
+import { usePermission } from '@/lib/hooks/usePermission';
 
 const WINDOWS = [
   { days: 0, label: 'Hasta hoy' },
@@ -79,9 +81,11 @@ export function PendingTestsPage() {
         title="Ensayos pendientes"
         description="Especímenes por ensayar, con la fecha ya recorrida por domingos y días festivos"
       >
-        <Button asChild>
-          <Link href="/tests/worksheet">Hoja de ensayos</Link>
-        </Button>
+        <Can permission="records.capture">
+          <Button asChild>
+            <Link href="/tests/worksheet">Hoja de ensayos</Link>
+          </Button>
+        </Can>
       </PageHeader>
       <PendingTestsView />
     </div>
@@ -90,6 +94,7 @@ export function PendingTestsPage() {
 
 export function PendingTestsView({ projectId: fixedProject }: { projectId?: string }) {
   const today = useToday();
+  const canCapture = usePermission('records.capture');
   const [projectId, setProjectId] = useState('');
   const [windowDays, setWindowDays] = useState(7);
   const [status, setStatus] = useState<StatusFilter>('all');
@@ -231,14 +236,19 @@ export function PendingTestsView({ projectId: fixedProject }: { projectId?: stri
             <div className="hidden md:block">
               <PendingTable
                 rows={rows}
-                today={today}
+                today={canCapture ? today : null}
                 showProject={!fixedProject}
-                onReschedule={setEditing}
+                onReschedule={canCapture ? setEditing : undefined}
               />
             </div>
             <div className="md:hidden">
               {rows.map((t) => (
-                <PendingCard key={t.id} test={t} today={today} onReschedule={setEditing} />
+                <PendingCard
+                  key={t.id}
+                  test={t}
+                  today={canCapture ? today : null}
+                  onReschedule={canCapture ? setEditing : undefined}
+                />
               ))}
             </div>
           </>
@@ -291,8 +301,8 @@ function ScheduledDate({ test }: { test: PendingTest }) {
 }
 
 /** Due tests are recorded on today's worksheet; later ones can only be looked at. */
-function worksheetHref(t: PendingTest, today: string): string | null {
-  return t.dueStatus === 'UPCOMING'
+function worksheetHref(t: PendingTest, today: string | null): string | null {
+  return !today || t.dueStatus === 'UPCOMING'
     ? null
     : `/tests/worksheet?projectId=${t.project.id}&date=${today}`;
 }
@@ -304,9 +314,9 @@ function PendingTable({
   onReschedule,
 }: {
   rows: PendingTest[];
-  today: string;
+  today: string | null;
   showProject: boolean;
-  onReschedule: (test: PendingTest) => void;
+  onReschedule?: (test: PendingTest) => void;
 }) {
   return (
     <Table className="min-w-[900px]">
@@ -356,9 +366,11 @@ function PendingTable({
               </TableCell>
               <TableCell>
                 <span className="flex items-center justify-end gap-1">
-                  <Button variant="ghost" size="xs" onClick={() => onReschedule(t)}>
-                    Cambiar edad
-                  </Button>
+                  {onReschedule && (
+                    <Button variant="ghost" size="xs" onClick={() => onReschedule(t)}>
+                      Cambiar edad
+                    </Button>
+                  )}
                   {worksheetHref(t, today) ? (
                     <Button size="xs" asChild>
                       <Link href={worksheetHref(t, today) as string}>Registrar ensayo</Link>
@@ -384,8 +396,8 @@ function PendingCard({
   onReschedule,
 }: {
   test: PendingTest;
-  today: string;
-  onReschedule: (test: PendingTest) => void;
+  today: string | null;
+  onReschedule?: (test: PendingTest) => void;
 }) {
   const look = DUE_STATUS[t.dueStatus];
   return (
@@ -411,9 +423,11 @@ function PendingCard({
           {t.ageDays} días · <ScheduledDate test={t} />
         </span>
         <span className="flex gap-1">
-          <Button variant="ghost" size="sm" onClick={() => onReschedule(t)}>
-            Cambiar edad
-          </Button>
+          {onReschedule && (
+            <Button variant="ghost" size="sm" onClick={() => onReschedule(t)}>
+              Cambiar edad
+            </Button>
+          )}
           {worksheetHref(t, today) ? (
             <Button size="sm" asChild>
               <Link href={worksheetHref(t, today) as string}>Registrar</Link>

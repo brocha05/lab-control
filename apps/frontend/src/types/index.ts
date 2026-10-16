@@ -67,7 +67,17 @@ export interface Tenant {
 }
 
 /** `GET /me`: current user + tenant (apps/backend/src/auth/auth.service.ts `MeView`). */
+/** What a role may change (apps/backend/src/auth/domain/permissions.ts). */
+export type Permission =
+  | 'catalogs.manage'
+  | 'records.capture'
+  | 'reports.prepare'
+  | 'reports.issue'
+  | 'users.manage'
+  | 'audit.read';
+
 export interface Me {
   user: User;
   tenant: Tenant;
+  permissions: Permission[];
 }
