@@ -8,8 +8,8 @@ Last updated: 2026-10-15 (lab questionnaire answered)
 | 1 Architecture + skeleton | ✅ Done |
 | 2 Core entities + auth | ✅ Done: migrations, tenant CLI, auth, global guard, `/me`, integration tests |
 | 3 Clients / projects | ✅ Done: API with cross-tenant tests, screens, app shell; client/project codes for report numbers |
-| 4, 5 Field records, samples, specimens | **Next.** Model complete in `drafts/domain.prisma`. Only front numbering (Q-79) is open |
-| 6 Test scheduling | Rules implemented (Sunday/holiday shift, ascending assignment, age tolerance). Endpoints/UI pending |
+| 4, 5 Field records, samples, specimens | ✅ Done (2026-10-15): catalogs + holidays, migration, API (create, nested save, complete/cancel), transcription screen. Front numbering (Q-79) open; 5.4 (cancel one specimen) pending |
+| 6 Test scheduling | **Next.** Rules implemented (Sunday/holiday shift, ascending assignment, age tolerance). Migration of `specimen_tests`, planning on completion, pending list |
 | 7 Test results | Formulas implemented and checked against the lab's worksheets. Endpoints/UI pending |
 | 8 Bitácora | Columns and scope (per project) known |
 | 9 Reports | Layout, numbering, versions, signatures known. Partial-report numbering open (Q-82) |
@@ -55,10 +55,9 @@ historical Excel (Q-85), age printed after a Sunday shift (Q-86).
 
 ## Next
 
-1. Phase 4: catalogs and holidays (4.0), field-record migration and module (4.1–4.6),
-   desktop-first transcription form.
-2. Phase 5–7: samples/specimens with per-project numbers, test planning on completion,
-   test entry screen using `compression.ts`.
+1. Phase 6: migrate `specimen_tests`, plan tests when a record is completed (project
+   default ages, ascending assignment, Sunday/holiday shift), pending-tests list.
+2. Phase 7: test entry screen per test date using `compression.ts`.
 3. Ask the lab for Q-79 … Q-86 and the historical Excel.
 
 ## Notes

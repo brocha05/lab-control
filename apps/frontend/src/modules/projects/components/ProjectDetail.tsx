@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -56,7 +56,14 @@ export function ProjectDetail({ id }: { id: string }) {
               />
             </CardContent>
           </Card>
-          {/* Test-age configuration (Phase 6) and field records (Phase 4) go here. */}
+          <Link
+            href={`/field-records?projectId=${project.id}`}
+            className="inline-flex items-center text-sm font-medium text-primary hover:underline"
+          >
+            <ClipboardList className="mr-1.5 h-4 w-4" />
+            Ver los registros de campo de esta obra
+          </Link>
+          {/* Test-age configuration (Phase 6) goes here. */}
         </>
       )}
     </div>

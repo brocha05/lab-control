@@ -46,14 +46,14 @@ cross-tenant test.
 - [x] 3.4 ✅ Frontend: projects list (search, client filter)/detail/form, `ClientSelect`, and the client page lists its projects with "Nuevo proyecto" pre-selecting the client
 - [x] 3.5 ✅ Frontend: app shell with sections Dashboard (client/project counts), Clients, Projects, Field Records, Bitácora, Pending Tests, Reports ("disponible próximamente" pages via `UpcomingSection` for blocked sections)
 
-## Phase 4 — Field records (FPC01-01 + questionnaire; 🔒 item: Q-79)
+## Phase 4 — Field records ✅ (front numbering 🔒 Q-79)
 
 - [x] 4.0 ✅ `catalogs` module: `concrete_suppliers` / `cement_types` (pick or add, names unique ignoring case, Q-06) and `holidays` (Q-21, Q-81): migration, endpoints, cross-tenant tests, "Configuración" screen
 - [x] 4.1 ✅ Migration `field_records`: `field_records`, `deliveries`, `samples`, `specimens` (also 5.1) with per-project unique numbers and positive CHECKs; ticket values per delivery (Q-65)
 - [x] 4.2 ✅ `field-records` module: create DRAFT, get, list by project (newest pour first, counts), nested `PUT` (header + deliveries + samples + specimens) while DRAFT; derived registro label, sheets and cumulative volume. Also 5.2
 - [x] 4.3 ✅ `assertFieldRecordTransition` (pure, tested); `complete` / `cancel` endpoints with conditional updates (409 on invalid or concurrent transitions)
 - [x] 4.4 ✅ `missingForCompletion` (pure, tested with MCH-068): everything filled in on the lab's example + visto bueno (Q-33, Q-73); `complete` → 422 with the missing items, also exposed on the detail view
-- [ ] 4.5 Frontend: **desktop-first** transcription form (records are filled on paper first, Q-49), mirroring FPC01-01's sections (header, datos de proyecto, condiciones, trazabilidad, entregas with their remisión data, especímenes, masa unitaria/aire, elementos, observaciones, visto bueno)
+- [x] 4.5 ✅ Frontend: **desktop-first** transcription form (records are filled on paper first, Q-49), mirroring FPC01-01's sections (header, datos de proyecto, condiciones, trazabilidad, entregas with their remisión data, especímenes, masa unitaria/aire, elementos, observaciones, visto bueno)
 - [x] 4.6 ✅ Registro number: next `registry_sequence` assigned on create unless given, unique per project (409), `GET …/next-numbers` (Q-55; per front 🔒 Q-79)
 
 ## Phase 5 — Samples & specimens (structure and numbering known)
