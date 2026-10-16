@@ -28,6 +28,7 @@ import {
   WIND_LABELS,
 } from '../schemas/fieldRecord.labels';
 import type { FieldRecordDetail } from '../types/fieldRecord.types';
+import { PlannedTestsSection } from '@/modules/specimen-tests/components/PlannedTestsSection';
 import { DeliveriesSection } from './DeliveriesSection';
 import { FieldRecordStatusBadge } from './FieldRecordsTable';
 import { NumberField, optionsOf, Section, SelectField, TextField } from './FormBits';
@@ -122,6 +123,8 @@ function EditorForm({ record }: { record: FieldRecordDetail }) {
         {editable && record.missingForCompletion.length > 0 && (
           <MissingPanel missing={record.missingForCompletion} />
         )}
+
+        {record.status === 'COMPLETED' && <PlannedTestsSection record={record} />}
 
         <fieldset disabled={!editable || busy} className="space-y-6">
           <Section title="Encabezado">

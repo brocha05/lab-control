@@ -35,6 +35,13 @@ export interface SpecimenView {
   status: 'CREATED' | 'CANCELLED';
   specimenNumber: number | null;
   moldCode: string | null;
+  /** Current (non-cancelled) test, planned when the record is completed. */
+  test: {
+    id: string;
+    ageDays: number;
+    keepExactDate: boolean;
+    status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  } | null;
 }
 
 export interface SampleView {

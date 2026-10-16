@@ -8,9 +8,9 @@ Last updated: 2026-10-15 (lab questionnaire answered)
 | 1 Architecture + skeleton | ✅ Done |
 | 2 Core entities + auth | ✅ Done: migrations, tenant CLI, auth, global guard, `/me`, integration tests |
 | 3 Clients / projects | ✅ Done: API with cross-tenant tests, screens, app shell; client/project codes for report numbers |
-| 4, 5 Field records, samples, specimens | ✅ Done (2026-10-15): catalogs + holidays, migration, API (create, nested save, complete/cancel), transcription screen. Front numbering (Q-79) open; 5.4 (cancel one specimen) pending |
-| 6 Test scheduling | **Next.** Rules implemented (Sunday/holiday shift, ascending assignment, age tolerance). Migration of `specimen_tests`, planning on completion, pending list |
-| 7 Test results | Formulas implemented and checked against the lab's worksheets. Endpoints/UI pending |
+| 4, 5 Field records, samples, specimens | ✅ Done: catalogs + holidays, migration, API (create, nested save, complete/cancel, cancel specimen), transcription screen. Front numbering (Q-79) open |
+| 6 Test scheduling | ✅ Done (2026-10-16): project default ages, tests planned on completion, pending list with Sunday/holiday shift, per-test age changes, screens |
+| 7 Test results | **Next.** Formulas implemented and checked against the lab's worksheets. Results endpoint, worksheet screen and print pending |
 | 8 Bitácora | Columns and scope (per project) known |
 | 9 Reports | Layout, numbering, versions, signatures known. Partial-report numbering open (Q-82) |
 | 10 Hardening | Real roles migrated; permissions and the **required** audit trail (Q-54) pending |
@@ -55,9 +55,9 @@ historical Excel (Q-85), age printed after a Sunday shift (Q-86).
 
 ## Next
 
-1. Phase 6: migrate `specimen_tests`, plan tests when a record is completed (project
-   default ages, ascending assignment, Sunday/holiday shift), pending-tests list.
-2. Phase 7: test entry screen per test date using `compression.ts`.
+1. Phase 7: record results (`POST /tests/:id/complete`) with `compression.ts`, the
+   FPC06-01 entry screen per project and test date, printable worksheet.
+2. Phase 8: the Bitácora per project.
 3. Ask the lab for Q-79 … Q-86 and the historical Excel.
 
 ## Notes
