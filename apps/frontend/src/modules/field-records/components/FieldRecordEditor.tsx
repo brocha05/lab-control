@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils/cn';
 import { addDays, formatDateLong } from '@/lib/utils/formatters';
 import { useCatalog } from '@/modules/catalogs/hooks/useCatalogs';
 import { useTestConfiguration } from '@/modules/projects/hooks/useProjects';
+import { RecordReportsSection } from '@/modules/reports/components/RecordReportsSection';
 import { PlannedTestsSection } from '@/modules/specimen-tests/components/PlannedTestsSection';
 import {
   useCancelFieldRecord,
@@ -134,6 +135,7 @@ function RecordView({ record }: { record: FieldRecordDetail }) {
       )}
       <RecordSummary values={toFormValues(record)} />
       {record.status === 'COMPLETED' && <PlannedTestsSection record={record} />}
+      {record.status === 'COMPLETED' && <RecordReportsSection fieldRecordId={record.id} />}
     </div>
   );
 }

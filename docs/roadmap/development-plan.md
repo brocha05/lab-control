@@ -89,14 +89,14 @@ cross-tenant test.
 - [ ] 8.5 Import the historical Excel (July 2025 → 2026, Q-53) once the file arrives (Q-85)
 - [ ] 8.4 Dashboard summary counts
 
-## Phase 9 — PDF reports (layout and rules known; 🔒 item: Q-82)
+## Phase 9 — PDF reports ✅ (🔒 partial reports: Q-82)
 
 - [x] 9.1 ✅ `ReportStorage`: local folder (dev/tests) or S3/MinIO; download streamed through the API (ADR-009)
 - [x] 9.2 ✅ `ReportRenderer`: playwright-core + headless Chromium (shared browser, 30 s timeout); stub for tests
 - [x] 9.3 ✅ Reports module (scope: field record): create/edit/generate/finalize (QUALITY_MANAGER only, Q-40), corrections as new versions with the same number + `superseded_at` (Q-36), checksum. 🔒 Partial reports wait for Q-82 (A-98)
 - [x] 9.4 ✅ `concrete-control` view model + assembler: report number (Q-56), one page per sample and a second page above 6 specimens (Q-71), values from `compression.ts`, failure type from the test (Q-60), out-of-tolerance note (Q-23), report-time fields prefilled from the project (Q-64)
 - [x] 9.5 ✅ `concrete-control` HTML/CSS template (Handlebars) matching FPC06-04. Open: scanned signatures and Technical Signatory per user (Q-37, Q-101, A-97); logos (Q-52)
-- [ ] 9.6 Frontend: report list/generate/download per project
+- [x] 9.6 ✅ Frontend: report section on the completed record (readiness, versions, report fields, generate, view PDF, issue only for the Jefe de Control de Calidad, correction), "Informes" page and project tab
 
 ## Phase 10 — Hardening
 

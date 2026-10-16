@@ -29,7 +29,6 @@ interface NavItem {
   also?: string[];
 }
 
-// Sections whose phase is still blocked (Bitácora, Informes) show an "upcoming" page.
 const NAV: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
   { href: '/clients', label: 'Clientes', icon: 'clients' },

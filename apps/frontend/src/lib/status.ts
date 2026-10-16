@@ -29,3 +29,11 @@ export const TEST_STATUS: Record<
   COMPLETED: { label: 'Ensayado', tone: 'done' },
   CANCELLED: { label: 'Cancelado', tone: 'off' },
 };
+
+/** Report versions (ADR-005); a superseded FINAL reads "Sustituido". */
+export const REPORT_STATUS: Record<'DRAFT' | 'GENERATED' | 'FINAL' | 'SUPERSEDED', StatusLook> = {
+  DRAFT: { label: 'Borrador', tone: 'draft' },
+  GENERATED: { label: 'PDF generado', tone: 'progress' },
+  FINAL: { label: 'Emitido', tone: 'done' },
+  SUPERSEDED: { label: 'Sustituido', tone: 'off' },
+};

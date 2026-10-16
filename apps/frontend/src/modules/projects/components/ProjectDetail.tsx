@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils/cn';
 import { getApiError } from '@/lib/utils/apiError';
 import { addDays, formatDateShort } from '@/lib/utils/formatters';
 import { BitacoraView } from '@/modules/bitacora/components/BitacoraView';
+import { ReportsList } from '@/modules/reports/components/ReportsList';
 import { FieldRecordsTable } from '@/modules/field-records/components/FieldRecordsTable';
 import { useFieldRecords } from '@/modules/field-records/hooks/useFieldRecords';
 import { PendingTestsView } from '@/modules/specimen-tests/components/PendingTestsPage';
@@ -25,12 +26,12 @@ import type { Project } from '../types/project.types';
 import { ProjectForm } from './ProjectForm';
 import { TestAgesCard } from './TestAgesCard';
 
-// The Informes tab comes with Phase 9.
 const TABS = [
   { key: 'resumen', label: 'Resumen' },
   { key: 'registros', label: 'Registros' },
   { key: 'bitacora', label: 'Bitácora' },
   { key: 'ensayos', label: 'Ensayos' },
+  { key: 'informes', label: 'Informes' },
   { key: 'config', label: 'Configuración' },
 ] as const;
 type Tab = (typeof TABS)[number]['key'];
@@ -155,6 +156,7 @@ export function ProjectDetail({ id }: { id: string }) {
         </div>
       )}
       {tab === 'bitacora' && <BitacoraView projectId={project.id} />}
+      {tab === 'informes' && <ReportsList projectId={project.id} />}
       {tab === 'config' && <ConfigTab project={project} />}
     </div>
   );

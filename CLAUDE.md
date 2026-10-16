@@ -56,6 +56,7 @@ pnpm lint | typecheck | format:check | build
 pnpm db:validate | db:generate   # prisma generate also runs on pnpm install
 pnpm db:migrate                  # apply/create migrations (needs Postgres)
 pnpm cli:create-tenant …         # create a lab + its ADMIN (usage: README; pnpm build first)
+pnpm exec playwright-core install chromium-headless-shell  # once: Chromium for report PDFs
 
 # apps/frontend  (on :3000)
 pnpm dev
