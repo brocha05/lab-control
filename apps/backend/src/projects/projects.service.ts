@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ClientsService } from '../clients/clients.service.js';
 import type { Prisma, Project } from '../generated/prisma/client.js';
 import type { PaginatedResult } from '../shared/http/api-response.js';
@@ -10,6 +15,11 @@ import type {
   ListProjectsQueryDto,
   UpdateProjectDto,
 } from './dto/project.dto.js';
+
+export interface TestAge {
+  ageDays: number;
+  specimenCount: number;
+}
 
 export interface ProjectView {
   id: string;
@@ -100,6 +110,39 @@ export class ProjectsService {
     }
     if (count !== 1) throw new NotFoundException('Project not found');
     return this.get(tenantId, id);
+  }
+
+  /**
+   * The project's default test ages, ascending (Q-20). Tests copy them when a field
+   * record is completed and can then be changed one by one (Q-22).
+   */
+  async testConfiguration(tenantId: string, projectId: string): Promise<TestAge[]> {
+    await this.assertExists(tenantId, projectId);
+    return this.prisma.projectTestConfiguration.findMany({
+      where: { tenantId, projectId },
+      select: { ageDays: true, specimenCount: true },
+      orderBy: { ageDays: 'asc' },
+    });
+  }
+
+  /** Replaces the whole set. Changing it never moves tests already planned (A-15). */
+  async replaceTestConfiguration(
+    tenantId: string,
+    projectId: string,
+    ages: readonly TestAge[],
+  ): Promise<TestAge[]> {
+    await this.assertExists(tenantId, projectId);
+    const repeated = ages.map((a) => a.ageDays).filter((age, i, all) => all.indexOf(age) !== i);
+    if (repeated.length > 0) {
+      throw new BadRequestException([`age ${repeated[0]} days is repeated`]);
+    }
+    await this.prisma.$transaction([
+      this.prisma.projectTestConfiguration.deleteMany({ where: { tenantId, projectId } }),
+      this.prisma.projectTestConfiguration.createMany({
+        data: ages.map((a) => ({ tenantId, projectId, ...a })),
+      }),
+    ]);
+    return this.testConfiguration(tenantId, projectId);
   }
 
   /** For other modules (field records): 404 unless the project belongs to the tenant. */

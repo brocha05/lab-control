@@ -65,7 +65,7 @@ cross-tenant test.
 
 ## Phase 6 — Test scheduling (rules known)
 
-- [ ] 6.1 Project default test ages: endpoints + UI (validate `ageDays > 0`, `specimenCount > 0`, unique ages; no closed list, Q-19)
+- [x] 6.1 ✅ Project default test ages: `GET/PUT /projects/:id/test-configuration` (positive integers, unique ages, no closed list, Q-19) + "Edades de ensayo" card on the project page
 - [x] 6.2 ✅ Scheduling rules in `test-schedule.ts`: pour date + age, Sunday/holiday shift unless `keepExactDate` (Q-21); `age-tolerance.ts` per NMX-C-083 (Q-62). Open: Q-81, Q-84, Q-86
 - [x] 6.3 ✅ `assignSpecimensToAges`: ascending specimen numbers → ascending ages (Q-14)
 - [ ] 6.4 `planTestsForFieldRecord` on completion (single transaction with the status change)

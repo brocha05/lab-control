@@ -21,6 +21,12 @@ export interface ProjectInput {
   location: string | null;
 }
 
+/** One default test age of a project (Q-20). */
+export interface TestAge {
+  ageDays: number;
+  specimenCount: number;
+}
+
 export interface ProjectListParams extends PaginationParams {
   q?: string;
   clientId?: string;

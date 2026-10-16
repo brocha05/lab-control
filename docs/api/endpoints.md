@@ -25,8 +25,8 @@ Legend: **Phase** = roadmap phase · 🔒 = blocked on domain documents
 | GET | `/projects` | `?page&limit&q&clientId` (q = name, code or location), sorted by name. Items include `client: { id, name }` | 3 ✅ |
 | POST | `/projects` | Create (`clientId`, `name`, `code` 3–4 letters unique per client → 409, `location?`). Another tenant's client → 404 | 3 ✅ |
 | GET / PATCH | `/projects/:id` | Read / update (`clientId` re-checked). No delete (A-24) | 3 ✅ |
-| GET | `/projects/:id/test-configuration` | Configured ages | 6 |
-| PUT | `/projects/:id/test-configuration` | Replace the set of `{ ageDays, specimenCount }` | 6 |
+| GET | `/projects/:id/test-configuration` | Default test ages, ascending | 6 ✅ |
+| PUT | `/projects/:id/test-configuration` | `{ ages: [{ ageDays, specimenCount }] }` replaces the set; repeated age → 400. Planned tests don't move | 6 ✅ |
 
 ## Field records, deliveries, samples, specimens
 

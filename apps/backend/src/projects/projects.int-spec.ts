@@ -153,4 +153,59 @@ describe('projects (integration)', () => {
       .set('Authorization', a.auth)
       .expect(400);
   });
+
+  describe('test configuration (6.1)', () => {
+    let projectId: string;
+    beforeEach(async () => {
+      const client = (await post(a, '/clients', { name: 'Cliente', code: 'CLI' })).data;
+      projectId = (await post(a, '/projects', { clientId: client.id, name: 'Obra', code: 'OBR' }))
+        .data.id;
+    });
+    const put = (who: TenantFixture, body: object) =>
+      request(t.http)
+        .put(api(`/projects/${projectId}/test-configuration`))
+        .set('Authorization', who.auth)
+        .send(body);
+
+    it('starts empty, replaces the set and returns it sorted by age', async () => {
+      const empty = await request(t.http)
+        .get(api(`/projects/${projectId}/test-configuration`))
+        .set('Authorization', a.auth)
+        .expect(200);
+      expect(empty.body.data).toEqual([]);
+
+      const saved = await put(a, {
+        ages: [
+          { ageDays: 28, specimenCount: 2 },
+          { ageDays: 7, specimenCount: 2 },
+        ],
+      }).expect(200);
+      expect(saved.body.data).toEqual([
+        { ageDays: 7, specimenCount: 2 },
+        { ageDays: 28, specimenCount: 2 },
+      ]);
+
+      const replaced = await put(a, { ages: [{ ageDays: 3, specimenCount: 1 }] }).expect(200);
+      expect(replaced.body.data).toEqual([{ ageDays: 3, specimenCount: 1 }]);
+    });
+
+    it('rejects repeated or invalid ages', async () => {
+      await put(a, {
+        ages: [
+          { ageDays: 7, specimenCount: 2 },
+          { ageDays: 7, specimenCount: 1 },
+        ],
+      }).expect(400);
+      await put(a, { ages: [{ ageDays: 0, specimenCount: 2 }] }).expect(400);
+      await put(a, { ages: [{ ageDays: 7, specimenCount: 2.5 }] }).expect(400);
+    });
+
+    it('returns 404 for another lab', async () => {
+      await request(t.http)
+        .get(api(`/projects/${projectId}/test-configuration`))
+        .set('Authorization', b.auth)
+        .expect(404);
+      await put(b, { ages: [{ ageDays: 7, specimenCount: 2 }] }).expect(404);
+    });
+  });
 });

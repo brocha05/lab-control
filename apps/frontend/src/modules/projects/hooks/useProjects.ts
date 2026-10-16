@@ -4,12 +4,13 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { toast } from 'sonner';
 import { toastApiError } from '@/lib/utils/apiError';
 import { projectsApi } from '../api/projectsApi';
-import type { ProjectInput, ProjectListParams } from '../types/project.types';
+import type { ProjectInput, ProjectListParams, TestAge } from '../types/project.types';
 
 export const projectKeys = {
   all: ['projects'] as const,
   list: (params: ProjectListParams) => ['projects', 'list', params] as const,
   detail: (id: string) => ['projects', 'detail', id] as const,
+  testConfiguration: (id: string) => ['projects', 'test-configuration', id] as const,
 };
 
 export function useProjects(params: ProjectListParams) {
@@ -49,5 +50,25 @@ export function useUpdateProject(id: string) {
       toast.success('Proyecto actualizado');
     },
     onError: (error) => toastApiError(error, 'No se pudo guardar el proyecto.'),
+  });
+}
+
+/** The project's default test ages (Q-20). */
+export function useTestConfiguration(id: string) {
+  return useQuery({
+    queryKey: projectKeys.testConfiguration(id),
+    queryFn: async () => (await projectsApi.testConfiguration(id)).data,
+  });
+}
+
+export function useSaveTestConfiguration(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (ages: TestAge[]) => (await projectsApi.saveTestConfiguration(id, ages)).data,
+    onSuccess: (ages) => {
+      queryClient.setQueryData(projectKeys.testConfiguration(id), ages);
+      toast.success('Edades de ensayo guardadas');
+    },
+    onError: (error) => toastApiError(error, 'No se pudieron guardar las edades.'),
   });
 }

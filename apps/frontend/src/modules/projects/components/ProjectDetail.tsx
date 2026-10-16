@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getApiError } from '@/lib/utils/apiError';
 import { useProject, useUpdateProject } from '../hooks/useProjects';
 import { ProjectForm } from './ProjectForm';
+import { TestAgesCard } from './TestAgesCard';
 
 export function ProjectDetail({ id }: { id: string }) {
   const { data: project, isLoading, error } = useProject(id);
@@ -63,7 +64,7 @@ export function ProjectDetail({ id }: { id: string }) {
             <ClipboardList className="mr-1.5 h-4 w-4" />
             Ver los registros de campo de esta obra
           </Link>
-          {/* Test-age configuration (Phase 6) goes here. */}
+          <TestAgesCard projectId={project.id} />
         </>
       )}
     </div>

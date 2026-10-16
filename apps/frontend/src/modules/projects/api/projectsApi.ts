@@ -1,6 +1,6 @@
 import apiClient from '@/lib/api/client';
 import type { PaginatedResponse } from '@/types';
-import type { Project, ProjectInput, ProjectListParams } from '../types/project.types';
+import type { Project, ProjectInput, ProjectListParams, TestAge } from '../types/project.types';
 
 // Endpoints: docs/api/endpoints.md#clients--projects
 export const projectsApi = {
@@ -13,4 +13,9 @@ export const projectsApi = {
 
   update: (id: string, data: Partial<ProjectInput>) =>
     apiClient.patch<Project>(`/projects/${id}`, data),
+
+  testConfiguration: (id: string) => apiClient.get<TestAge[]>(`/projects/${id}/test-configuration`),
+
+  saveTestConfiguration: (id: string, ages: TestAge[]) =>
+    apiClient.put<TestAge[]>(`/projects/${id}/test-configuration`, { ages }),
 };
