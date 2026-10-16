@@ -1,7 +1,7 @@
 'use client';
 
 import { FolderKanban } from 'lucide-react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Pagination } from '@/components/shared/Pagination';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,6 +13,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useToday } from '@/lib/hooks/useToday';
+import { addDays } from '@/lib/utils/formatters';
+import { usePendingTests } from '@/modules/specimen-tests/hooks/useSpecimenTests';
 import { useProjects } from '../hooks/useProjects';
 import type { ProjectListParams } from '../types/project.types';
 
@@ -23,7 +26,7 @@ interface ProjectsTableProps {
   hideClient?: boolean;
   emptyTitle: string;
   emptyDescription?: string;
-  onCreate?: () => void;
+  emptyActions?: React.ReactNode;
 }
 
 export function ProjectsTable({
@@ -32,22 +35,26 @@ export function ProjectsTable({
   hideClient,
   emptyTitle,
   emptyDescription,
-  onCreate,
+  emptyActions,
 }: ProjectsTableProps) {
+  const router = useRouter();
+  const today = useToday();
   const { data, isLoading, isError } = useProjects(params);
+  // Open tests up to a week ahead, counted per project (overdue and today flagged).
+  const tests = usePendingTests({ until: addDays(today, 7) });
   const items = data?.items ?? [];
 
   if (isLoading) {
     return (
-      <div className="space-y-3 p-6">
+      <div className="space-y-3 p-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-8 w-full" />
+          <Skeleton key={i} className="h-6 w-full" />
         ))}
       </div>
     );
   }
   if (isError) {
-    return <p className="p-6 text-sm text-destructive">No se pudieron cargar los proyectos.</p>;
+    return <p className="p-4 text-sm text-destructive">No se pudieron cargar los proyectos.</p>;
   }
   if (items.length === 0) {
     return (
@@ -55,49 +62,63 @@ export function ProjectsTable({
         icon={FolderKanban}
         title={emptyTitle}
         description={emptyDescription}
-        actionLabel={onCreate ? 'Nuevo proyecto' : undefined}
-        onAction={onCreate}
+        actions={emptyActions}
       />
     );
   }
 
+  const pending = (projectId: string) => {
+    const mine = tests.data?.filter((t) => t.project.id === projectId) ?? [];
+    return { total: mine.length, attention: mine.filter((t) => t.dueStatus !== 'UPCOMING').length };
+  };
+
   return (
     <>
-      <Table>
+      <Table className="min-w-[760px]">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-24">Clave</TableHead>
-            <TableHead>Obra</TableHead>
+            <TableHead>Proyecto</TableHead>
             {!hideClient && <TableHead>Cliente</TableHead>}
             <TableHead>Ubicación</TableHead>
+            <TableHead className="w-48">Ensayos próximos 7 días</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {items.map((project) => (
-            <TableRow key={project.id}>
-              <TableCell className="font-mono text-xs">{project.code ?? '—'}</TableCell>
-              <TableCell className="font-medium">
-                <Link href={`/projects/${project.id}`} className="hover:underline">
-                  {project.name}
-                </Link>
-              </TableCell>
-              {!hideClient && (
-                <TableCell>
-                  <Link
-                    href={`/clients/${project.client.id}`}
-                    className="text-muted-foreground hover:text-foreground hover:underline"
-                  >
-                    {project.client.name}
-                  </Link>
+          {items.map((project) => {
+            const p = pending(project.id);
+            return (
+              <TableRow
+                key={project.id}
+                className="cursor-pointer"
+                onClick={() => router.push(`/projects/${project.id}`)}
+              >
+                <TableCell className="h-[52px]">
+                  <span className="font-medium">{project.name}</span>
+                  {project.code && (
+                    <span className="ml-2 font-mono text-xs text-subtle">{project.code}</span>
+                  )}
                 </TableCell>
-              )}
-              <TableCell className="text-muted-foreground">{project.location ?? '—'}</TableCell>
-            </TableRow>
-          ))}
+                {!hideClient && (
+                  <TableCell className="text-sidebar-foreground">{project.client.name}</TableCell>
+                )}
+                <TableCell className="text-muted-foreground">{project.location ?? '—'}</TableCell>
+                <TableCell>
+                  <span className="flex items-center gap-2">
+                    <span className="font-mono text-[13px]">{p.total}</span>
+                    {p.attention > 0 && (
+                      <span className="rounded-sm border border-st-late-bd bg-st-late px-1.5 py-px text-xs text-st-late-fg">
+                        {p.attention} atención
+                      </span>
+                    )}
+                  </span>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
-      {data && (
-        <div className="border-t p-4">
+      {data && data.pages > 1 && (
+        <div className="border-t px-4 py-3">
           <Pagination
             page={data.page}
             pages={data.pages}

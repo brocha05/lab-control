@@ -60,7 +60,7 @@ export function CatalogCard({ kind, title, description, placeholder }: CatalogCa
             aria-label={`Agregar a ${title}`}
           />
           <Button type="submit" variant="outline" disabled={create.isPending || !newName.trim()}>
-            <Plus className="mr-1 h-4 w-4" />
+            <Plus />
             Agregar
           </Button>
         </form>

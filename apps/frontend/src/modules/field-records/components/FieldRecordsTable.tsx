@@ -1,7 +1,7 @@
 'use client';
 
 import { ClipboardList } from 'lucide-react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Pagination } from '@/components/shared/Pagination';
 import { Badge } from '@/components/ui/badge';
@@ -14,93 +14,89 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { formatCalendarDate } from '@/lib/utils/formatters';
+import { FIELD_RECORD_STATUS } from '@/lib/status';
+import { formatDateNumeric } from '@/lib/utils/formatters';
 import { useFieldRecords } from '../hooks/useFieldRecords';
-import { STATUS_LABELS } from '../schemas/fieldRecord.labels';
 import type { FieldRecordListParams, FieldRecordStatus } from '../types/fieldRecord.types';
 
-const STATUS_VARIANT: Record<FieldRecordStatus, 'secondary' | 'success' | 'outline'> = {
-  DRAFT: 'secondary',
-  COMPLETED: 'success',
-  CANCELLED: 'outline',
-};
-
 export function FieldRecordStatusBadge({ status }: { status: FieldRecordStatus }) {
-  return <Badge variant={STATUS_VARIANT[status]}>{STATUS_LABELS[status]}</Badge>;
+  const look = FIELD_RECORD_STATUS[status];
+  return <Badge tone={look.tone}>{look.label}</Badge>;
 }
 
 interface FieldRecordsTableProps {
   projectId: string;
   params: FieldRecordListParams;
-  onPageChange: (page: number) => void;
-  onCreate?: () => void;
+  /** Without it, no pagination footer (e.g. "recent records"). */
+  onPageChange?: (page: number) => void;
+  emptyActions?: React.ReactNode;
 }
 
 export function FieldRecordsTable({
   projectId,
   params,
   onPageChange,
-  onCreate,
+  emptyActions,
 }: FieldRecordsTableProps) {
+  const router = useRouter();
   const { data, isLoading, isError } = useFieldRecords(projectId, params);
   const items = data?.items ?? [];
 
   if (isLoading) {
     return (
-      <div className="space-y-3 p-6">
+      <div className="space-y-3 p-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-8 w-full" />
+          <Skeleton key={i} className="h-6 w-full" />
         ))}
       </div>
     );
   }
   if (isError) {
-    return <p className="p-6 text-sm text-destructive">No se pudieron cargar los registros.</p>;
+    return <p className="p-4 text-sm text-destructive">No se pudieron cargar los registros.</p>;
   }
   if (items.length === 0) {
     return (
       <EmptyState
         icon={ClipboardList}
-        title="Sin registros de campo"
-        description="Captura aquí los registros de colado (FPC01-01) de esta obra."
-        actionLabel={onCreate ? 'Nuevo registro' : undefined}
-        onAction={onCreate}
+        title="Este proyecto aún no tiene registros de campo"
+        description="Al completar el primer registro se programan los ensayos de sus especímenes."
+        actions={emptyActions}
       />
     );
   }
 
   return (
     <>
-      <Table>
+      <Table className="min-w-[760px]">
         <TableHeader>
           <TableRow>
             <TableHead className="w-28">Registro</TableHead>
-            <TableHead className="w-32">Fecha de colado</TableHead>
+            <TableHead className="w-28">Colado</TableHead>
             <TableHead>Elemento colado</TableHead>
-            <TableHead className="w-20 text-right">Entregas</TableHead>
-            <TableHead className="w-24 text-right">Especímenes</TableHead>
-            <TableHead className="w-28">Estado</TableHead>
+            <TableHead className="w-24 text-right">Entregas</TableHead>
+            <TableHead className="w-24 text-right">Muestras</TableHead>
+            <TableHead className="w-28 text-right">Especímenes</TableHead>
+            <TableHead className="w-32">Captura</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {items.map((r) => (
-            <TableRow key={r.id}>
-              <TableCell className="font-mono text-xs">
-                <Link href={`/field-records/${r.id}`} className="hover:underline">
-                  {r.registryNumber ?? 'Sin número'}
-                </Link>
-                {r.frontNumber > 1 && (
-                  <span className="ml-1 text-muted-foreground">F{r.frontNumber}</span>
-                )}
+            <TableRow
+              key={r.id}
+              className="cursor-pointer"
+              onClick={() => router.push(`/field-records/${r.id}`)}
+            >
+              <TableCell className="h-[50px] font-mono text-[13px] text-primary">
+                {r.registryNumber ?? 'Sin número'}
+                {r.frontNumber > 1 && <span className="ml-1 text-subtle">F{r.frontNumber}</span>}
               </TableCell>
-              <TableCell>{formatCalendarDate(r.pourDate)}</TableCell>
-              <TableCell className="max-w-md truncate">
-                <Link href={`/field-records/${r.id}`} className="hover:underline">
-                  {r.castElement ?? '—'}
-                </Link>
+              <TableCell className="tabular-nums">{formatDateNumeric(r.pourDate)}</TableCell>
+              <TableCell className="max-w-md truncate font-medium">
+                {r.castElement ?? '—'}
               </TableCell>
-              <TableCell className="text-right">{r.deliveryCount}</TableCell>
-              <TableCell className="text-right">{r.specimenCount}</TableCell>
+              <TableCell className="text-right font-mono text-[13px]">{r.deliveryCount}</TableCell>
+              <TableCell className="text-right font-mono text-[13px]">{r.sampleCount}</TableCell>
+              <TableCell className="text-right font-mono text-[13px]">{r.specimenCount}</TableCell>
               <TableCell>
                 <FieldRecordStatusBadge status={r.status} />
               </TableCell>
@@ -108,8 +104,8 @@ export function FieldRecordsTable({
           ))}
         </TableBody>
       </Table>
-      {data && (
-        <div className="border-t p-4">
+      {data && onPageChange && data.pages > 1 && (
+        <div className="border-t px-4 py-3">
           <Pagination
             page={data.page}
             pages={data.pages}

@@ -11,7 +11,7 @@ export default function Page() {
       title="Bitácora"
       description="Bitácora electrónica de ensayos de concreto hidráulico (FPC01-02)"
       icon={BookOpen}
-      upcoming="Se llenará sola con los registros de campo y los resultados de los ensayes: un renglón por espécimen."
+      upcoming="Se llenará sola con los registros de campo y los resultados de los ensayos: un renglón por espécimen."
     />
   );
 }

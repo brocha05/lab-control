@@ -66,7 +66,7 @@ export function LoginForm() {
       </div>
 
       <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {isPending && <Loader2 className="animate-spin" />}
         Iniciar sesión
       </Button>
     </form>

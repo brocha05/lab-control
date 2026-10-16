@@ -1,14 +1,8 @@
 import type { Metadata } from 'next';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { DashboardSummary } from '@/modules/dashboard/components/DashboardSummary';
+import { DashboardPage } from '@/modules/dashboard/components/DashboardPage';
 
-export const metadata: Metadata = { title: 'Inicio' };
+export const metadata: Metadata = { title: 'Dashboard' };
 
-export default function DashboardPage() {
-  return (
-    <div className="space-y-8">
-      <PageHeader title="Inicio" description="Resumen del laboratorio" />
-      <DashboardSummary />
-    </div>
-  );
+export default function Page() {
+  return <DashboardPage />;
 }

@@ -49,7 +49,7 @@ export function ConfirmDialog({
             {cancelLabel}
           </Button>
           <Button variant={variant} onClick={onConfirm} disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isLoading && <Loader2 className="animate-spin" />}
             {confirmLabel}
           </Button>
         </DialogFooter>

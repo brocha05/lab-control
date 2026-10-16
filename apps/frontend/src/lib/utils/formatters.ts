@@ -52,3 +52,54 @@ export function truncate(str: string, maxLength: number): string {
   if (str.length <= maxLength) return str;
   return `${str.slice(0, maxLength)}...`;
 }
+
+const MONTHS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const WEEKDAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+function parts(value: string): [number, number, number] {
+  const [y, m, d] = value.split('-').map(Number);
+  return [y, m, d];
+}
+
+/** `2026-10-03` → `03 Oct 2026`. */
+export function formatDateLong(value: string | null | undefined): string {
+  if (!value) return '—';
+  const [y, m, d] = parts(value);
+  return `${String(d).padStart(2, '0')} ${MONTHS[m - 1]} ${y}`;
+}
+
+/** `2026-10-03` → `03 Oct`. */
+export function formatDateShort(value: string | null | undefined): string {
+  if (!value) return '—';
+  const [, m, d] = parts(value);
+  return `${String(d).padStart(2, '0')} ${MONTHS[m - 1]}`;
+}
+
+/** `2026-10-03` → `03/10/2026`. */
+export function formatDateNumeric(value: string | null | undefined): string {
+  if (!value) return '—';
+  const [y, m, d] = parts(value);
+  return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
+}
+
+/** `2026-10-03` → `Sábado 03 Oct 2026`. */
+export function formatDateWithWeekday(value: string): string {
+  const [y, m, d] = parts(value);
+  return `${WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]} ${formatDateLong(value)}`;
+}
+
+/** Today as `YYYY-MM-DD` in the lab's timezone (A-14); the browser's if unknown. */
+export function todayCalendarDate(timeZone?: string): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+}
+
+/** Adds days to a `YYYY-MM-DD` date (UTC arithmetic). */
+export function addDays(value: string, days: number): string {
+  const [y, m, d] = parts(value);
+  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
+}

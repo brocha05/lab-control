@@ -10,11 +10,12 @@ import { useCreateFieldRecord, useNextNumbers } from '../hooks/useFieldRecords';
 
 interface NewFieldRecordFormProps {
   projectId: string;
-  onCancel: () => void;
+  /** Closes the form (also after the draft is created). */
+  onClose: () => void;
 }
 
 /** Starts a DRAFT with the pour date and the registro number (next one by default, Q-55). */
-export function NewFieldRecordForm({ projectId, onCancel }: NewFieldRecordFormProps) {
+export function NewFieldRecordForm({ projectId, onClose }: NewFieldRecordFormProps) {
   const router = useRouter();
   const next = useNextNumbers(projectId);
   const create = useCreateFieldRecord(projectId);
@@ -31,7 +32,12 @@ export function NewFieldRecordForm({ projectId, onCancel }: NewFieldRecordFormPr
         registrySequence: registry ? Number(registry) : undefined,
         frontNumber: Number(front) || 1,
       },
-      { onSuccess: (record) => router.push(`/field-records/${record.id}`) }
+      {
+        onSuccess: (record) => {
+          onClose();
+          router.push(`/field-records/${record.id}`);
+        },
+      }
     );
   };
 
@@ -76,11 +82,11 @@ export function NewFieldRecordForm({ projectId, onCancel }: NewFieldRecordFormPr
         </FormField>
       </div>
       <div className="flex justify-end gap-2 pt-2">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={create.isPending}>
+        <Button type="button" variant="outline" onClick={onClose} disabled={create.isPending}>
           Cancelar
         </Button>
         <Button type="submit" disabled={create.isPending || !pourDate}>
-          {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {create.isPending && <Loader2 className="animate-spin" />}
           Crear registro
         </Button>
       </div>

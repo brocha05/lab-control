@@ -91,7 +91,7 @@ export function HolidaysCard() {
             variant="outline"
             disabled={create.isPending || !date || !name.trim()}
           >
-            <Plus className="mr-1 h-4 w-4" />
+            <Plus />
             Agregar
           </Button>
         </form>

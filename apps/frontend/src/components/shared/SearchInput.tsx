@@ -13,14 +13,14 @@ interface SearchInputProps {
 
 export function SearchInput({ value, onChange, placeholder, className }: SearchInputProps) {
   return (
-    <div className={cn('relative w-full max-w-sm', className)}>
-      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+    <div className={cn('relative min-w-[220px] max-w-[360px] flex-1', className)}>
+      <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle" />
       <Input
         type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder ?? 'Buscar…'}
-        className="pl-9"
+        className="pl-[34px]"
         aria-label={placeholder ?? 'Buscar'}
       />
     </div>

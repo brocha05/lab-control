@@ -11,7 +11,7 @@ export default function Page() {
       title="Informes"
       description="Informes de pruebas de control de concreto hidráulico (FPC06-04)"
       icon={FileText}
-      upcoming="Cuando todos los ensayes de una muestra estén completos se generará su informe en PDF."
+      upcoming="Cuando todos los ensayos de una muestra estén completos se generará su informe en PDF."
     />
   );
 }

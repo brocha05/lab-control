@@ -29,9 +29,9 @@ export function useRescheduleTest() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['tests'] });
       void queryClient.invalidateQueries({ queryKey: ['field-records', 'detail'] });
-      toast.success('Ensaye reprogramado');
+      toast.success('Ensayo reprogramado');
     },
-    onError: (error) => toastApiError(error, 'No se pudo reprogramar el ensaye.'),
+    onError: (error) => toastApiError(error, 'No se pudo reprogramar el ensayo.'),
   });
 }
 

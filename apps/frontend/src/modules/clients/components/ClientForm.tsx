@@ -101,7 +101,7 @@ export function ClientForm({
           </Button>
         )}
         <Button type="submit" disabled={isPending || (!!client && !isDirty)}>
-          {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isPending && <Loader2 className="animate-spin" />}
           {submitLabel}
         </Button>
       </div>

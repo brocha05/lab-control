@@ -1,158 +1,169 @@
 'use client';
 
+import { ChevronDown, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  BookOpen,
-  Building2,
-  CalendarClock,
-  ChevronLeft,
-  ChevronRight,
-  ClipboardList,
-  FileText,
-  FlaskConical,
-  FolderKanban,
-  LayoutDashboard,
-  Settings,
-} from 'lucide-react';
-import { useState } from 'react';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useToday } from '@/lib/hooks/useToday';
 import { cn } from '@/lib/utils/cn';
-import { Button } from '@/components/ui/button';
-import { useAuthStore } from '@/store/authStore';
 import { formatInitials } from '@/lib/utils/formatters';
+import { useAuth, useCurrentUser } from '@/modules/auth/hooks/useAuth';
+import { usePendingTests } from '@/modules/specimen-tests/hooks/useSpecimenTests';
+import { useUiStore } from '@/store/uiStore';
+import { ROLE_LABELS } from '@/types';
+import { BrandMark } from './BrandMark';
+import { NavIcon, type NavIconName } from './NavIcons';
 
 interface NavItem {
   href: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  exact?: boolean;
+  icon: NavIconName;
+  /** Other paths that light up this item. */
+  also?: string[];
 }
 
-interface NavGroup {
-  label: string;
-  items: NavItem[];
-}
-
-// App shell (development-plan 3.5). Sections whose phase is blocked show an
-// "upcoming" page until they are built.
-const NAV_GROUPS: NavGroup[] = [
-  {
-    label: 'General',
-    items: [{ href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true }],
-  },
-  {
-    label: 'Laboratorio',
-    items: [
-      { href: '/field-records', label: 'Registros de campo', icon: ClipboardList },
-      { href: '/tests/pending', label: 'Pruebas pendientes', icon: CalendarClock },
-      { href: '/bitacora', label: 'Bitácora', icon: BookOpen },
-      { href: '/reports', label: 'Informes', icon: FileText },
-    ],
-  },
-  {
-    label: 'Catálogos',
-    items: [
-      { href: '/clients', label: 'Clientes', icon: Building2 },
-      { href: '/projects', label: 'Proyectos', icon: FolderKanban },
-      { href: '/settings', label: 'Configuración', icon: Settings },
-    ],
-  },
+// Sections whose phase is still blocked (Bitácora, Informes) show an "upcoming" page.
+const NAV: NavItem[] = [
+  { href: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
+  { href: '/clients', label: 'Clientes', icon: 'clients' },
+  { href: '/projects', label: 'Proyectos', icon: 'projects', also: ['/field-records'] },
+  { href: '/bitacora', label: 'Bitácora', icon: 'bitacora' },
+  { href: '/tests/pending', label: 'Ensayos pendientes', icon: 'tests' },
+  { href: '/reports', label: 'Informes', icon: 'reports' },
 ];
 
-function NavLink({ href, label, icon: Icon, exact, collapsed }: NavItem & { collapsed: boolean }) {
+function NavLink({ item, count }: { item: NavItem; count?: number }) {
   const pathname = usePathname();
-  const isActive = exact ? pathname === href : pathname.startsWith(href);
+  const setDrawerOpen = useUiStore((s) => s.setDrawerOpen);
+  const active = [item.href, ...(item.also ?? [])].some((p) => pathname.startsWith(p));
 
   return (
     <Link
-      href={href}
-      title={collapsed ? label : undefined}
+      href={item.href}
+      onClick={() => setDrawerOpen(false)}
+      aria-current={active ? 'page' : undefined}
       className={cn(
-        'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150',
-        isActive
-          ? 'bg-primary/10 text-primary'
-          : 'text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
-        collapsed && 'justify-center px-2'
+        'flex h-9 items-center gap-2.5 whitespace-nowrap rounded-md px-2.5 text-sm transition-colors',
+        active
+          ? 'bg-sidebar-accent font-semibold text-sidebar-accent-foreground'
+          : 'font-medium text-sidebar-foreground hover:bg-muted'
       )}
     >
-      <Icon
-        className={cn(
-          'h-4 w-4 shrink-0 transition-colors',
-          isActive
-            ? 'text-primary'
-            : 'text-sidebar-foreground/50 group-hover:text-sidebar-foreground'
-        )}
-      />
-      {!collapsed && <span className="flex-1 truncate">{label}</span>}
+      <NavIcon name={item.icon} />
+      <span className="flex-1">{item.label}</span>
+      {!!count && (
+        <span
+          className="rounded-full border border-st-late-bd bg-st-late px-[7px] py-px font-mono text-[11px] font-medium text-st-late-fg"
+          aria-label={`${count} requieren atención`}
+        >
+          {count}
+        </span>
+      )}
     </Link>
   );
 }
 
-export function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
-  const { user } = useAuthStore();
+/** Tests overdue or due today: the badge on "Ensayos pendientes". */
+function useAttentionCount(): number {
+  const today = useToday();
+  const { data } = usePendingTests({ until: today });
+  return data?.length ?? 0;
+}
+
+function UserMenu() {
+  const { logout } = useAuth();
+  const me = useCurrentUser();
+  const user = me.data?.user;
+  if (!user) return <div className="h-8" />;
 
   return (
-    <aside
-      className={cn(
-        'relative flex h-screen flex-col border-r bg-sidebar transition-all duration-300 ease-in-out',
-        collapsed ? 'w-[60px]' : 'w-60'
-      )}
-    >
-      <div className="flex h-16 shrink-0 items-center border-b px-3">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex w-full items-center gap-2.5 rounded-md text-left outline-none focus-visible:outline-2 focus-visible:outline-ring">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-sidebar-accent text-xs font-semibold text-sidebar-accent-foreground">
+            {formatInitials(user.fullName)}
+          </span>
+          <span className="min-w-0 flex-1 leading-tight">
+            <span className="block truncate text-[13px] font-medium">{user.fullName}</span>
+            <span className="block truncate text-xs text-subtle">
+              {ROLE_LABELS[user.role] ?? user.role}
+            </span>
+          </span>
+          <ChevronDown className="h-4 w-4 text-subtle" strokeWidth={1.6} />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="start" side="top">
+        <DropdownMenuLabel className="font-normal">
+          <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
+          <LogOut className="h-4 w-4" />
+          Cerrar sesión
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+export function Sidebar() {
+  const drawerOpen = useUiStore((s) => s.drawerOpen);
+  const setDrawerOpen = useUiStore((s) => s.setDrawerOpen);
+  const attention = useAttentionCount();
+  const me = useCurrentUser();
+
+  return (
+    <>
+      {drawerOpen && (
         <div
-          className={cn('flex items-center gap-3 overflow-hidden', collapsed && 'justify-center')}
-        >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary shadow-sm">
-            <FlaskConical className="h-4 w-4 text-primary-foreground" />
-          </div>
-          {!collapsed && (
-            <p className="truncate text-sm font-semibold tracking-tight">
-              {process.env.NEXT_PUBLIC_APP_NAME ?? 'Lab Control'}
-            </p>
-          )}
-        </div>
-      </div>
-
-      <nav className="flex flex-1 flex-col gap-4 overflow-y-auto p-3 pt-4">
-        {NAV_GROUPS.map((group) => (
-          <div key={group.label} className="space-y-1">
-            {!collapsed && (
-              <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/30">
-                {group.label}
-              </p>
-            )}
-            {collapsed && <div className="my-1 h-px bg-border/50" />}
-            {group.items.map((item) => (
-              <NavLink key={item.href} {...item} collapsed={collapsed} />
-            ))}
-          </div>
-        ))}
-      </nav>
-
-      {!collapsed && user && (
-        <div className="border-t p-3">
-          <div className="flex items-center gap-2.5 rounded-lg px-3 py-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-              {formatInitials(user.fullName)}
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-xs font-medium">{user.fullName}</p>
-              <p className="truncate text-[10px] text-muted-foreground">{user.email}</p>
-            </div>
-          </div>
-        </div>
+          className="fixed inset-0 z-30 bg-[rgba(20,22,25,0.42)] md:hidden"
+          onClick={() => setDrawerOpen(false)}
+          aria-hidden
+        />
       )}
-
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setCollapsed((v) => !v)}
-        className="absolute -right-3 top-[72px] z-10 h-6 w-6 rounded-full border bg-background shadow-sm hover:bg-accent"
-        aria-label={collapsed ? 'Expandir menú' : 'Contraer menú'}
+      <aside
+        className={cn(
+          'z-40 flex h-full w-[244px] shrink-0 flex-col border-r bg-sidebar',
+          'fixed inset-y-0 left-0 md:static',
+          drawerOpen ? 'flex' : 'hidden md:flex'
+        )}
       >
-        {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
-      </Button>
-    </aside>
+        <div className="flex h-[60px] shrink-0 items-center border-b px-[18px]">
+          <BrandMark />
+        </div>
+
+        <nav className="flex flex-1 flex-col gap-0.5 overflow-auto px-2.5 py-3">
+          <div className="px-2.5 py-1.5 text-[11px] uppercase tracking-[0.07em] text-subtle">
+            Operación
+          </div>
+          {NAV.map((item) => (
+            <NavLink
+              key={item.href}
+              item={item}
+              count={item.href === '/tests/pending' ? attention : undefined}
+            />
+          ))}
+          <div className="mx-2.5 my-3 h-px bg-border" />
+          <NavLink item={{ href: '/settings', label: 'Configuración', icon: 'settings' }} />
+        </nav>
+
+        <div className="flex shrink-0 flex-col gap-3 border-t px-4 py-3.5">
+          <div className="text-xs leading-snug text-muted-foreground">
+            <div className="mb-0.5 text-[11px] uppercase tracking-[0.07em] text-subtle">
+              Laboratorio
+            </div>
+            {me.data?.tenant.name ?? '—'}
+          </div>
+          <UserMenu />
+        </div>
+      </aside>
+    </>
   );
 }

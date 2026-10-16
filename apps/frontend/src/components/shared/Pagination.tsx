@@ -13,14 +13,14 @@ interface PaginationProps {
 export function Pagination({ page, pages, total, onPageChange }: PaginationProps) {
   if (pages <= 1) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-[13px] text-subtle">
         {total} {total === 1 ? 'registro' : 'registros'}
       </p>
     );
   }
   return (
     <div className="flex items-center justify-between gap-4">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-[13px] text-subtle">
         Página {page} de {pages} · {total} registros
       </p>
       <div className="flex gap-2">
@@ -30,7 +30,7 @@ export function Pagination({ page, pages, total, onPageChange }: PaginationProps
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
         >
-          <ChevronLeft className="mr-1 h-4 w-4" />
+          <ChevronLeft />
           Anterior
         </Button>
         <Button
@@ -40,7 +40,7 @@ export function Pagination({ page, pages, total, onPageChange }: PaginationProps
           disabled={page >= pages}
         >
           Siguiente
-          <ChevronRight className="ml-1 h-4 w-4" />
+          <ChevronRight />
         </Button>
       </div>
     </div>

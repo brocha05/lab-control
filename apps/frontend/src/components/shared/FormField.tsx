@@ -12,16 +12,16 @@ interface FormFieldProps {
 /** Label + control + error message, the layout every form uses. */
 export function FormField({ id, label, error, hint, required, children }: FormFieldProps) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>
+    <div className="space-y-1.5">
+      <Label htmlFor={id} className="text-[13px] font-medium">
         {label}
         {required && <span className="ml-0.5 text-destructive">*</span>}
       </Label>
       {children}
       {error ? (
-        <p className="text-sm text-destructive">{error}</p>
+        <p className="text-[13px] text-st-late-fg">{error}</p>
       ) : (
-        hint && <p className="text-xs text-muted-foreground">{hint}</p>
+        hint && <p className="text-xs text-subtle">{hint}</p>
       )}
     </div>
   );

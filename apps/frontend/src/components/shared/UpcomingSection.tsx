@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
+import { SetBreadcrumbs } from '@/components/layout/SetBreadcrumbs';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { Card } from '@/components/ui/card';
 
 interface UpcomingSectionProps {
   title: string;
@@ -14,11 +14,12 @@ interface UpcomingSectionProps {
 /** Placeholder for sections whose phase is still blocked (PROJECT_STATUS.md). */
 export function UpcomingSection({ title, description, icon, upcoming }: UpcomingSectionProps) {
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-5">
+      <SetBreadcrumbs crumbs={[{ label: title }]} />
       <PageHeader title={title} description={description} />
-      <Card>
+      <div className="rounded-lg border bg-card">
         <EmptyState icon={icon} title="Disponible próximamente" description={upcoming} />
-      </Card>
+      </div>
     </div>
   );
 }

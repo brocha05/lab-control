@@ -79,6 +79,8 @@ export function useCompleteFieldRecord(id: string) {
     onSuccess: (record) => {
       queryClient.setQueryData(fieldRecordKeys.detail(id), record);
       void queryClient.invalidateQueries({ queryKey: ['field-records', 'list'] });
+      // Completing plans the record's tests (6.4).
+      void queryClient.invalidateQueries({ queryKey: ['tests'] });
       toast.success('Registro completado');
     },
     onError: (error) => {

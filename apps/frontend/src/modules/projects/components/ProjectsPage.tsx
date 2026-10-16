@@ -1,68 +1,90 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { Modal } from '@/components/shared/Modal';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { useBreadcrumbs } from '@/lib/hooks/useBreadcrumbs';
 import { useListState } from '@/lib/hooks/useListState';
 import { ClientSelect } from '@/modules/clients/components/ClientSelect';
 import { useCreateProject } from '../hooks/useProjects';
 import { ProjectForm } from './ProjectForm';
 import { ProjectsTable } from './ProjectsTable';
 
+/** Projects, optionally filtered by `?clientId=` (from a client's "Proyectos" action). */
 export function ProjectsPage() {
+  useBreadcrumbs([{ label: 'Proyectos' }]);
   const router = useRouter();
+  const pathname = usePathname();
+  const clientId = useSearchParams().get('clientId') ?? '';
   const { setPage, search, setSearch, params } = useListState();
-  const [clientId, setClientId] = useState('');
   const [creating, setCreating] = useState(false);
   const createProject = useCreateProject();
 
   const filtered = Boolean(params.q || clientId);
+  const setClientId = (id: string) => {
+    setPage(1);
+    router.replace(id ? `${pathname}?clientId=${id}` : pathname);
+  };
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="Proyectos" description="Obras bajo control de calidad">
+    <div className="flex flex-col gap-5">
+      <PageHeader
+        title="Proyectos"
+        description="Obras con control de calidad de concreto hidráulico"
+      >
         <Button onClick={() => setCreating(true)}>
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus strokeWidth={2} />
           Nuevo proyecto
         </Button>
       </PageHeader>
 
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar obra, clave o ubicación…"
-        />
-        <div className="w-full sm:w-72">
-          <ClientSelect
-            value={clientId}
-            onChange={(v) => {
-              setClientId(v);
-              setPage(1);
-            }}
-            allLabel="Todos los clientes"
+      <div className="overflow-hidden rounded-lg border bg-card">
+        <div className="flex flex-wrap items-center gap-3 border-b px-4 py-3">
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar proyecto, clave o ubicación…"
           />
+          <div className="w-full sm:w-64">
+            <ClientSelect value={clientId} onChange={setClientId} allLabel="Todos los clientes" />
+          </div>
         </div>
-      </div>
-
-      <Card>
         <ProjectsTable
           params={{ ...params, clientId: clientId || undefined }}
           onPageChange={setPage}
-          emptyTitle={filtered ? 'Sin resultados' : 'Todavía no hay proyectos'}
+          emptyTitle={
+            filtered ? 'Ningún proyecto coincide con los filtros' : 'Todavía no hay proyectos'
+          }
           emptyDescription={
             filtered
-              ? 'Ningún proyecto coincide con los filtros.'
+              ? 'Este cliente no tiene proyectos registrados o la búsqueda no arrojó resultados.'
               : 'Crea el primer proyecto (obra) de un cliente.'
           }
-          onCreate={filtered ? undefined : () => setCreating(true)}
+          emptyActions={
+            filtered ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearch('');
+                  setClientId('');
+                }}
+              >
+                Quitar filtros
+              </Button>
+            ) : (
+              <Button size="sm" onClick={() => setCreating(true)}>
+                <Plus strokeWidth={2} />
+                Nuevo proyecto
+              </Button>
+            )
+          }
         />
-      </Card>
+      </div>
 
       <Modal open={creating} onOpenChange={setCreating} title="Nuevo proyecto">
         <ProjectForm

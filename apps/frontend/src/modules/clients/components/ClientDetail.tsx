@@ -1,16 +1,15 @@
 'use client';
 
-import { ArrowLeft, Plus } from 'lucide-react';
-import Link from 'next/link';
+import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Modal } from '@/components/shared/Modal';
-import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useBreadcrumbs } from '@/lib/hooks/useBreadcrumbs';
 import { getApiError } from '@/lib/utils/apiError';
-import { formatDateTime } from '@/lib/utils/formatters';
 import { ProjectForm } from '@/modules/projects/components/ProjectForm';
 import { ProjectsTable } from '@/modules/projects/components/ProjectsTable';
 import { useCreateProject } from '@/modules/projects/hooks/useProjects';
@@ -22,80 +21,95 @@ export function ClientDetail({ id }: { id: string }) {
   const updateClient = useUpdateClient(id);
   const router = useRouter();
   const [projectsPage, setProjectsPage] = useState(1);
+  const [editing, setEditing] = useState(false);
   const [creatingProject, setCreatingProject] = useState(false);
   const createProject = useCreateProject();
+  useBreadcrumbs([{ label: 'Clientes', href: '/clients' }, { label: client?.name ?? '…' }]);
+
+  if (isLoading) return <Skeleton className="h-64 w-full" />;
+  if (!client) {
+    return (
+      <p className="text-sm text-destructive">
+        {getApiError(error)?.code === 'NOT_FOUND'
+          ? 'El cliente no existe.'
+          : 'No se pudo cargar el cliente.'}
+      </p>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <Link
-        href="/clients"
-        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+    <div className="flex flex-col gap-5">
+      <PageHeader
+        title={
+          <span className="flex flex-wrap items-center gap-3">
+            {client.name}
+            {client.code && (
+              <Badge tone="outline" plain className="font-mono">
+                {client.code}
+              </Badge>
+            )}
+          </span>
+        }
+        description="Cliente del laboratorio"
       >
-        <ArrowLeft className="mr-1 h-4 w-4" />
-        Clientes
-      </Link>
+        <Button variant="outline" onClick={() => setEditing(true)}>
+          Editar
+        </Button>
+      </PageHeader>
 
-      {isLoading ? (
-        <Skeleton className="h-64 w-full" />
-      ) : !client ? (
-        <p className="text-sm text-destructive">
-          {getApiError(error)?.code === 'NOT_FOUND'
-            ? 'El cliente no existe.'
-            : 'No se pudo cargar el cliente.'}
-        </p>
-      ) : (
-        <>
-          <PageHeader
-            title={client.name}
-            description={`Actualizado ${formatDateTime(client.updatedAt)}`}
-          />
-          <Card className="max-w-2xl">
-            <CardHeader>
-              <CardTitle className="text-base">Datos del cliente</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* key: reset the form to the saved values after each update */}
-              <ClientForm
-                key={client.updatedAt}
-                client={client}
-                submitLabel="Guardar cambios"
-                isPending={updateClient.isPending}
-                onSubmit={(input) => updateClient.mutate(input)}
-              />
-            </CardContent>
-          </Card>
+      <section className="max-w-[860px] rounded-lg border bg-card">
+        <h2 className="border-b px-4 py-3.5 text-[15px] font-semibold">Contacto</h2>
+        <div className="grid grid-cols-2 gap-x-5 gap-y-3.5 p-4 text-sm">
+          <div>
+            <div className="mb-0.5 text-xs text-[#6A6E73]">Contacto principal</div>
+            <div className="font-medium">{client.contactName ?? '—'}</div>
+          </div>
+          <div>
+            <div className="mb-0.5 text-xs text-[#6A6E73]">Teléfono</div>
+            <div className="font-medium">{client.contactPhone ?? '—'}</div>
+          </div>
+        </div>
+      </section>
 
-          <Card>
-            <CardHeader className="flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-base">Proyectos</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => setCreatingProject(true)}>
-                <Plus className="mr-1 h-4 w-4" />
-                Nuevo proyecto
-              </Button>
-            </CardHeader>
-            <ProjectsTable
-              params={{ page: projectsPage, limit: 10, clientId: id }}
-              onPageChange={setProjectsPage}
-              hideClient
-              emptyTitle="Este cliente no tiene proyectos"
-            />
-          </Card>
+      <section className="overflow-hidden rounded-lg border bg-card">
+        <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
+          <h2 className="text-[15px] font-semibold">Proyectos</h2>
+          <Button size="sm" variant="outline" onClick={() => setCreatingProject(true)}>
+            <Plus />
+            Nuevo proyecto
+          </Button>
+        </div>
+        <ProjectsTable
+          params={{ page: projectsPage, limit: 10, clientId: id }}
+          onPageChange={setProjectsPage}
+          hideClient
+          emptyTitle="Este cliente no tiene proyectos"
+        />
+      </section>
 
-          <Modal open={creatingProject} onOpenChange={setCreatingProject} title="Nuevo proyecto">
-            <ProjectForm
-              defaultClientId={id}
-              submitLabel="Crear proyecto"
-              isPending={createProject.isPending}
-              onCancel={() => setCreatingProject(false)}
-              onSubmit={(input) =>
-                createProject.mutate(input, {
-                  onSuccess: (project) => router.push(`/projects/${project.id}`),
-                })
-              }
-            />
-          </Modal>
-        </>
-      )}
+      <Modal open={editing} onOpenChange={setEditing} title="Editar cliente">
+        <ClientForm
+          client={client}
+          submitLabel="Guardar cambios"
+          isPending={updateClient.isPending}
+          onCancel={() => setEditing(false)}
+          onSubmit={(input) => updateClient.mutate(input, { onSuccess: () => setEditing(false) })}
+        />
+      </Modal>
+
+      <Modal open={creatingProject} onOpenChange={setCreatingProject} title="Nuevo proyecto">
+        <ProjectForm
+          defaultClientId={id}
+          submitLabel="Crear proyecto"
+          isPending={createProject.isPending}
+          onCancel={() => setCreatingProject(false)}
+          onSubmit={(input) =>
+            createProject.mutate(input, {
+              onSuccess: (project) => router.push(`/projects/${project.id}`),
+            })
+          }
+        />
+      </Modal>
     </div>
   );
 }

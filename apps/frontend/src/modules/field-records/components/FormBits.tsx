@@ -16,21 +16,36 @@ interface BaseProps {
   hint?: string;
 }
 
+const labelClass = 'text-[13px] font-medium text-[#33363A]';
+
 export function TextField({
   name,
   label,
   className,
   hint,
+  unit,
   ...input
-}: BaseProps & Omit<React.ComponentProps<typeof Input>, 'name'>) {
+}: BaseProps & { unit?: string } & Omit<React.ComponentProps<typeof Input>, 'name'>) {
   const { register } = useFormContext();
   return (
     <div className={cn('space-y-1.5', className)}>
-      <Label htmlFor={name} className="text-xs text-muted-foreground">
+      <Label htmlFor={name} className={labelClass}>
         {label}
       </Label>
-      <Input id={name} className="h-9" {...input} {...register(name)} />
-      {hint && <p className="text-[11px] text-muted-foreground">{hint}</p>}
+      <div className="relative">
+        <Input
+          id={name}
+          className={cn(unit && 'pr-14', input.type === 'number' && 'font-mono')}
+          {...input}
+          {...register(name)}
+        />
+        {unit && (
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[13px] text-subtle">
+            {unit}
+          </span>
+        )}
+      </div>
+      {hint && <p className="text-xs text-[#6A6E73]">{hint}</p>}
     </div>
   );
 }
@@ -39,16 +54,7 @@ export function NumberField({
   step = '0.1',
   ...props
 }: BaseProps & { step?: string; unit?: string }) {
-  const { unit, label, ...rest } = props;
-  return (
-    <TextField
-      {...rest}
-      label={unit ? `${label} (${unit})` : label}
-      type="number"
-      step={step}
-      inputMode="decimal"
-    />
-  );
+  return <TextField {...props} type="number" step={step} inputMode="decimal" />;
 }
 
 export function TimeField(props: BaseProps) {
@@ -65,10 +71,10 @@ export function SelectField({
   const { register } = useFormContext();
   return (
     <div className={cn('space-y-1.5', className)}>
-      <Label htmlFor={name} className="text-xs text-muted-foreground">
+      <Label htmlFor={name} className={labelClass}>
         {label}
       </Label>
-      <NativeSelect id={name} className="h-9" {...register(name)}>
+      <NativeSelect id={name} {...register(name)}>
         <option value="">{emptyLabel}</option>
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -80,11 +86,36 @@ export function SelectField({
   );
 }
 
+export function TextAreaField({
+  name,
+  label,
+  className,
+  hint,
+  rows = 3,
+}: BaseProps & { rows?: number }) {
+  const { register } = useFormContext();
+  return (
+    <div className={cn('space-y-1.5', className)}>
+      <Label htmlFor={name} className={labelClass}>
+        {label}
+      </Label>
+      <textarea
+        id={name}
+        rows={rows}
+        className="flex w-full resize-y rounded-md border border-input bg-card px-2.5 py-2 text-sm disabled:bg-surface disabled:opacity-70"
+        {...register(name)}
+      />
+      {hint && <p className="text-xs text-[#6A6E73]">{hint}</p>}
+    </div>
+  );
+}
+
 /** Turns a label map into select options. */
 export function optionsOf<K extends string>(labels: Record<K, string>) {
   return (Object.entries(labels) as [K, string][]).map(([value, label]) => ({ value, label }));
 }
 
+/** A titled block inside a step. */
 export function Section({
   title,
   description,
@@ -95,12 +126,24 @@ export function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-lg border bg-card p-5">
-      <header className="mb-4">
+    <section className="space-y-3">
+      <header>
         <h3 className="text-sm font-semibold">{title}</h3>
-        {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
+        {description && <p className="mt-0.5 text-[13px] text-muted-foreground">{description}</p>}
       </header>
       {children}
     </section>
+  );
+}
+
+/** Responsive field grid used by every step. */
+export function FieldGrid({ children, min = 200 }: { children: React.ReactNode; min?: number }) {
+  return (
+    <div
+      className="grid gap-x-5 gap-y-4"
+      style={{ gridTemplateColumns: `repeat(auto-fill, minmax(min(${min}px, 100%), 1fr))` }}
+    >
+      {children}
+    </div>
   );
 }

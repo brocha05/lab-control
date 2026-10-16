@@ -63,10 +63,10 @@ export function DeliveriesSection({
         type="button"
         variant="outline"
         size="sm"
-        className="mt-4"
+        className="mt-3"
         onClick={() => append(emptyDelivery())}
       >
-        <Plus className="mr-1 h-4 w-4" />
+        <Plus />
         Agregar entrega
       </Button>
     </Section>
@@ -93,20 +93,20 @@ function DeliveryRow({
 
   return (
     <div className="rounded-md border">
-      <div className="flex items-center justify-between border-b bg-muted/40 px-3 py-2">
-        <p className="text-sm font-medium">
+      <div className="flex items-center justify-between border-b bg-surface px-3 py-2">
+        <p className="text-sm font-semibold">
           Entrega {index + 1}
-          <span className="ml-2 text-xs font-normal text-muted-foreground">Hoja {sheet}</span>
+          <span className="ml-2 font-mono text-xs font-normal text-subtle">Hoja {sheet}</span>
         </p>
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-8 w-8 text-subtle hover:bg-muted"
           onClick={onRemove}
           aria-label={`Quitar entrega ${index + 1}`}
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 />
         </Button>
       </div>
 
@@ -114,8 +114,10 @@ function DeliveryRow({
         <TextField name={`${p}.ticketNumber`} label="Remisión / placas" className="lg:col-span-2" />
         <NumberField name={`${p}.volumeM3`} label="Volumen" unit="m³" step="0.01" />
         <div className="space-y-1.5">
-          <p className="text-xs text-muted-foreground">Acumulado (m³)</p>
-          <p className="flex h-9 items-center text-sm">{cumulative ?? '—'}</p>
+          <p className="text-[13px] font-medium text-[#33363A]">Acumulado</p>
+          <p className="flex h-[38px] items-center font-mono text-sm">
+            {cumulative ?? '—'} <span className="ml-1 text-[13px] text-subtle">m³</span>
+          </p>
         </div>
         <TimeField name={`${p}.plantDepartureTime`} label="Salida planta / hechura" />
         <TimeField name={`${p}.siteArrivalTime`} label="Llegada obra / disponible" />
@@ -135,7 +137,7 @@ function DeliveryRow({
       <div className="border-t px-3 py-2">
         <button
           type="button"
-          className="flex items-center text-xs font-medium text-muted-foreground hover:text-foreground"
+          className="flex items-center text-[13px] font-medium text-primary"
           onClick={() => setShowTicket((v) => !v)}
         >
           {showTicket ? (
@@ -206,7 +208,7 @@ function SamplesEditor({
   };
 
   return (
-    <div className="border-t bg-muted/20 px-3 py-3">
+    <div className="border-t bg-[#FCFCFB] px-3 py-3">
       {fields.map((field, j) => (
         <SampleEditor
           key={field.id}
@@ -216,7 +218,7 @@ function SamplesEditor({
         />
       ))}
       <Button type="button" variant="ghost" size="sm" onClick={addSample}>
-        <Plus className="mr-1 h-4 w-4" />
+        <Plus />
         Muestra de este camión
       </Button>
     </div>
@@ -243,7 +245,7 @@ function SampleEditor({
   };
 
   return (
-    <div className="mb-3 rounded-md border bg-background p-3">
+    <div className="mb-3 rounded-md border bg-card p-3">
       <div className="mb-3 flex items-end gap-3">
         <TextField name={`${p}.sampleNumber`} label="No. muestra" type="number" className="w-28" />
         <SelectField
@@ -257,15 +259,15 @@ function SampleEditor({
           type="button"
           variant="ghost"
           size="icon"
-          className="ml-auto h-9 w-9"
+          className="ml-auto h-9 w-9 text-subtle hover:bg-muted"
           onClick={onRemove}
           aria-label="Quitar muestra"
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 />
         </Button>
       </div>
 
-      <p className="mb-1.5 text-xs text-muted-foreground">
+      <p className="mb-1.5 text-[13px] font-medium text-[#33363A]">
         Especímenes (clave de espécimen · clave de molde, en el orden de la hoja)
       </p>
       <div className="flex flex-wrap gap-2">
@@ -273,13 +275,13 @@ function SampleEditor({
           <div key={field.id} className="flex items-center gap-1 rounded-md border px-1.5 py-1">
             <Input
               type="number"
-              className="h-8 w-20"
+              className="h-8 w-20 font-mono"
               placeholder="405"
               aria-label={`Espécimen ${k + 1}`}
               {...register(`${p}.specimens.${k}.specimenNumber`)}
             />
             <Input
-              className="h-8 w-16"
+              className="h-8 w-16 font-mono"
               placeholder="020"
               aria-label={`Molde del espécimen ${k + 1}`}
               {...register(`${p}.specimens.${k}.moldCode`)}
@@ -288,7 +290,7 @@ function SampleEditor({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-7 w-7"
+              className="h-7 w-7 text-subtle hover:bg-muted"
               onClick={() => remove(k)}
               aria-label={`Quitar espécimen ${k + 1}`}
             >
@@ -297,7 +299,7 @@ function SampleEditor({
           </div>
         ))}
         <Button type="button" variant="outline" size="sm" className="h-10" onClick={addSpecimen}>
-          <Plus className="h-4 w-4" />
+          <Plus />
         </Button>
       </div>
     </div>

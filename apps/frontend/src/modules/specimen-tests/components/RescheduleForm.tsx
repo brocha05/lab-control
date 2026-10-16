@@ -66,7 +66,7 @@ export function RescheduleForm({ testId, ageDays, keepExactDate, onDone }: Resch
           Cancelar
         </Button>
         <Button type="submit" disabled={!valid || reschedule.isPending}>
-          {reschedule.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {reschedule.isPending && <Loader2 className="animate-spin" />}
           Guardar
         </Button>
       </div>

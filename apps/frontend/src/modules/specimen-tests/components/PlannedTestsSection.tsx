@@ -17,16 +17,9 @@ import type {
   FieldRecordDetail,
   SpecimenView,
 } from '@/modules/field-records/types/fieldRecord.types';
+import { TEST_STATUS } from '@/lib/status';
 import { useCancelSpecimen } from '../hooks/useSpecimenTests';
-import type { SpecimenTestStatus } from '../types/specimenTest.types';
 import { RescheduleForm } from './RescheduleForm';
-
-const STATUS_LABELS: Record<SpecimenTestStatus, string> = {
-  SCHEDULED: 'Programado',
-  IN_PROGRESS: 'En proceso',
-  COMPLETED: 'Ensayado',
-  CANCELLED: 'Cancelado',
-};
 
 interface Row {
   sampleNumber: number | null;
@@ -50,14 +43,14 @@ export function PlannedTestsSection({ record }: { record: FieldRecordDetail }) {
   );
 
   return (
-    <section className="rounded-lg border bg-card">
-      <header className="p-5 pb-3">
-        <h3 className="text-sm font-semibold">Ensayes programados</h3>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          La fecha de cada ensaye está en Pruebas pendientes, ya recorrida por domingos y festivos.
+    <section className="overflow-hidden rounded-lg border bg-card">
+      <header className="border-b px-4 py-3.5">
+        <h2 className="text-[15px] font-semibold">Ensayos programados</h2>
+        <p className="mt-0.5 text-[13px] text-muted-foreground">
+          La fecha de cada ensayo está en Ensayos pendientes, ya recorrida por domingos y festivos.
         </p>
       </header>
-      <Table>
+      <Table className="min-w-[640px]">
         <TableHeader>
           <TableRow>
             <TableHead className="w-24">Muestra</TableHead>
@@ -75,25 +68,25 @@ export function PlannedTestsSection({ record }: { record: FieldRecordDetail }) {
             const open = test && (test.status === 'SCHEDULED' || test.status === 'IN_PROGRESS');
             return (
               <TableRow key={specimen.id}>
-                <TableCell className="font-mono text-xs">{row.sampleNumber ?? '—'}</TableCell>
-                <TableCell className="font-mono text-xs">
+                <TableCell className="font-mono text-[13px]">{row.sampleNumber ?? '—'}</TableCell>
+                <TableCell className="font-mono text-[13px] font-semibold">
                   {specimen.specimenNumber ?? '—'}
                 </TableCell>
-                <TableCell className="font-mono text-xs">{specimen.moldCode ?? '—'}</TableCell>
+                <TableCell className="font-mono text-[13px]">{specimen.moldCode ?? '—'}</TableCell>
                 <TableCell>
-                  {test ? `${test.ageDays} d` : '—'}
+                  {test ? `${test.ageDays} días` : '—'}
                   {test?.keepExactDate && (
-                    <Badge variant="outline" className="ml-1">
+                    <Badge tone="outline" plain className="ml-1">
                       exacta
                     </Badge>
                   )}
                 </TableCell>
                 <TableCell>
                   {specimen.status === 'CANCELLED' ? (
-                    <Badge variant="outline">Espécimen cancelado</Badge>
+                    <Badge tone="off">Espécimen cancelado</Badge>
                   ) : test ? (
-                    <Badge variant={test.status === 'COMPLETED' ? 'success' : 'secondary'}>
-                      {STATUS_LABELS[test.status]}
+                    <Badge tone={TEST_STATUS[test.status].tone}>
+                      {TEST_STATUS[test.status].label}
                     </Badge>
                   ) : (
                     '—'
@@ -102,10 +95,15 @@ export function PlannedTestsSection({ record }: { record: FieldRecordDetail }) {
                 <TableCell className="text-right">
                   {open && (
                     <>
-                      <Button variant="ghost" size="sm" onClick={() => setEditing(row)}>
+                      <Button variant="ghost" size="xs" onClick={() => setEditing(row)}>
                         Cambiar edad
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => setCancelling(row)}>
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        className="text-st-late-fg hover:bg-st-late"
+                        onClick={() => setCancelling(row)}
+                      >
                         Cancelar
                       </Button>
                     </>
@@ -136,7 +134,7 @@ export function PlannedTestsSection({ record }: { record: FieldRecordDetail }) {
         open={cancelling !== null}
         onOpenChange={(o) => !o && setCancelling(null)}
         title={`Cancelar espécimen ${cancelling?.specimen.specimenNumber ?? ''}`}
-        description="Úsalo si el espécimen se dañó. Se cancela también su ensaye pendiente."
+        description="Úsalo si el espécimen se dañó. Se cancela también su ensayo pendiente."
         confirmLabel="Cancelar espécimen"
         cancelLabel="Volver"
         variant="destructive"
