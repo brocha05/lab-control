@@ -31,7 +31,10 @@ cd apps/backend
 cp .env.example .env
 pnpm install            # also runs `prisma generate`
 pnpm db:migrate         # apply migrations
-pnpm build && ADMIN_PASSWORD=change-me-please pnpm cli:create-tenant   --name "Laboratorio demo" --slug demo --timezone America/Mexico_City   --admin-email admin@demo.local --admin-name "Admin Demo"
+pnpm build
+ADMIN_PASSWORD=change-me-please pnpm cli:create-tenant \
+  --name "Laboratorio demo" --slug demo --timezone America/Mexico_City \
+  --admin-email admin@demo.local --admin-name "Jefe de Control de Calidad"   # role QUALITY_MANAGER
 pnpm start:dev          # GET /api/v1/health
 
 # Frontend: http://localhost:3000

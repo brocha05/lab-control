@@ -27,7 +27,7 @@ describe('GET /me (integration)', () => {
         id: a.userId,
         email: a.email,
         fullName: 'Admin lab-a',
-        role: 'ADMIN',
+        role: 'QUALITY_MANAGER',
         isActive: true,
       },
       tenant: {
@@ -63,7 +63,7 @@ describe('GET /me (integration)', () => {
 
   it('rejects an expired token and one signed with another secret', async () => {
     const { a } = await createTwoTenants(t.prisma, t.http);
-    const claims = { sub: a.userId, tenantId: a.tenantId, role: 'ADMIN' };
+    const claims = { sub: a.userId, tenantId: a.tenantId, role: 'QUALITY_MANAGER' };
     const expired = await jwt.signAsync(
       { ...claims, exp: Math.floor(Date.now() / 1000) - 60 },
       { secret: secret() },
@@ -79,7 +79,7 @@ describe('GET /me (integration)', () => {
     // because the lookup is scoped by (userId, tenantId).
     const { a, b } = await createTwoTenants(t.prisma, t.http);
     const crossed = await jwt.signAsync(
-      { sub: a.userId, tenantId: b.tenantId, role: 'ADMIN' },
+      { sub: a.userId, tenantId: b.tenantId, role: 'QUALITY_MANAGER' },
       { secret: secret(), expiresIn: 60 },
     );
     await request(t.http).get('/api/v1/me').set('Authorization', `Bearer ${crossed}`).expect(401);

@@ -22,10 +22,10 @@ describe('createTenantWithAdmin (integration)', () => {
     await truncateAll(t.prisma);
   });
 
-  it('creates the tenant and a hashed ADMIN user', async () => {
+  it('creates the tenant and its QUALITY_MANAGER with a hashed password', async () => {
     const { tenantId, adminUserId } = await createTenantWithAdmin(t.prisma, input);
     const user = await t.prisma.user.findFirstOrThrow({ where: { id: adminUserId, tenantId } });
-    expect(user.role).toBe('ADMIN');
+    expect(user.role).toBe('QUALITY_MANAGER');
     expect(user.passwordHash).not.toContain('a-long-password');
     await expect(verifyPassword('a-long-password', user.passwordHash)).resolves.toBe(true);
   });

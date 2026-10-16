@@ -39,8 +39,16 @@ export type PaginationParams = {
 
 // ─── Identity & tenancy (docs/database/schema.md) ────────────────────────────
 
-/** Placeholder roles. ASSUMPTION A-33, real roles are Q-39/Q-40. */
-export type UserRole = 'ADMIN' | 'MEMBER';
+/** The lab's roles (Q-39), mirroring the backend `UserRole` enum. */
+export type UserRole = 'QUALITY_MANAGER' | 'QMS_COORDINATOR' | 'LAB_MANAGER' | 'FIELD_CREW_CHIEF';
+
+/** Position names as the lab writes them (UI is Spanish, A-40). */
+export const ROLE_LABELS: Record<UserRole, string> = {
+  QUALITY_MANAGER: 'Jefe de Control de Calidad',
+  QMS_COORDINATOR: 'Coordinador del SGC',
+  LAB_MANAGER: 'Jefe de Laboratorio',
+  FIELD_CREW_CHIEF: 'Jefe de Brigada de Campo',
+};
 
 export interface User {
   id: string;

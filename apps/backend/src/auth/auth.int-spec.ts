@@ -26,7 +26,7 @@ describe('auth (integration)', () => {
       id: a.userId,
       email: a.email,
       fullName: 'Admin lab-a',
-      role: 'ADMIN',
+      role: 'QUALITY_MANAGER',
       isActive: true,
     });
     expect(res.body.data.user.passwordHash).toBeUndefined();

@@ -16,7 +16,7 @@ export interface TenantFixture {
 
 const PASSWORD = 'integration-password-1';
 
-/** Creates a tenant with an ADMIN user (same code path as the CLI) and logs in. */
+/** Creates a tenant with its QUALITY_MANAGER (same code path as the CLI) and logs in. */
 export async function createTenantFixture(
   prisma: PrismaService,
   http: Server,

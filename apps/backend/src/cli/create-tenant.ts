@@ -15,8 +15,9 @@ export interface CreatedTenant {
 }
 
 /**
- * Creates a laboratory (tenant) and its first ADMIN user in one transaction
- * (development-plan 2.2). Fails if the slug or the email already exists.
+ * Creates a laboratory (tenant) and its first user, the Jefe de Control de Calidad
+ * (QUALITY_MANAGER, who administers users: A-81), in one transaction. Fails if the
+ * slug or the email already exists.
  */
 export async function createTenantWithAdmin(
   prisma: PrismaClient,
@@ -32,7 +33,7 @@ export async function createTenantWithAdmin(
           email: input.admin.email,
           fullName: input.admin.fullName,
           passwordHash,
-          role: 'ADMIN',
+          role: 'QUALITY_MANAGER',
         },
       });
       return { tenantId: tenant.id, adminUserId: admin.id };

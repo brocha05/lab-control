@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ROLE_LABELS } from '@/types';
 import { useAuth } from '@/modules/auth/hooks/useAuth';
 import { formatInitials } from '@/lib/utils/formatters';
 
@@ -35,6 +36,9 @@ export function UserDropdown() {
           <div className="flex flex-col gap-0.5">
             <p className="text-sm font-medium leading-none">{user.fullName}</p>
             <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+            <p className="pt-1 text-xs leading-none text-muted-foreground">
+              {ROLE_LABELS[user.role] ?? user.role}
+            </p>
           </div>
         </DropdownMenuLabel>
 

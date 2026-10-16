@@ -25,10 +25,17 @@ datasource db {
   provider = "postgresql"
 }
 
-/// Placeholder roles. ASSUMPTION A-33 — roles seen on the forms are listed in Q-39.
+/// The lab's hierarchy (Q-39). The Auxiliar doesn't use the system.
+/// Permissions (Q-40, Q-34): docs/domain/entities.md#roles.
 enum UserRole {
-  ADMIN
-  MEMBER
+  /// Jefe de Control de Calidad: authorizes and issues reports; administers users (A-81).
+  QUALITY_MANAGER
+  /// Coordinador del SGC: captures field records and tests.
+  QMS_COORDINATOR
+  /// Jefe de Laboratorio: signs worksheets and reports.
+  LAB_MANAGER
+  /// Jefe de Brigada de Campo (muestreador).
+  FIELD_CREW_CHIEF
 }
 
 // ─── Tenant ─────────────────────────────────────────────────────────────────
@@ -67,7 +74,7 @@ model User {
   email        String   @unique
   passwordHash String   @map("password_hash")
   fullName     String   @map("full_name")
-  role         UserRole @default(MEMBER)
+  role         UserRole
   isActive     Boolean  @default(true) @map("is_active")
   // TBD: signature image, title prefix ("DCC", "Ing.") and position for report
   //      signing (Q-37, Q-39)

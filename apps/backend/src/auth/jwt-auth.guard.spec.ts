@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import type { AuthService } from './auth.service.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
 
-const principal = { userId: 'u1', tenantId: 't1', role: 'ADMIN' };
+const principal = { userId: 'u1', tenantId: 't1', role: 'QMS_COORDINATOR' };
 
 function setup(isPublic: boolean | undefined, authorization?: string) {
   const req: { headers: { authorization?: string }; user?: unknown } = {
