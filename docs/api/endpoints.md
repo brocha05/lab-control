@@ -72,16 +72,13 @@ Bodies follow FPC01-01 ([analysis](../domain/analysis/FPC01-01.md)). Column list
 
 | Method | Path | Purpose | Phase |
 |--------|------|---------|-------|
-| GET | `/projects/:id/reports` | List reports of the project's records (latest version each) | 9 |
-| GET | `/field-records/:id/reports` | List versions for one record | 9 |
-| POST | `/field-records/:id/reports` | Create a draft (`templateKey`, `isPartial?`), report-time fields prefilled from the project (Q-64). Readiness: all tests done unless partial (Q-35) | 9 |
-| PATCH | `/reports/:id` | Edit report-time fields while not `FINAL` | 9 |
-| GET | `/reports/:id` | Metadata (+ snapshot for preview) | 9 |
-| POST | `/reports/:id/regenerate` | Regenerate while not `FINAL` | 9 |
-| POST | `/reports/:id/finalize` | `GENERATED → FINAL`, `QUALITY_MANAGER` only (Q-40). Supersedes the previous FINAL version (Q-36) | 9 |
-| POST | `/field-records/:id/reports/correction` | New version with the same number, from a FINAL one (Q-36) | 9 |
-| GET | `/reports/:id/download` | Returns a short-lived signed URL | 9 |
-| GET | `/field-records/:id/reports/readiness` | Which requirements are missing | 9 |
+| GET | `/reports` | `?projectId=` → every version, newest first, with record and project | 9 ✅ |
+| GET | `/field-records/:id/reports` | `{ missing, reports }`: what blocks a full report (Q-35) + the versions, newest first | 9 ✅ |
+| POST | `/field-records/:id/reports` | New DRAFT: the first report, or a correction of the FINAL one (same number, Q-36). Report fields omitted → copied from the project's latest report (Q-64, A-96). Draft record → 422; a version in progress → 409 | 9 ✅ |
+| PATCH | `/reports/:id` | Edit report fields while not FINAL; back to DRAFT (the PDF must be regenerated). FINAL → 409 | 9 ✅ |
+| POST | `/reports/:id/generate` | Freeze the snapshot, render the PDF, store it + SHA-256 → GENERATED. Not ready → 422 with `details`; FINAL → 409 | 9 ✅ |
+| POST | `/reports/:id/finalize` | `GENERATED → FINAL`, `QUALITY_MANAGER` only (403 otherwise, Q-40). Supersedes the previous FINAL version (Q-36) | 9 ✅ |
+| GET | `/reports/:id/pdf` | The stored PDF, streamed after the tenant check (ADR-009) | 9 ✅ |
 
 ## Dashboard
 

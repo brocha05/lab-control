@@ -147,6 +147,25 @@ export class AuthService {
     return calendarDateInTimeZone(tenant.timezone, now);
   }
 
+  /** For other modules (reports): the lab's name and contact data, and its "today". */
+  async tenantProfile(tenantId: string): Promise<{
+    name: string;
+    legalName: string | null;
+    address: string | null;
+    phone: string | null;
+    today: CalendarDate;
+  }> {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
+    if (!tenant) throw new UnauthorizedException('Unknown tenant');
+    return {
+      name: tenant.name,
+      legalName: tenant.legalName,
+      address: tenant.address,
+      phone: tenant.phone,
+      today: calendarDateInTimeZone(tenant.timezone),
+    };
+  }
+
   /** Used by the JWT guard. Throws 401 for any invalid, expired or malformed token. */
   async verifyAccessToken(token: string): Promise<AuthenticatedUser> {
     let claims: AccessTokenClaims;

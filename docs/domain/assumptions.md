@@ -71,7 +71,7 @@ Status values: `OPEN` · `CONFIRMED` · `REJECTED` · `PARTIAL`
 | ID | Assumption | Why we assume it | Status | Related question |
 |----|-----------|------------------|--------|------------------|
 | A-50 | Expected scale is small: a handful of tenants, tens of users, thousands (not millions) of specimens per year. | Single-laboratory product. | CONFIRMED (questionnaire 2026-10-15, Q-50): 10–15 projects/year, 20–40 pours/month | Q-50 |
-| A-51 | Generated PDFs and attachments go in private S3-compatible storage and are served through short-lived signed URLs. | Security requirement in the brief. | OPEN | Q-30 |
+| A-51 | Generated PDFs and attachments go in private S3-compatible storage. Downloads go through the API after the tenant check (ADR-009). | Security requirement in the brief. | OPEN | Q-30 |
 | A-52 | Report generation can run synchronously in the API process at MVP scale. | See ADR-006. Revisit if generation exceeds a few seconds. | OPEN | — |
 
 ## From the first lab documents (2026-10-14)
@@ -122,3 +122,7 @@ Introduced while modelling FPC01-01, FPC01-02, FPC06-01 and FPC06-04
 | A-93 | Only completed field records appear in the Bitácora; drafts and cancelled ones don't. | A draft is still being transcribed. | OPEN | Q-100 |
 | A-94 | Unit weight in the Bitácora is rounded to 1 kg/m³. | Q-67 gave the formula, not the rounding. | OPEN | Q-67 |
 | A-95 | The Excel export follows FPC01-02: a tab per project, record/sample data in merged cells, untested specimens show their scheduled date in grey. | Q-68 (workbook with a tab per project). | OPEN | Q-91 |
+| A-96 | A new report copies the author's fields (mixing equipment, compaction, mix design, admixture) from the project's latest report; observaciones start empty. | Q-64: usually the same for the whole project. | OPEN | Q-64 |
+| A-97 | Until scanned signatures are uploaded, the PDF prints blank signature lines for the Jefe de laboratorio and the Jefe de control de calidad. | Q-37 accepts scanned signatures, but none were provided yet. | OPEN | Q-101 |
+| A-98 | Only full reports (every specimen tested) are generated; partial reports wait for the numbering answer. | Q-82 is open. | OPEN | Q-82 |
+| A-99 | "Fecha de informe" is the day the PDF is generated, in the lab's timezone. | FPC06-04 shows the issue date. | OPEN | Q-102 |

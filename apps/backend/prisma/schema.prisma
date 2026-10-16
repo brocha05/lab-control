@@ -70,6 +70,7 @@ model Tenant {
   samples                   Sample[]
   specimens                 Specimen[]
   specimenTests             SpecimenTest[]
+  reports                   Report[]
 
   @@map("tenants")
 }
@@ -397,6 +398,7 @@ model FieldRecord {
   supplier   ConcreteSupplier? @relation(fields: [supplierId, tenantId], references: [id, tenantId])
   cementType CementType?       @relation(fields: [cementTypeId, tenantId], references: [id, tenantId])
   deliveries Delivery[]
+  reports    Report[]
 
   @@unique([id, tenantId])
   @@unique([projectId, registrySequence])
@@ -576,4 +578,67 @@ model SpecimenTest {
   @@index([tenantId, specimenId])
   @@index([tenantId, testDate])
   @@map("specimen_tests")
+}
+
+// ─── Report (FPC06-04 "Informe de pruebas de control de concreto hidráulico";
+//     historical artifact — ADR-005) ───────────────────────────────────────
+// One report per field record, one page per sample, a second page above 6
+// specimens (Q-71). Issued by the Jefe de Control de Calidad only (Q-40); signed by
+// the Jefe de Laboratorio and the Jefe de Control de Calidad, at least one of them a
+// Technical Signatory (Q-37).
+
+model Report {
+  id              String       @id @default(uuid()) @db.Uuid
+  tenantId        String       @map("tenant_id") @db.Uuid
+  fieldRecordId   String       @map("field_record_id") @db.Uuid
+  /// e.g. "concrete-control" (FPC06-04, "CTO-REC" in the number). Selects assembler + template.
+  templateKey     String       @map("template_key")
+  templateVersion String?      @map("template_version")
+  /// Incrementing per (field record, templateKey). A correction = new version with
+  /// the same report number (Q-36, Q-51).
+  version         Int
+  status          ReportStatus @default(DRAFT)
+  /// "No. informe": {client code}-{project code}-F{front}-CTO-REC-{registro, 3 digits},
+  /// e.g. "MAR-PVLT-F1-CTO-REC-068" (Q-56). Same for every version.
+  reportNumber    String?      @map("report_number")
+  /// Issued before every specimen was tested, at the client's request (Q-35).
+  isPartial       Boolean      @default(false) @map("is_partial")
+
+  // Entered by the report author at report time; prefilled from the project
+  // defaults (Q-64).
+  mixingEquipment    String? @map("mixing_equipment")
+  compactionMethod   String? @map("compaction_method")
+  mixDesignReference String? @map("mix_design_reference")
+  admixture          String?
+  observations       String?
+
+  /// Frozen view model used to render the PDF (incl. "Fecha de informe").
+  /// Never edited after FINAL.
+  snapshot              Json?
+  snapshotSchemaVersion Int?      @map("snapshot_schema_version")
+  /// Object-storage key of the PDF (private bucket).
+  storageKey            String?   @map("storage_key")
+  contentSha256         String?   @map("content_sha256")
+  generatedAt           DateTime? @map("generated_at") @db.Timestamptz
+  generatedById         String?   @map("generated_by_id") @db.Uuid
+  finalizedAt           DateTime? @map("finalized_at") @db.Timestamptz
+  finalizedById         String?   @map("finalized_by_id") @db.Uuid
+  /// Set on a FINAL version when a corrected version is finalized (recalled, Q-36).
+  supersededAt          DateTime? @map("superseded_at") @db.Timestamptz
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  fieldRecord FieldRecord @relation(fields: [fieldRecordId, tenantId], references: [id, tenantId])
+
+  @@unique([tenantId, fieldRecordId, templateKey, version])
+  @@index([tenantId, status])
+  @@index([tenantId, reportNumber])
+  @@map("reports")
+}
+
+enum ReportStatus {
+  DRAFT
+  GENERATED
+  FINAL
 }

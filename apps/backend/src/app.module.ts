@@ -7,6 +7,7 @@ import { CatalogsModule } from './catalogs/catalogs.module.js';
 import { ClientsModule } from './clients/clients.module.js';
 import { FieldRecordsModule } from './field-records/field-records.module.js';
 import { ProjectsModule } from './projects/projects.module.js';
+import { ReportsModule } from './reports/reports.module.js';
 import { SpecimenTestsModule } from './specimen-tests/specimen-tests.module.js';
 import { HealthController } from './health/health.controller.js';
 import { Env, validateEnv } from './shared/config/env.validation.js';
@@ -44,6 +45,7 @@ import { PrismaModule } from './shared/prisma/prisma.module.js';
     FieldRecordsModule,
     SpecimenTestsModule,
     BitacoraModule,
+    ReportsModule,
   ],
   controllers: [HealthController],
 })

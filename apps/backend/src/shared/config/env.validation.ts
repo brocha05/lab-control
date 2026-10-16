@@ -10,7 +10,22 @@ export interface Env {
   JWT_ACCESS_SECRET: string;
   JWT_ACCESS_TTL_SECONDS: number;
   REFRESH_TOKEN_TTL_DAYS: number;
+  /** Where report PDFs go: a local folder (development, tests) or S3/MinIO (ADR-005). */
+  REPORT_STORAGE_DRIVER: 'local' | 's3';
+  REPORT_STORAGE_DIR: string;
+  S3_ENDPOINT: string | undefined;
+  S3_REGION: string;
+  S3_BUCKET: string | undefined;
+  S3_ACCESS_KEY_ID: string | undefined;
+  S3_SECRET_ACCESS_KEY: string | undefined;
+  /** HTML → PDF (ADR-006): headless Chromium, or a stub for tests without a browser. */
+  PDF_RENDERER: 'playwright' | 'stub';
+  /** Optional Chromium executable (e.g. a system Chrome); default: Playwright's own. */
+  PDF_CHROMIUM_PATH: string | undefined;
 }
+
+const opt = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
 
 const MIN_SECRET_LENGTH = 32;
 
@@ -56,6 +71,23 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     errors.push('REFRESH_TOKEN_TTL_DAYS must be a positive integer');
   }
 
+  const storage = str(raw.REPORT_STORAGE_DRIVER, 'local');
+  if (storage !== 'local' && storage !== 's3') {
+    errors.push('REPORT_STORAGE_DRIVER must be local or s3');
+  }
+  if (
+    storage === 's3' &&
+    (!opt(raw.S3_BUCKET) || !opt(raw.S3_ACCESS_KEY_ID) || !opt(raw.S3_SECRET_ACCESS_KEY))
+  ) {
+    errors.push(
+      'REPORT_STORAGE_DRIVER=s3 needs S3_BUCKET, S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY',
+    );
+  }
+  const renderer = str(raw.PDF_RENDERER, 'playwright');
+  if (renderer !== 'playwright' && renderer !== 'stub') {
+    errors.push('PDF_RENDERER must be playwright or stub');
+  }
+
   if (errors.length > 0) {
     throw new Error(`Invalid environment configuration:\n- ${errors.join('\n- ')}`);
   }
@@ -69,5 +101,14 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     JWT_ACCESS_SECRET: jwtSecret as string,
     JWT_ACCESS_TTL_SECONDS: accessTtl,
     REFRESH_TOKEN_TTL_DAYS: refreshTtl,
+    REPORT_STORAGE_DRIVER: storage as Env['REPORT_STORAGE_DRIVER'],
+    REPORT_STORAGE_DIR: str(raw.REPORT_STORAGE_DIR, 'storage/reports'),
+    S3_ENDPOINT: opt(raw.S3_ENDPOINT),
+    S3_REGION: str(raw.S3_REGION, 'us-east-1'),
+    S3_BUCKET: opt(raw.S3_BUCKET),
+    S3_ACCESS_KEY_ID: opt(raw.S3_ACCESS_KEY_ID),
+    S3_SECRET_ACCESS_KEY: opt(raw.S3_SECRET_ACCESS_KEY),
+    PDF_RENDERER: renderer as Env['PDF_RENDERER'],
+    PDF_CHROMIUM_PATH: opt(raw.PDF_CHROMIUM_PATH),
   };
 }

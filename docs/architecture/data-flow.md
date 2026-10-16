@@ -29,7 +29,7 @@
                                                      → upload to private storage
                                                      → status GENERATED
                                                      POST /reports/:id/finalize → FINAL
-                                                     GET /reports/:id/download → signed URL
+                                                     GET /reports/:id/pdf → streamed (ADR-009)
 ```
 
 ## 2. How test planning works (domain logic, no domain content)

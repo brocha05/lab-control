@@ -24,7 +24,7 @@ one (shared database, `tenant_id` column).
     └── shared                              prisma, tenancy, dates, errors, config, logging
     │
     ├──▶ PostgreSQL       (all source-of-truth data + report snapshots)
-    ├──▶ Object storage   (PDFs; private; signed URLs)
+    ├──▶ Object storage   (PDFs; private; served through the API, ADR-009)
     └──▶ (optional, later) queue → worker   (only if PDF generation gets slow)
 ```
 
@@ -85,8 +85,8 @@ tables.
   from the existing boilerplate.
 - **Authorization:** role guard (roles TBD, Q-39/Q-40) + **tenant scoping** on every
   query ([multi-tenancy.md](multi-tenancy.md)).
-- **Files:** private bucket. Downloads only through short-lived pre-signed URLs issued
-  after a tenant-scoped lookup of the `Report` row.
+- **Files:** private bucket. Downloads are streamed by the API after a tenant-scoped
+  lookup of the `Report` row (ADR-009).
 - **Secrets:** environment variables or a secret manager only.
 - **Audit:** from Phase 2, tenant-owned tables have `created_at`, `updated_at`, and
   (where meaningful) `created_by_id`. A proper `audit_events` table (who, what entity,

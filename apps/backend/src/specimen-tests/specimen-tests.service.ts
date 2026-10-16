@@ -17,7 +17,12 @@ import {
   InvalidCalendarDateError,
   parseCalendarDate,
 } from '../shared/dates/calendar-date.js';
-import { parseTimeOfDay, timeOfDayFromDb, timeOfDayToDb } from '../shared/dates/time-of-day.js';
+import {
+  parseTimeOfDay,
+  TimeOfDay,
+  timeOfDayFromDb,
+  timeOfDayToDb,
+} from '../shared/dates/time-of-day.js';
 import { PrismaService } from '../shared/prisma/prisma.service.js';
 import { computeCompression } from './domain/compression.js';
 import { assignSpecimensToAges, type TestAgeRule } from './domain/test-schedule.js';
@@ -46,6 +51,20 @@ export interface SpecimenTestBrief {
   /** Derived from the readings once completed (ADR-008). */
   stressKgCm2: number | null;
   percentOfDesign: number | null;
+}
+
+export interface SpecimenTestReadings {
+  specimenId: string;
+  status: SpecimenTestStatus;
+  ageDays: number;
+  testDate: CalendarDate | null;
+  testTime: TimeOfDay | null;
+  height1Cm: number | null;
+  height2Cm: number | null;
+  diameter1Cm: number | null;
+  diameter2Cm: number | null;
+  maxLoadKgf: number | null;
+  failureType: number | null;
 }
 
 const BRIEF_SELECT = {
@@ -448,6 +467,31 @@ export class SpecimenTestsService {
       data: { status: 'CANCELLED' },
     });
     return true;
+  }
+
+  /** For the reports module: the current test of each specimen with its readings. */
+  async readingsForSpecimens(
+    tenantId: string,
+    specimenIds: readonly string[],
+  ): Promise<SpecimenTestReadings[]> {
+    if (specimenIds.length === 0) return [];
+    const rows = await this.prisma.specimenTest.findMany({
+      where: { tenantId, specimenId: { in: [...specimenIds] }, status: { not: 'CANCELLED' } },
+      orderBy: { createdAt: 'asc' },
+    });
+    return rows.map((r) => ({
+      specimenId: r.specimenId,
+      status: r.status,
+      ageDays: r.ageDays,
+      testDate: r.testDate ? calendarDateFromDb(r.testDate) : null,
+      testTime: r.testTime ? timeOfDayFromDb(r.testTime) : null,
+      height1Cm: num(r.height1Cm),
+      height2Cm: num(r.height2Cm),
+      diameter1Cm: num(r.diameter1Cm),
+      diameter2Cm: num(r.diameter2Cm),
+      maxLoadKgf: num(r.maxLoadKgf),
+      failureType: r.failureType,
+    }));
   }
 
   /**

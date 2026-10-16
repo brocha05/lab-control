@@ -14,7 +14,23 @@ describe('validateEnv', () => {
       JWT_ACCESS_SECRET: SECRET,
       JWT_ACCESS_TTL_SECONDS: 900,
       REFRESH_TOKEN_TTL_DAYS: 7,
+      REPORT_STORAGE_DRIVER: 'local',
+      REPORT_STORAGE_DIR: 'storage/reports',
+      S3_ENDPOINT: undefined,
+      S3_REGION: 'us-east-1',
+      S3_BUCKET: undefined,
+      S3_ACCESS_KEY_ID: undefined,
+      S3_SECRET_ACCESS_KEY: undefined,
+      PDF_RENDERER: 'playwright',
+      PDF_CHROMIUM_PATH: undefined,
     });
+  });
+
+  it('requires the S3 settings when storing reports in S3', () => {
+    expect(() => validateEnv({ ...required, REPORT_STORAGE_DRIVER: 's3' })).toThrow(
+      /S3_BUCKET, S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY/,
+    );
+    expect(() => validateEnv({ ...required, PDF_RENDERER: 'wkhtml' })).toThrow(/PDF_RENDERER/);
   });
 
   it('parses PORT from a string', () => {

@@ -164,3 +164,5 @@ Sources and context: [analysis/](analysis/README.md).
 | Q-98 | P2 | Is the failure type required for every specimen, or only when observed? | | | A-89 |
 | Q-99 | P2 | Should the system keep the sheet's observaciones and the names of who signed it, or is paper enough? | | | Printable worksheet (A-91) |
 | Q-100 | P2 | Do cancelled specimens and cancelled or draft records appear in the Bitácora (e.g. marked as cancelled)? | | | Bitácora rows (A-92, A-93) |
+| Q-101 | P1 | Please send the scanned signatures of the Jefe de laboratorio and the Jefe de control de calidad, and tell us which staff are Technical Signatories (ema). | | | Report signatures (A-97) |
+| Q-102 | P2 | Is "Fecha de informe" the day the report is generated or the day it is issued (finalized)? | | | Snapshot issue date (A-99) |

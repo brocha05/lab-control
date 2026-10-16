@@ -39,3 +39,6 @@ apps/frontend/AGENTS.md
 
 # Answered lab questionnaire (client/staff data). Lives outside git; summary in docs/domain/analysis/
 docs/*.docx
+
+# Local report PDFs (REPORT_STORAGE_DRIVER=local)
+apps/backend/storage/
