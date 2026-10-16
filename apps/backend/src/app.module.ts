@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { AuditModule } from './audit/audit.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { DashboardModule } from './dashboard/dashboard.module.js';
 import { BitacoraModule } from './bitacora/bitacora.module.js';
 import { CatalogsModule } from './catalogs/catalogs.module.js';
 import { ClientsModule } from './clients/clients.module.js';
@@ -48,6 +49,7 @@ import { PrismaModule } from './shared/prisma/prisma.module.js';
     BitacoraModule,
     ReportsModule,
     AuditModule,
+    DashboardModule,
   ],
   controllers: [HealthController],
 })

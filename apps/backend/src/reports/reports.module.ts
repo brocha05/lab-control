@@ -40,5 +40,6 @@ import { createReportStorage, ReportStorage } from './storage/report-storage.js'
         }),
     },
   ],
+  exports: [ReportsService],
 })
 export class ReportsModule {}

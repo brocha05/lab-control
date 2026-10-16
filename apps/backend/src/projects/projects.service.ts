@@ -151,6 +151,11 @@ export class ProjectsService {
     if (found !== 1) throw new NotFoundException('Project not found');
   }
 
+  /** For the dashboard (8.4). */
+  count(tenantId: string): Promise<number> {
+    return this.prisma.project.count({ where: { tenantId } });
+  }
+
   /** For other modules (Bitácora export): every project id of the tenant, by name. */
   async listIds(tenantId: string): Promise<string[]> {
     const rows = await this.prisma.project.findMany({

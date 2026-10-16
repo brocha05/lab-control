@@ -107,7 +107,7 @@ one row: author, route (`action`), resource (`entityType`), `entityId`, status, 
 
 | Method | Path | Purpose | Phase |
 |--------|------|---------|-------|
-| GET | `/dashboard/summary` | Counts: due today, overdue, drafts, reports pending. Derived only. | 8+ |
+| GET | `/dashboard/summary` | `{ today, until, clients, projects, tests: { overdue, dueToday, upcoming, byProject[] }, draftFieldRecords, pendingReports }`. Upcoming = the 7 days after today; pending reports = versions not FINAL. Derived only, every role | 8.4 ✅ |
 
 ## Ops
 

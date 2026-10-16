@@ -114,6 +114,11 @@ export class FieldRecordsService {
     return paginated(rows.map(toSummary), total, query);
   }
 
+  /** For the dashboard (8.4): records still being captured. */
+  countDrafts(tenantId: string): Promise<number> {
+    return this.prisma.fieldRecord.count({ where: { tenantId, status: 'DRAFT' } });
+  }
+
   async get(tenantId: string, id: string): Promise<FieldRecordDetail> {
     const record = await this.prisma.fieldRecord.findFirst({
       where: { id, tenantId },

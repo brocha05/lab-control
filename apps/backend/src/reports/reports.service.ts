@@ -138,6 +138,11 @@ export class ReportsService {
     return rows.map(toView);
   }
 
+  /** For the dashboard (8.4): versions not yet issued (DRAFT or GENERATED). */
+  countPending(tenantId: string): Promise<number> {
+    return this.prisma.report.count({ where: { tenantId, status: { not: 'FINAL' } } });
+  }
+
   async forRecord(tenantId: string, fieldRecordId: string): Promise<RecordReports> {
     const input = await this.loadInput(tenantId, fieldRecordId, emptyFields());
     const rows = await this.prisma.report.findMany({

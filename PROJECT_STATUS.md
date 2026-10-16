@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-10-15 (lab questionnaire answered)
+Last updated: 2026-10-16 (dashboard summary, 8.4)
 
 | Phase | State |
 |-------|-------|
@@ -11,7 +11,7 @@ Last updated: 2026-10-15 (lab questionnaire answered)
 | 4, 5 Field records, samples, specimens | ✅ Done: catalogs + holidays, migration, API (create, nested save, complete/cancel, cancel specimen), transcription screen. Front numbering (Q-79) open |
 | 6 Test scheduling | ✅ Done (2026-10-16): project default ages, tests planned on completion, pending list with Sunday/holiday shift, per-test age changes, screens |
 | 7 Test results | ✅ Done (2026-10-16): FPC06-01 worksheet per project and date, results saved per sheet and derived on read (ADR-008), printable sheet. Test time, corrections and scope assumed (A-83 … A-91) |
-| 8 Bitácora | ✅ Done (2026-10-16): per-project read model, screen, print, Excel export (a tab per project). Historical import waits for the file (Q-85); dashboard counts (8.4) pending |
+| 8 Bitácora | ✅ Done (2026-10-16): per-project read model, screen, print, Excel export (a tab per project). Dashboard counts endpoint (8.4). Historical import (8.5) left out of the MVP |
 | 9 Reports | ✅ Done (2026-10-16): FPC06-04 PDF per record, frozen snapshot + SHA-256, versions with the same number, issue by the Jefe de Control de Calidad. Open: scanned signatures (Q-101), partial reports (Q-82) |
 | 10 Hardening | ✅ Done (2026-10-16): permissions per role + staff accounts, audit trail (ADR-010) with history screens, security headers, sign-in rate limit, exhaustive cross-tenant suite, no RLS for now (ADR-011) |
 
@@ -58,8 +58,8 @@ historical Excel (Q-85), age printed after a Sunday shift (Q-86).
 ## Next
 
 1. Ask the lab for Q-79 … Q-103 (section 9 of the questionnaire); adjust the permission matrix and assumptions.
-2. Signatures on the report once the lab sends them (Q-101); 8.4 dashboard counts; 8.5 import when the historical Excel arrives.
-3. Ask the lab for Q-79 … Q-99 (section 9 of the questionnaire) and the historical Excel.
+2. Signatures on the report once the lab sends them (Q-101).
+3. Phase 11 (production) once hosting is decided. After the MVP: 8.5 historical import (Q-85).
 
 ## Notes
 

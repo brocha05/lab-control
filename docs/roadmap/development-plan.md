@@ -86,8 +86,8 @@ cross-tenant test.
 - [x] 8.1 ✅ `bitacora` module (`GET /projects/:id/bitacora?from&to`, completed records only A-93, cancelled specimens left out A-92): tenant-scoped composed query **per project** (one tab per project, Q-68), one row per specimen with the FPC01-02 columns; slump shows both readings (Q-66)
 - [x] 8.2 ✅ Frontend: Bitácora per project (sidebar page + project tab): merged cells like FPC01-02, summary, search and pour-date filter, print view, Excel buttons (one project / all)
 - [x] 8.3 ✅ Excel export `GET /bitacora/export?projectId=` (exceljs; a tab per project, FPC01-02 columns, merged cells; A-95, Q-91)
-- [ ] 8.5 Import the historical Excel (July 2025 → 2026, Q-53) once the file arrives (Q-85)
-- [ ] 8.4 Dashboard summary counts
+- [x] 8.4 ✅ `GET /dashboard/summary` (module `dashboard`, no table): clients, projects, overdue / today / next-7-days tests (per project too), draft records, report versions not issued; the dashboard reads its counts from it
+- [ ] 8.5 ⏸ Out of the MVP (decided 2026-10-16): import the historical Excel (July 2025 → 2026, Q-53) once the file arrives (Q-85)
 
 ## Phase 9 — PDF reports ✅ (🔒 partial reports: Q-82)
 

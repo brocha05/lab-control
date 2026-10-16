@@ -45,6 +45,11 @@ export class ClientsService {
     return paginated(rows.map(toView), total, query);
   }
 
+  /** For the dashboard (8.4). */
+  count(tenantId: string): Promise<number> {
+    return this.prisma.client.count({ where: { tenantId } });
+  }
+
   async get(tenantId: string, id: string): Promise<ClientView> {
     const client = await this.prisma.client.findFirst({ where: { id, tenantId } });
     if (!client) throw new NotFoundException('Client not found');

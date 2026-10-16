@@ -19,34 +19,29 @@ import { useBreadcrumbs } from '@/lib/hooks/useBreadcrumbs';
 import { useToday } from '@/lib/hooks/useToday';
 import { DUE_STATUS } from '@/lib/status';
 import { addDays, formatDateLong, formatDateWithWeekday } from '@/lib/utils/formatters';
-import { useClients } from '@/modules/clients/hooks/useClients';
 import { useProjects } from '@/modules/projects/hooks/useProjects';
 import { usePendingTests } from '@/modules/specimen-tests/hooks/useSpecimenTests';
 import { useUiStore } from '@/store/uiStore';
-import { MAX_PAGE_SIZE } from '@/types';
+import { useDashboardSummary } from '../hooks/useDashboardSummary';
 import { Can } from '@/components/shared/Can';
 
-/**
- * Counts from the list endpoints. A dedicated GET /dashboard/summary can replace them
- * later (development-plan 8.4).
- */
+/** Counts from GET /dashboard/summary (8.4); the tables show the first rows of each list. */
 export function DashboardPage() {
   useBreadcrumbs([{ label: 'Dashboard' }]);
   const router = useRouter();
   const setNewRecordOpen = useUiStore((s) => s.setNewRecordOpen);
   const today = useToday();
-  const clients = useClients({ page: 1, limit: 1 });
-  const projects = useProjects({ page: 1, limit: MAX_PAGE_SIZE });
+  const summary = useDashboardSummary();
+  const projects = useProjects({ page: 1, limit: 6 });
   const tests = usePendingTests({ until: addDays(today, 7) });
 
   const all = tests.data ?? [];
-  const late = all.filter((t) => t.dueStatus === 'OVERDUE').length;
-  const dueToday = all.filter((t) => t.dueStatus === 'DUE_TODAY').length;
-  const upcoming = all.length - late - dueToday;
-  const pendingByProject = new Map<string, number>();
-  for (const t of all) {
-    pendingByProject.set(t.project.id, (pendingByProject.get(t.project.id) ?? 0) + 1);
-  }
+  const s = summary.data;
+  const late = s?.tests.overdue ?? 0;
+  const dueToday = s?.tests.dueToday ?? 0;
+  const drafts = s?.draftFieldRecords ?? 0;
+  const pendingReports = s?.pendingReports ?? 0;
+  const pendingByProject = new Map(s?.tests.byProject.map((p) => [p.projectId, p.count]));
 
   return (
     <div className="flex flex-col gap-6">
@@ -62,7 +57,7 @@ export function DashboardPage() {
         </Can>
       </PageHeader>
 
-      {late + dueToday > 0 && (
+      {late + dueToday + drafts + pendingReports > 0 && (
         <div className="flex flex-wrap items-center gap-x-5 gap-y-3 rounded-lg border bg-card px-4 py-3">
           <div className="flex items-center gap-2.5 text-sm font-semibold">
             <AlertTriangle className="h-[18px] w-[18px] text-st-late-dot" strokeWidth={1.8} />
@@ -75,6 +70,24 @@ export function DashboardPage() {
           <Link href="/tests/pending" className="whitespace-nowrap text-sm text-st-today-fg">
             <span className="font-mono font-medium">{dueToday}</span> ensayos programados para hoy
           </Link>
+          {drafts > 0 && (
+            <>
+              <span className="h-4 w-px bg-border" />
+              <span className="whitespace-nowrap text-sm text-sidebar-foreground">
+                <span className="font-mono font-medium">{drafts}</span>{' '}
+                {drafts === 1 ? 'registro en borrador' : 'registros en borrador'}
+              </span>
+            </>
+          )}
+          {pendingReports > 0 && (
+            <>
+              <span className="h-4 w-px bg-border" />
+              <Link href="/reports" className="whitespace-nowrap text-sm text-sidebar-foreground">
+                <span className="font-mono font-medium">{pendingReports}</span>{' '}
+                {pendingReports === 1 ? 'informe por emitir' : 'informes por emitir'}
+              </Link>
+            </>
+          )}
           <Link
             href="/tests/pending"
             className="ml-auto whitespace-nowrap text-[13px] font-medium text-primary"
@@ -85,12 +98,12 @@ export function DashboardPage() {
       )}
 
       <MetricStrip
-        isLoading={tests.isLoading || projects.isLoading}
+        isLoading={summary.isLoading}
         metrics={[
           {
             label: 'Proyectos',
-            value: projects.data?.total ?? 0,
-            sub: `de ${clients.data?.total ?? 0} ${clients.data?.total === 1 ? 'cliente' : 'clientes'}`,
+            value: s?.projects ?? 0,
+            sub: `de ${s?.clients ?? 0} ${s?.clients === 1 ? 'cliente' : 'clientes'}`,
             href: '/projects',
           },
           { label: 'Ensayos atrasados', value: late, sub: 'fecha vencida', href: '/tests/pending' },
@@ -100,7 +113,12 @@ export function DashboardPage() {
             sub: formatDateLong(today),
             href: '/tests/pending',
           },
-          { label: 'Próximos 7 días', value: upcoming, sub: 'programados', href: '/tests/pending' },
+          {
+            label: 'Próximos 7 días',
+            value: s?.tests.upcoming ?? 0,
+            sub: 'programados',
+            href: '/tests/pending',
+          },
         ]}
       />
 
@@ -190,7 +208,7 @@ export function DashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {projects.data?.items.slice(0, 6).map((p) => (
+              {projects.data?.items.map((p) => (
                 <TableRow
                   key={p.id}
                   className="cursor-pointer"
