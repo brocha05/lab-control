@@ -13,7 +13,7 @@ Last updated: 2026-10-15 (lab questionnaire answered)
 | 7 Test results | ✅ Done (2026-10-16): FPC06-01 worksheet per project and date, results saved per sheet and derived on read (ADR-008), printable sheet. Test time, corrections and scope assumed (A-83 … A-91) |
 | 8 Bitácora | ✅ Done (2026-10-16): per-project read model, screen, print, Excel export (a tab per project). Historical import waits for the file (Q-85); dashboard counts (8.4) pending |
 | 9 Reports | ✅ Done (2026-10-16): FPC06-04 PDF per record, frozen snapshot + SHA-256, versions with the same number, issue by the Jefe de Control de Calidad. Open: scanned signatures (Q-101), partial reports (Q-82) |
-| 10 Hardening | ✅ Mostly done (2026-10-16): permissions per role + staff accounts, audit trail (ADR-010) with history screens, security headers, sign-in rate limit. Pending: exhaustive cross-tenant suite (10.3), RLS decision (10.4) |
+| 10 Hardening | ✅ Done (2026-10-16): permissions per role + staff accounts, audit trail (ADR-010) with history screens, security headers, sign-in rate limit, exhaustive cross-tenant suite, no RLS for now (ADR-011) |
 
 ## Known
 

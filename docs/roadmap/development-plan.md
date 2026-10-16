@@ -98,12 +98,12 @@ cross-tenant test.
 - [x] 9.5 ✅ `concrete-control` HTML/CSS template (Handlebars) matching FPC06-04. Open: scanned signatures and Technical Signatory per user (Q-37, Q-101, A-97); logos (Q-52)
 - [x] 9.6 ✅ Frontend: report section on the completed record (readiness, versions, report fields, generate, view PDF, issue only for the Jefe de Control de Calidad, correction), "Informes" page and project tab
 
-## Phase 10 — Hardening
+## Phase 10 — Hardening ✅
 
 - [x] 10.1 ✅ Permissions per role (`PermissionsGuard`, matrix in [entities.md](../domain/entities.md#roles), A-100/A-101) and user management (A-81, Q-83)
 - [x] 10.2 ✅ `audit_events` (ADR-010): one row per successful change through the API (author, route, entity, body with passwords redacted), `GET /audit-events` for `audit.read`
-- [ ] 10.3 Exhaustive cross-tenant test suite (every endpoint)
-- [ ] 10.4 RLS spike + ADR (enable or not)
+- [x] 10.3 ✅ `src/testing/cross-tenant.int-spec.ts`: every route with an id, called with another lab's ids → 404; filtered lists → empty
+- [x] 10.4 ✅ ADR-011: no RLS for now (single app role, composite keys, exhaustive suite); revisit with a second lab or direct DB access
 - [x] 10.5 ✅ helmet security headers, sign-in rate limit (10/min per IP), `pnpm audit --prod` clean
 
 ## Phase 11 — Production
