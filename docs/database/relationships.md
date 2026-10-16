@@ -11,7 +11,12 @@ erDiagram
     TENANT ||--o{ USER : has
     TENANT ||--o{ CLIENT : has
     CLIENT ||--o{ PROJECT : "owns (A-02)"
-    PROJECT ||--o{ PROJECT_TEST_CONFIGURATION : "configures ages (A-10)"
+    PROJECT ||--o{ PROJECT_TEST_CONFIGURATION : "default ages (Q-20)"
+    TENANT ||--o{ HOLIDAY : "moves test dates (Q-21)"
+    CONCRETE_SUPPLIER ||--o{ FIELD_RECORD : "supplies (Q-06)"
+    CEMENT_TYPE ||--o{ FIELD_RECORD : "specified (Q-06)"
+    PROJECT ||--o{ SAMPLE : "numbers (Q-57)"
+    PROJECT ||--o{ SPECIMEN : "numbers (Q-58)"
     PROJECT ||--o{ FIELD_RECORD : "has (A-03)"
     FIELD_RECORD ||--o{ DELIVERY : "receives (A-60)"
     DELIVERY ||--o{ SAMPLE : "is sampled (A-61)"
@@ -29,12 +34,13 @@ erDiagram
         uuid id PK
         uuid tenant_id FK
         text email UK
-        enum role "placeholder"
+        enum role "Q-39"
     }
     CLIENT {
         uuid id PK
         uuid tenant_id FK
         text name
+        text code "MAR"
         text contact_name
     }
     PROJECT {
@@ -42,6 +48,7 @@ erDiagram
         uuid tenant_id FK
         uuid client_id FK
         text name
+        text code "PVLT"
         text location
     }
     PROJECT_TEST_CONFIGURATION {
@@ -56,7 +63,8 @@ erDiagram
         uuid tenant_id FK
         uuid project_id FK
         enum status
-        text registry_number "MCH-068"
+        int registry_sequence "MCH-068"
+        int front_number "F1"
         date pour_date "age reference"
         numeric specified_strength_kg_cm2
         text cast_element
@@ -142,9 +150,10 @@ fails at the database level.
 
 | Relation | Current | Possible after validation | Question |
 |----------|---------|---------------------------|----------|
-| Project → Client | N:1 | N:M (owner + contractor + supervisor?) | Q-41 (only one party printed) |
-| FieldRecord → Delivery | 1:N | — (4 in the example) | Q-77 |
+| Project → Client | N:1 | — (confirmed, Q-41) | — |
+| FieldRecord → Delivery | 1:N | — (7 per sheet, several sheets, Q-71/Q-77) | — |
 | Delivery → Sample | 1:N | 1:1 | Q-71 |
-| Specimen → SpecimenTest | 1:N | 1:1 (each specimen tested once on the forms) | Q-16 |
-| Report → FieldRecord | N:1 | Report → Sample | Q-71 |
-| Test ages | per project | per record ("edad definitiva") / lab default | Q-20, Q-74 |
+| Specimen → SpecimenTest | 1:N | 1:1 (each specimen tested once, Q-16) | — |
+| Report → FieldRecord | N:1 | — (confirmed: one page per sample, Q-71) | — |
+| Test ages | project default + per-test edit | — (Q-20, Q-22) | — |
+| Registro numbering | per project | per front | Q-79 |

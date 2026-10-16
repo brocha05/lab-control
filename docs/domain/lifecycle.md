@@ -1,7 +1,8 @@
 # Lifecycles
 
-> All states are **preliminary** ([A-20] … [A-24]). Each must be validated against the
-> real business process (Q-33 … Q-37).
+> States from [A-20] … [A-24], checked against the lab's answers of 2026-10-15
+> (Q-22, Q-33, Q-34, Q-35, Q-36, Q-73). Roles are in
+> [entities.md](entities.md#roles).
 
 Principle: when a business fact matters ("this test is done"), store it as an
 **explicit state**. Don't infer it from incidental data (`if (test.result != null)`).
@@ -10,9 +11,10 @@ through generic `update({ status })` calls.
 
 Each module keeps its transition rules in one pure function (e.g.
 `assertFieldRecordTransition(from, to)`), unit-tested, and called by the service before
-writing.
+writing. Every state change and every correction is written to the audit trail, which
+the accreditation requires (Q-54).
 
-## FieldRecord [A-20]
+## FieldRecord
 
 ```
           complete()             (terminal)
@@ -23,20 +25,20 @@ writing.
  CANCELLED (terminal)
 ```
 
-| Transition | Guard | Status |
-|-----------|-------|--------|
-| DRAFT → COMPLETED | Record is "complete" | **BLOCKED** on Q-33 |
-| DRAFT → CANCELLED | Reason required? | Q-34 |
-| COMPLETED → anything | Can a completed record be reopened or corrected? | Q-34 |
+The record is filled on paper on site and transcribed later (Q-49). On paper it is
+finished when it is signed ("visto bueno", usually by the client) and its unused spaces
+are cancelled (Q-33, Q-73). In the system, `complete()` means "the signed paper is fully
+transcribed".
 
-Open: whether specimens/tests are created on completion, or as soon as specimens are
-registered in DRAFT. Current proposal: tests are **planned on completion**, so drafts
-don't pollute the pending-tests list.
+| Transition | Guard |
+|-----------|-------|
+| DRAFT → COMPLETED | Every field filled in on the lab's example is present (Q-33): header, specified values, conditions, equipment used, each delivery's row, specimen references, elements, sampler, visto bueno. Humidity, unit weight, air content and the sketch stay optional |
+| DRAFT → CANCELLED | Allowed |
+| COMPLETED → (edit) | Corrections allowed (e.g. typos), only for `QMS_COORDINATOR` and `QUALITY_MANAGER`, always audited (Q-34). No state change |
 
-FPC01-01 carries two signatures (Muestreador, Visto bueno) but no state. Whether
-"Visto bueno" is the completion step is Q-73. Deliveries, samples and specimens are
-edited as part of the record while it is `DRAFT`. They have no lifecycle of their own,
-except a Specimen's cancellation.
+Tests are **planned on completion** with the project's default ages (Q-20), so drafts
+don't fill the pending-tests list. Deliveries, samples and specimens are edited as part
+of the record. They have no lifecycle of their own, except a Specimen's cancellation.
 
 ## Specimen [A-21]
 
@@ -49,13 +51,8 @@ Derived (not stored):
 | scheduled | ≥1 test in `SCHEDULED` / `IN_PROGRESS` |
 | tested | all non-cancelled tests are `COMPLETED` |
 
-**Why it's derived:** the brief suggested `CREATED → SCHEDULED → TESTED → CANCELLED`.
-But "scheduled" and "tested" are facts about the specimen's *tests*. Storing them on
-the specimen too would create two sources of truth that can disagree. If Q-16 shows
-Specimen ↔ Test is 1:1, revisit this (the states may merge into the test).
-
-Cancelling a specimen (e.g. damaged in transport, an assumed scenario) cancels its open
-tests in the same transaction.
+Each specimen is tested once (Q-16), but the 1:N shape lets a cancelled test be
+replanned. Cancelling a specimen cancels its open tests in the same transaction.
 
 ## SpecimenTest [A-22]
 
@@ -68,41 +65,45 @@ tests in the same transaction.
  CANCELLED (terminal)
 ```
 
-- `SCHEDULED → COMPLETED` directly is allowed if `IN_PROGRESS` turns out to be
-  unnecessary (Q-24). Remove `IN_PROGRESS` entirely if the lab doesn't need it.
-- No form shows an "in progress" state. FPC06-01 records results directly, so
-  `IN_PROGRESS` is a candidate for removal.
-- `complete()` requires the FPC06-01 readings (heights, diameters, load in kgf, age
-  tolerance; load time and failure type only when given, Q-60, Q-63). Calculations are
-  **BLOCKED** on Q-59 and Q-61.
-- `testDate` ("fecha de ensayos", date only) is entered by the user, defaulting to today
-  in the tenant timezone. The **actual age at test** is derived from it and `pourDate`.
-- Late or missed tests: Q-23. Age tolerance: Q-62.
+- No form shows an "in progress" state; FPC06-01 records results directly, so
+  `SCHEDULED → COMPLETED` is the normal path and `IN_PROGRESS` may be removed.
+- While not `COMPLETED`, the test's `ageDays` (and `keepExactDate`) can be changed at the
+  client's request (Q-22). After completion it can't.
+- `complete()` requires the FPC06-01 readings: test date and time, two heights, two
+  diameters, load in kgf, failure type. Load time is a spot check on 1 of every 10
+  specimens tested in a day (Q-63). Results are calculated by `compression.ts`.
+- The scheduled date moves past Sundays and holidays unless `keepExactDate` (Q-21).
+  Testing outside the age tolerance (Q-62) is allowed but noted on the report (Q-23).
 
 ## Report [A-23]
 
 ```
         generate()              finalize()
- DRAFT ───────────▶ GENERATED ────────────▶ FINAL (terminal, immutable)
-   ▲                   │
-   └── regenerate() ───┘   (new snapshot, same version, while not FINAL)
+ DRAFT ───────────▶ GENERATED ────────────▶ FINAL (immutable)
+   ▲                   │                      │
+   └── regenerate() ───┘                      │ correction: new version, same number;
+                                              ▼ when it is finalized → supersededAt set
 ```
 
-- `DRAFT`: a report request exists. No artifact yet.
+- `DRAFT`: a report request exists, with the report-time fields (mixing equipment,
+  compaction method, mix design, admixture, observations) prefilled from the project
+  defaults (Q-64). No artifact yet.
 - `GENERATED`: snapshot and PDF exist. Can be previewed and regenerated.
-- `FINAL`: issued. Snapshot and PDF are frozen. Corrections create a **new Report
-  version** (Q-36). The old one stays retrievable.
+- `FINAL`: issued by the Jefe de Control de Calidad only (Q-40). Snapshot and PDF are
+  frozen.
+- Correction (Q-36): a new version with the **same report number**. Finalizing it sets
+  `supersededAt` on the previous FINAL version; the lab recalls the old PDF from the
+  client and notifies them.
+- Readiness for `generate()`: the record is `COMPLETED` and every non-cancelled test is
+  `COMPLETED`, unless a **partial** report is requested (`isPartial`, Q-35). Whether
+  the final report after a partial one keeps the number: Q-82.
+- Signatures: Jefe de Laboratorio and Jefe de Control de Calidad, scanned images; at
+  least one Technical Signatory (Q-37).
 - Generation failure: the report stays `DRAFT` and the error is logged. If async
   generation is introduced later, add `FAILED`.
-- Scope: one FieldRecord [A-68]. general_flow.png says the report is generated
-  automatically "once everything is filled". The candidate readiness guard for
-  `generate()` is: the record is `COMPLETED` and every non-cancelled test of its
-  specimens is `COMPLETED`. Still **BLOCKED** on Q-35.
-- Who can finalize: Q-40. Signatures: Q-37 (FPC06-04 has two: Jefe de laboratorio and
-  Jefe de control de calidad).
 
 ## Tenant / User
 
 - User: `isActive` flag (deactivate, never delete, because users are referenced by
   records they created).
-- Tenant: no lifecycle needed for now.
+- Tenant: no lifecycle needed.

@@ -44,11 +44,12 @@ Then:
 
 1. `planTests(referenceDate, rules)` returns, per age, the scheduled date and how many
    specimens are needed.
-2. The service assigns the record's specimens to ages. In the example (FPC01-02),
-   specimens 405–406 went to 3 days and 407–408 to 7 days, i.e. by ascending specimen
-   number and ascending age. **Whether that's the rule is still unconfirmed (Q-14,
-   Q-74).** Until then, Phase 6 can't be finished.
-3. One `SpecimenTest` row per specimen per assigned age, storing `ageDays` only.
+2. The service assigns the record's specimens to ages in **ascending order**: the
+   lowest specimen numbers go to the first age (Q-14). Usually 2 per age.
+3. Each scheduled date moves to the next day while it falls on a Sunday or a holiday,
+   unless the test keeps its exact date (Q-21). The user can still change one test's
+   age until it is tested (Q-22).
+4. One `SpecimenTest` row per specimen per assigned age, storing `ageDays` only.
 
 Example (mirrors the brief; ages are **not** constants):
 
@@ -65,7 +66,8 @@ Example (mirrors the brief; ages are **not** constants):
 | Actual age at test | `specimenAgeInDays(pourDate, testDate)` | No |
 | Due status | `classifyDueStatus(scheduledDate, today)` | No |
 | Bitácora rows | `bitacora` query service | No |
-| Calculated test values | `specimen-tests` domain functions | **TBD.** Candidate formulas in the FPC06-01/FPC06-04 analyses; rounding conflict Q-59, factors Q-61. Store vs. derive: ADR in development-plan 7.5. |
+| Calculated test values | `specimen-tests/domain/compression.ts` (rules confirmed, Q-26/Q-59/Q-61) | Not yet. Store vs. derive: ADR in development-plan 7.5. |
+| Age tolerance | `ageToleranceHours()` / `isWithinAgeTolerance()` (Q-62) | No |
 | Report data | `reports` assembler | **Yes, as snapshot**, by design (ADR-005) |
 
 ## 4. Edits after the fact

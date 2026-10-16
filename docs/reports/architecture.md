@@ -66,8 +66,23 @@ reports/templates/
 - The view model holds every printed value already formatted, including the
   calculated ones (stress, MPa, %, averages). Rule 1 still applies.
 
-## Unknown (🔒)
+## Known from the questionnaire (2026-10-15)
 
-Numbering (Q-56), rounding and conversion factors (Q-59, Q-61), signatures (Q-37, Q-38),
-readiness (Q-35), more than 6 specimens or several samples per record (Q-71), revisions
-(Q-36), and whether partial reports (e.g. 3-day results only) are issued.
+- Number: `{client code}-{project code}-F{front}-CTO-REC-{registro, 3 digits}` (Q-56).
+  A corrected report keeps the number; the previous FINAL version is superseded and
+  recalled (Q-36).
+- Pages: one page per sample; a second page above 6 specimens (Q-71).
+- Values: rounding and factors per NMX-C-083 (Q-26, Q-59, Q-61), computed by
+  `compression.ts`; failure type from the worksheet (Q-60). No conformity statement (Q-28).
+  Tests outside the age tolerance are noted (Q-23).
+- Report-time fields (mixing equipment, compaction method, mix design, admixture,
+  observations) come from the report author, prefilled from the project (Q-64).
+- Signatures: Jefe de Laboratorio + Jefe de Control de Calidad, scanned images, at least
+  one Technical Signatory (Q-37). Issued only by the Jefe de Control de Calidad (Q-40).
+- Partial reports on request (Q-35). Reports are digital only.
+- A verification QR is welcome if simple (Q-38): future.
+
+## Unknown
+
+Whether the final report after a partial one keeps the number (Q-82), MPa input and
+average decimals (Q-80).

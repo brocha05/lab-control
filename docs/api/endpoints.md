@@ -36,10 +36,12 @@ Bodies follow FPC01-01 ([analysis](../domain/analysis/FPC01-01.md)). Column list
 | Method | Path | Purpose | Phase |
 |--------|------|---------|-------|
 | GET | `/projects/:id/field-records` | List for project | 4 |
-| POST | `/projects/:id/field-records` | Create `DRAFT` (`pourDate` + header fields) | 4 |
+| POST | `/projects/:id/field-records` | Create `DRAFT` (`pourDate` + header fields). `registrySequence` proposed as the project's next number, editable (Q-55) | 4 |
 | GET | `/field-records/:id` | Record with deliveries → samples → specimens | 4 |
 | PUT | `/field-records/:id` | Replace the whole form while `DRAFT`: header + nested deliveries, samples, specimens | 4/5 |
-| POST | `/field-records/:id/complete` | `DRAFT → COMPLETED`, plans tests 🔒 (Q-33) | 4/6 |
+| POST | `/field-records/:id/complete` | `DRAFT → COMPLETED` (completeness, Q-33), plans tests with the project's default ages | 4/6 |
+| GET / POST | `/catalogs/suppliers`, `/catalogs/cement-types` | List / add catalog entries (Q-06) | 4 |
+| GET / PUT | `/holidays?year=` | The lab's holiday calendar (Q-21, Q-81) | 6 |
 | POST | `/field-records/:id/cancel` | `→ CANCELLED` | 4 |
 | POST | `/specimens/:id/cancel` | Cancel specimen + open tests | 5 |
 
@@ -56,8 +58,9 @@ Bodies follow FPC01-01 ([analysis](../domain/analysis/FPC01-01.md)). Column list
 | GET | `/tests/pending` | `?until=YYYY-MM-DD&projectId=` → tests with derived `scheduledDate`, `dueStatus` | 6 |
 | GET | `/projects/:id/tests?testDate=YYYY-MM-DD` | Compression worksheet FPC06-01 (derived, A-72) | 7 |
 | GET | `/tests/:id` | Detail incl. specimen/record context | 7 |
+| PATCH | `/tests/:id/schedule` | Change `ageDays` / `keepExactDate` while not completed (Q-21, Q-22) | 6 |
 | POST | `/tests/:id/start` | `SCHEDULED → IN_PROGRESS` (if the state is kept, A-22) | 7 |
-| POST | `/tests/:id/complete` | Record FPC06-01 readings (`testDate`, heights, diameters, `maxLoadKgf`, …). Calculations 🔒 (Q-59, Q-61) | 7 |
+| POST | `/tests/:id/complete` | Record FPC06-01 readings (`testDate`, `testTime`, heights, diameters, `maxLoadKgf`, `failureType`, …). Results from `compression.ts` | 7 |
 | POST | `/tests/:id/cancel` | Cancel | 7 |
 
 ## Bitácora (read-only)
@@ -72,12 +75,14 @@ Bodies follow FPC01-01 ([analysis](../domain/analysis/FPC01-01.md)). Column list
 |--------|------|---------|-------|
 | GET | `/projects/:id/reports` | List reports of the project's records (latest version each) | 9 |
 | GET | `/field-records/:id/reports` | List versions for one record | 9 |
-| POST | `/field-records/:id/reports` | Create + generate (`templateKey`) 🔒 readiness (Q-35). Scope = record (A-68) | 9 |
+| POST | `/field-records/:id/reports` | Create a draft (`templateKey`, `isPartial?`), report-time fields prefilled from the project (Q-64). Readiness: all tests done unless partial (Q-35) | 9 |
+| PATCH | `/reports/:id` | Edit report-time fields while not `FINAL` | 9 |
 | GET | `/reports/:id` | Metadata (+ snapshot for preview) | 9 |
 | POST | `/reports/:id/regenerate` | Regenerate while not `FINAL` | 9 |
-| POST | `/reports/:id/finalize` | `GENERATED → FINAL` (role TBD, Q-40) | 9 |
+| POST | `/reports/:id/finalize` | `GENERATED → FINAL`, `QUALITY_MANAGER` only (Q-40). Supersedes the previous FINAL version (Q-36) | 9 |
+| POST | `/field-records/:id/reports/correction` | New version with the same number, from a FINAL one (Q-36) | 9 |
 | GET | `/reports/:id/download` | Returns a short-lived signed URL | 9 |
-| GET | `/field-records/:id/reports/readiness` | Which requirements are missing 🔒 | 9 |
+| GET | `/field-records/:id/reports/readiness` | Which requirements are missing | 9 |
 
 ## Dashboard
 

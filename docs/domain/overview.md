@@ -1,9 +1,9 @@
 # Domain Overview
 
-> Status: **discovery phase**. The first lab documents (FPC01-01, FPC01-02, FPC06-01,
-> FPC06-04) and the process diagram `docs/general_flow.png` were analyzed on 2026-10-14:
-> [analysis/](analysis/README.md). Remaining unknowns: [assumptions.md](assumptions.md)
-> and [open-questions.md](open-questions.md).
+> Status: the lab documents (FPC01-01, FPC01-02, FPC06-01, FPC06-04) and the process
+> diagram were analyzed on 2026-10-14, and the lab answered the follow-up questionnaire
+> on 2026-10-15: [analysis/](analysis/README.md). Remaining unknowns:
+> [assumptions.md](assumptions.md) and [open-questions.md](open-questions.md).
 
 ## What the business does
 
@@ -87,17 +87,27 @@ Derived (not stored as source data):
 | **Field Record** (*registro de campo*, FPC01-01) | The record of one pour (*colado*): specified concrete, conditions, equipment, deliveries, specimens. Numbered "MCH-068". | Yes (FPC01-01) |
 | **Colado** | A pour. Its date (*fecha del colado*) is the test-age reference date. | Yes (FPC06-04) |
 | **Delivery** (*entrega*) | One truck (*trompo*, ready-mix) or batch (site-mixed) received during the pour. A row of FPC01-01. | Yes (FPC01-01) |
-| **Remisión** | Delivery ticket. Its number identifies the delivery. | Yes (FPC01-01) |
+| **Remisión** | Delivery ticket of one truck, with its own f'c, slump, aggregate, cement and age (Q-65). | Yes (FPC01-01, Q-65) |
+| **MCH** | *Muestreo de Concreto Hidráulico*: prefix of the registro number, consecutive per project (Q-55). | Yes (Q-55) |
+| **Frente** | A front of a project ("F1" in the report number); a project can have several (Q-56). | Yes (Q-56) |
+| **CTO-REC** | Report number segments: *concreto* · *resistencia a compresión* (Q-56). | Yes (Q-56) |
+| **PSV** | *Paso Superior Vehicular*: informal project reference with no traceability (Q-78). | Yes (Q-78) |
+| **Hoja** | A paper sheet of the field record, 7 trucks each; one record can have several (Q-71, Q-77). | Yes |
+| **Visto bueno** | Signature that closes the field record, usually the client's (Q-73). | Yes (Q-73) |
+| **Tolerancia de edad** | Allowed window around a test age, from the molding time (NMX-C-083, Q-62). | Yes (Q-62) |
+| **Especímenes hermanos** | The two specimens tested at the same age; the age's result is their average (Q-14). | Yes (Q-14) |
+| **Signatario Técnico** | Person accredited by the ema to endorse reports; at least one signs each report (Q-37). | Yes (Q-37) |
+| **ema** | *Entidad Mexicana de Acreditación*. The lab is accredited under NMX-EC-17025-ONNCCE-2018 (Q-52). | Yes (Q-52) |
 | **Revenimiento** | Slump (cm). Specified as "14.0 ± 3.5"; measured twice per delivery. | Yes (FPC01-01) |
 | **f'c / MR** | Specified compressive strength / modulus of rupture (kgf/cm²). | Yes (FPC01-01) |
-| **Edad definitiva** | Design age (days) on the record. Relation to test ages: Q-74. | Partly |
+| **Edad definitiva** | Age at which the supplier guarantees design f'c. Test ages follow from it but are chosen by the user (Q-74). | Yes (Q-74) |
 | **Sample** (*muestra*) | Concrete taken from one delivery to mold specimens. Numbered "102". | Yes (FPC01-02, FPC06-04) |
 | **Specimen** (*espécimen*: cilindro, viga, cubo) | A molded test piece. Numbered "405"; made in a mold with its own key ("020"). | Yes (FPC01-01) |
 | **Test age** (*edad de ensayo*) | Days after the pour date when a specimen is tested. | Yes (FPC06-04) |
 | **Test** (*ensaye*) | Compression test of a specimen at an age (FPC06-01). Named `SpecimenTest` in code (see [entities.md](entities.md)). | Yes (FPC06-01) |
 | **Tipo de falla** | Failure pattern number observed after the break (NMX-C-083). | Partly (Q-60) |
 | **Bitácora** (FPC01-02) | Electronic log, one row per specimen, field data + result. A **derived** view. | Yes (FPC01-02); scope Q-68 |
-| **Report** (*informe*, FPC06-04) | Formal PDF issued to the client for one sample. A historical artifact. | Yes (FPC06-04) |
+| **Report** (*informe*, FPC06-04) | Formal PDF issued to the client for one field record, one page per sample. Informative only, no conformity statement (Q-28). A historical artifact. | Yes (FPC06-04, Q-71) |
 | **SGC** | *Sistema de gestión de calidad*: the lab's quality system. Its coordinator signs FPC06-01. | Yes (FPC06-01) |
 
 ## Future materials (out of scope now)
