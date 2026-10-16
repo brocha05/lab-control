@@ -299,10 +299,41 @@ describe('field records (integration)', () => {
       });
     });
 
-    it('completes the MCH-068 record, then it can no longer be edited or cancelled', async () => {
+    it('needs the project test ages to complete (422)', async () => {
       await as(a).put(`/field-records/${id}`, mch068Form(catalog)).expect(200);
+      const res = await as(a).post(`/field-records/${id}/complete`, {}).expect(422);
+      expect(res.body.error.details).toEqual(['testAges']);
+      const still = await as(a).get(`/field-records/${id}`);
+      expect(still.body.data.status).toBe('DRAFT');
+    });
+
+    it('completes the MCH-068 record and plans its tests (6.4)', async () => {
+      await as(a).put(`/field-records/${id}`, mch068Form(catalog)).expect(200);
+      await as(a)
+        .put(`/projects/${projectId}/test-configuration`, {
+          ages: [
+            { ageDays: 7, specimenCount: 2 },
+            { ageDays: 3, specimenCount: 2 },
+          ],
+        })
+        .expect(200);
       const done = await as(a).post(`/field-records/${id}/complete`, {}).expect(200);
       expect(done.body.data).toMatchObject({ status: 'COMPLETED', missingForCompletion: [] });
+
+      // Q-14: 405–406 at 3 days, 407–408 at 7 days.
+      const specimens = done.body.data.deliveries[0].samples[0].specimens as {
+        specimenNumber: number;
+        test: { ageDays: number; status: string } | null;
+      }[];
+      expect(specimens.map((sp) => [sp.specimenNumber, sp.test?.ageDays, sp.test?.status])).toEqual(
+        [
+          [405, 3, 'SCHEDULED'],
+          [406, 3, 'SCHEDULED'],
+          [407, 7, 'SCHEDULED'],
+          [408, 7, 'SCHEDULED'],
+        ],
+      );
+      await expect(t.prisma.specimenTest.count()).resolves.toBe(4);
 
       await as(a).put(`/field-records/${id}`, mch068Form(catalog)).expect(409);
       await as(a).post(`/field-records/${id}/complete`, {}).expect(409);

@@ -1,8 +1,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // ACTIVE SCHEMA — only what is migrated: identity, clients/projects, catalogs,
-// and field capture (field records, deliveries, samples, specimens; 4.1).
+// field capture (field records, deliveries, samples, specimens; 4.1) and tests (6.4).
 //
-// Tests and reports still live in `prisma/drafts/domain.prisma`. Each later phase
+// Reports still live in `prisma/drafts/domain.prisma`. Each later phase
 // moves its models here with its own migration. Lab numbers (registro, muestra,
 // espécimen) are consecutive per project (Q-55, Q-57, Q-58).
 //
@@ -69,6 +69,7 @@ model Tenant {
   deliveries                Delivery[]
   samples                   Sample[]
   specimens                 Specimen[]
+  specimenTests             SpecimenTest[]
 
   @@map("tenants")
 }
@@ -504,12 +505,75 @@ model Specimen {
   createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz
 
-  tenant  Tenant  @relation(fields: [tenantId], references: [id])
-  sample  Sample  @relation(fields: [sampleId, tenantId], references: [id, tenantId])
-  project Project @relation(fields: [projectId, tenantId], references: [id, tenantId])
+  tenant  Tenant         @relation(fields: [tenantId], references: [id])
+  sample  Sample         @relation(fields: [sampleId, tenantId], references: [id, tenantId])
+  project Project        @relation(fields: [projectId, tenantId], references: [id, tenantId])
+  tests   SpecimenTest[]
 
   @@unique([id, tenantId])
   @@unique([projectId, specimenNumber])
   @@index([tenantId, sampleId])
   @@map("specimens")
+}
+
+// ─── Lab testing (development-plan 6.4) ─────────────────────────────────────
+
+/// ASSUMPTION A-22 — no form shows an "in progress" state; may be dropped.
+enum SpecimenTestStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+// ─── SpecimenTest (one row of FPC06-01 "Registro de resultados de resistencia
+//     a la compresión de especímenes ensayados (cilindros)") ─────────────────
+// Each specimen is tested once (Q-16); 1:N stays so a cancelled test can be
+// replanned (A-05). The scheduled DATE is derived: pourDate + ageDays, moved past
+// Sundays/holidays unless `keepExactDate` (Q-21). Age tolerance (Q-62) is derived
+// from the sample's molding time and `testDate` + `testTime`.
+
+model SpecimenTest {
+  id                 String             @id @default(uuid()) @db.Uuid
+  tenantId           String             @map("tenant_id") @db.Uuid
+  specimenId         String             @map("specimen_id") @db.Uuid
+  /// "Edad (días)". Copied from the project's default ages when planned; editable
+  /// until the test is completed (Q-22, A-15).
+  ageDays            Int                @map("age_days")
+  /// Test on the exact age even on a Sunday/holiday (client requirement, Q-21).
+  keepExactDate      Boolean            @default(false) @map("keep_exact_date")
+  status             SpecimenTestStatus @default(SCHEDULED)
+  /// "Fecha de ensayos".
+  testDate           DateTime?          @map("test_date") @db.Date
+  /// Time of the break, for the age tolerance (Q-62). Not printed on FPC06-01.
+  testTime           DateTime?          @map("test_time") @db.Time(0)
+  /// "Altura (cm)", reading 1.
+  height1Cm          Decimal?           @map("height_1_cm") @db.Decimal(4, 1)
+  /// "Altura (cm)", reading 2.
+  height2Cm          Decimal?           @map("height_2_cm") @db.Decimal(4, 1)
+  /// "Diámetro (cm)", reading 1.
+  diameter1Cm        Decimal?           @map("diameter_1_cm") @db.Decimal(4, 1)
+  /// "Diámetro (cm)", reading 2.
+  diameter2Cm        Decimal?           @map("diameter_2_cm") @db.Decimal(4, 1)
+  /// "Carga máxima registrada — kgf": the press reading (Q-61). N is derived.
+  maxLoadKgf         Decimal?           @map("max_load_kgf") @db.Decimal(9, 1)
+  /// "Tiempo (s)": spot check on 1 of every 10 specimens tested in a day (Q-63).
+  loadDurationS      Int?               @map("load_duration_s")
+  /// "Tipo de falla" (NMX-C-083 pattern). The worksheet is authoritative (Q-60).
+  failureType        Int?               @map("failure_type") @db.SmallInt
+  /// "Prensa", e.g. "CCP-PRE-05". One press, direct readings (Q-75).
+  pressCode          String?            @map("press_code")
+  /// "Dimensiones" instruments, e.g. "CCP-FLX-01, CCP-RME-02".
+  dimensionEquipment String?            @map("dimension_equipment")
+  performedById      String?            @map("performed_by_id") @db.Uuid
+  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+  specimen Specimen @relation(fields: [specimenId, tenantId], references: [id, tenantId])
+
+  @@index([tenantId, status])
+  @@index([tenantId, specimenId])
+  @@index([tenantId, testDate])
+  @@map("specimen_tests")
 }

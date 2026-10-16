@@ -8,6 +8,7 @@ import {
 import { CatalogsService } from '../catalogs/catalogs.service.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import { ProjectsService } from '../projects/projects.service.js';
+import { SpecimenTestsService } from '../specimen-tests/specimen-tests.service.js';
 import {
   CalendarDate,
   calendarDateToDb,
@@ -76,6 +77,7 @@ export class FieldRecordsService {
     private readonly prisma: PrismaService,
     private readonly projects: ProjectsService,
     private readonly catalogs: CatalogsService,
+    private readonly specimenTests: SpecimenTestsService,
   ) {}
 
   async list(
@@ -119,7 +121,11 @@ export class FieldRecordsService {
     });
     if (!record) throw new NotFoundException('Field record not found');
     const project = await this.projects.summary(tenantId, record.projectId);
-    return toDetail(record, project);
+    const specimenIds = record.deliveries.flatMap((d) =>
+      d.samples.flatMap((s) => s.specimens.map((sp) => sp.id)),
+    );
+    const tests = await this.specimenTests.briefsForSpecimens(tenantId, specimenIds);
+    return toDetail(record, project, tests);
   }
 
   /** Next free numbers in the project (Q-55, Q-57, Q-58), proposed to the user. */
@@ -261,7 +267,8 @@ export class FieldRecordsService {
 
   /**
    * DRAFT → COMPLETED once everything on the lab's example is filled in (Q-33), else
-   * 422 with the missing items. Tests are planned here in Phase 6 (development-plan 6.4).
+   * 422 with the missing items. In the same transaction, every specimen gets a
+   * SCHEDULED test with the project's default ages (Q-20, development-plan 6.4).
    */
   async complete(tenantId: string, id: string): Promise<FieldRecordDetail> {
     const record = await this.get(tenantId, id);
@@ -272,7 +279,23 @@ export class FieldRecordsService {
         details: record.missingForCompletion,
       });
     }
-    await this.setStatus(tenantId, id, record.status, 'COMPLETED');
+    const ages = await this.projects.testConfiguration(tenantId, record.project.id);
+    if (ages.length === 0) {
+      throw new UnprocessableEntityException({
+        message: 'The project has no test ages configured',
+        details: ['testAges'],
+      });
+    }
+    const samples = record.deliveries.flatMap((d) =>
+      d.samples.map((s) => ({
+        // Complete records have every specimen numbered (missingForCompletion).
+        specimens: s.specimens.map((sp) => ({ id: sp.id, specimenNumber: sp.specimenNumber ?? 0 })),
+      })),
+    );
+    await this.prisma.$transaction(async (tx) => {
+      await this.setStatus(tenantId, id, record.status, 'COMPLETED', tx);
+      await this.specimenTests.planForSamples(tx, tenantId, samples, ages);
+    });
     return this.get(tenantId, id);
   }
 
@@ -299,8 +322,9 @@ export class FieldRecordsService {
     id: string,
     from: FieldRecordStatus,
     to: FieldRecordStatus,
+    tx: Prisma.TransactionClient = this.prisma,
   ): Promise<void> {
-    const { count } = await this.prisma.fieldRecord.updateMany({
+    const { count } = await tx.fieldRecord.updateMany({
       where: { id, tenantId, status: from },
       data: { status: to },
     });

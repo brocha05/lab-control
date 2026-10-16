@@ -109,23 +109,26 @@ export function planTestAges(
 
 /**
  * Q-14: in ascending order of specimen number, the first `specimenCount` specimens go
- * to the first age, the next ones to the second age, and so on. The number of
- * specimens must match the plan; the user adjusts individual ages afterwards (Q-22).
+ * to the first age, the next ones to the second age, and so on.
+ * ASSUMPTION A-82: when a sample has more specimens than the plan, the extra ones go to
+ * the last age; with fewer, the last ages get fewer. The user then adjusts single
+ * tests (Q-22). Throws only when there are no ages at all.
  */
 export function assignSpecimensToAges(
   specimenNumbers: readonly number[],
   rules: readonly TestAgeRule[],
 ): { specimenNumber: number; ageDays: number }[] {
-  const planned = rules.reduce((sum, r) => sum + r.specimenCount, 0);
-  if (specimenNumbers.length !== planned) {
-    throw new InvalidTestAgeRuleError(
-      `The plan needs ${planned} specimens, the sample has ${specimenNumbers.length}`,
-    );
+  if (rules.length === 0) {
+    throw new InvalidTestAgeRuleError('No test ages configured');
   }
   const sortedNumbers = [...specimenNumbers].sort((a, b) => a - b);
   const sortedRules = [...rules].sort((a, b) => a.ageDays - b.ageDays);
   const ages = sortedRules.flatMap((r) => Array<number>(r.specimenCount).fill(r.ageDays));
-  return sortedNumbers.map((specimenNumber, i) => ({ specimenNumber, ageDays: ages[i] }));
+  const lastAge = sortedRules[sortedRules.length - 1].ageDays;
+  return sortedNumbers.map((specimenNumber, i) => ({
+    specimenNumber,
+    ageDays: ages[i] ?? lastAge,
+  }));
 }
 
 /** `today` must be computed in the tenant's timezone (ASSUMPTION A-14). */

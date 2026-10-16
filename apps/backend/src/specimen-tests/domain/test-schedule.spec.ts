@@ -124,10 +124,19 @@ describe('assignSpecimensToAges (Q-14)', () => {
     ]);
   });
 
-  it('rejects a sample whose specimen count does not match the plan', () => {
-    expect(() => assignSpecimensToAges([1, 2, 3], [{ ageDays: 7, specimenCount: 4 }])).toThrow(
-      'The plan needs 4 specimens, the sample has 3',
-    );
+  it('sends extra specimens to the last age (A-82)', () => {
+    const rules = [
+      { ageDays: 7, specimenCount: 2 },
+      { ageDays: 28, specimenCount: 2 },
+    ];
+    expect(assignSpecimensToAges([1, 2, 3, 4, 5], rules).map((a) => a.ageDays)).toEqual([
+      7, 7, 28, 28, 28,
+    ]);
+    expect(assignSpecimensToAges([1, 2, 3], rules).map((a) => a.ageDays)).toEqual([7, 7, 28]);
+  });
+
+  it('needs at least one configured age', () => {
+    expect(() => assignSpecimensToAges([1, 2], [])).toThrow('No test ages configured');
   });
 });
 

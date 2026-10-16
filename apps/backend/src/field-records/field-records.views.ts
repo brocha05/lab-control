@@ -15,6 +15,7 @@ import type {
   WindCondition,
 } from '../generated/prisma/client.js';
 import { CalendarDate, calendarDateFromDb } from '../shared/dates/calendar-date.js';
+import type { SpecimenTestBrief } from '../specimen-tests/specimen-tests.service.js';
 import { TimeOfDay, timeOfDayFromDb } from '../shared/dates/time-of-day.js';
 import { missingForCompletion } from './domain/completeness.js';
 import { formatRegistryNumber, sheetCount, sheetOfDelivery } from './domain/numbering.js';
@@ -44,6 +45,8 @@ export interface SpecimenView {
   status: SpecimenStatus;
   specimenNumber: number | null;
   moldCode: string | null;
+  /** The specimen's current (non-cancelled) test, planned when the record is completed. */
+  test: Omit<SpecimenTestBrief, 'specimenId'> | null;
 }
 
 export interface SampleView {
@@ -166,7 +169,14 @@ type DetailRow = FieldRecord & {
   })[];
 };
 
-export function toDetail(r: DetailRow, project: FieldRecordDetail['project']): FieldRecordDetail {
+export function toDetail(
+  r: DetailRow,
+  project: FieldRecordDetail['project'],
+  tests: readonly SpecimenTestBrief[] = [],
+): FieldRecordDetail {
+  const testBySpecimen = new Map(
+    tests.filter((t) => t.status !== 'CANCELLED').map(({ specimenId, ...t }) => [specimenId, t]),
+  );
   let cumulative: number | null = 0;
   const deliveries = r.deliveries.map((d): DeliveryView => {
     const volume = num(d.volumeM3);
@@ -203,6 +213,7 @@ export function toDetail(r: DetailRow, project: FieldRecordDetail['project']): F
           status: sp.status,
           specimenNumber: sp.specimenNumber,
           moldCode: sp.moldCode,
+          test: testBySpecimen.get(sp.id) ?? null,
         })),
       })),
     };
