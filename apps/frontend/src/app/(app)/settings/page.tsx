@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { CatalogCard } from '@/modules/catalogs/components/CatalogCard';
 import { HolidaysCard } from '@/modules/catalogs/components/HolidaysCard';
 import { UsersCard } from '@/modules/users/components/UsersCard';
+import { AuditTrail } from '@/modules/audit/components/AuditTrail';
 import { PermissionFieldset } from '@/components/shared/PermissionFieldset';
 
 export const metadata: Metadata = { title: 'Configuración' };
@@ -34,6 +35,7 @@ export default function Page() {
         </div>
         <HolidaysCard />
       </PermissionFieldset>
+      <AuditTrail title="Auditoría del laboratorio" showLinks />
     </div>
   );
 }
