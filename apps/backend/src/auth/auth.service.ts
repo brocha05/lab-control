@@ -7,6 +7,7 @@ import { CalendarDate, calendarDateInTimeZone } from '../shared/dates/calendar-d
 import { PrismaService } from '../shared/prisma/prisma.service.js';
 import type { AuthenticatedUser } from '../shared/tenancy/authenticated-user.js';
 import { hashPassword, verifyPassword } from './domain/password.js';
+import { type Permission, permissionsOf } from './domain/permissions.js';
 import {
   generateRefreshToken,
   hashRefreshToken,
@@ -44,6 +45,8 @@ export interface TenantView {
 export interface MeView {
   user: AuthUserView;
   tenant: TenantView;
+  /** What the user's role may change (docs/domain/entities.md#roles). */
+  permissions: Permission[];
 }
 
 /** Claims of the access token. The tenant comes ONLY from here (ADR-002). */
@@ -134,6 +137,7 @@ export class AuthService {
     return {
       user: toView(user),
       tenant: { id: tenant.id, name: tenant.name, slug: tenant.slug, timezone: tenant.timezone },
+      permissions: permissionsOf(user.role),
     };
   }
 
@@ -180,7 +184,14 @@ export class AuthService {
     if (typeof claims.sub !== 'string' || typeof claims.tenantId !== 'string') {
       throw new UnauthorizedException('Invalid or expired access token');
     }
-    return { userId: claims.sub, tenantId: claims.tenantId, role: claims.role };
+    // The role and the active flag come from the database, so a role change or a
+    // deactivation applies on the next request, not when the token expires.
+    const user = await this.prisma.user.findFirst({
+      where: { id: claims.sub, tenantId: claims.tenantId, isActive: true },
+      select: { role: true },
+    });
+    if (!user) throw new UnauthorizedException('User not found or inactive');
+    return { userId: claims.sub, tenantId: claims.tenantId, role: user.role };
   }
 
   private async issueTokens(user: User): Promise<TokenPair> {

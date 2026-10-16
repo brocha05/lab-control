@@ -80,6 +80,20 @@ Bodies follow FPC01-01 ([analysis](../domain/analysis/FPC01-01.md)). Column list
 | POST | `/reports/:id/finalize` | `GENERATED → FINAL`, `QUALITY_MANAGER` only (403 otherwise, Q-40). Supersedes the previous FINAL version (Q-36) | 9 ✅ |
 | GET | `/reports/:id/pdf` | The stored PDF, streamed after the tenant check (ADR-009) | 9 ✅ |
 
+## Users (Phase 10.1)
+
+`users.manage` (Jefe de Control de Calidad). Mutating endpoints elsewhere need the
+permission of the matrix in docs/domain/entities.md#roles; a missing permission is 403.
+
+| Method | Path | Purpose | Phase |
+|--------|------|---------|-------|
+| GET | `/users` | The lab's staff | 10 ✅ |
+| POST | `/users` | `{ email, fullName, role, password }`; email taken → 409 | 10 ✅ |
+| PATCH | `/users/:id` | `{ fullName?, role?, isActive? }`; own role/deactivation → 409; role change or deactivation ends the sessions | 10 ✅ |
+| POST | `/users/:id/password` | `{ password }` → 204, ends the sessions | 10 ✅ |
+
+`GET /me` also returns `permissions` (the role's list).
+
 ## Dashboard
 
 | Method | Path | Purpose | Phase |

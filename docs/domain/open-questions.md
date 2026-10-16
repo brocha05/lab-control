@@ -166,3 +166,4 @@ Sources and context: [analysis/](analysis/README.md).
 | Q-100 | P2 | Do cancelled specimens and cancelled or draft records appear in the Bitácora (e.g. marked as cancelled)? | | | Bitácora rows (A-92, A-93) |
 | Q-101 | P1 | Please send the scanned signatures of the Jefe de laboratorio and the Jefe de control de calidad, and tell us which staff are Technical Signatories (ema). | | | Report signatures (A-97) |
 | Q-102 | P2 | Is "Fecha de informe" the day the report is generated or the day it is issued (finalized)? | | | Snapshot issue date (A-99) |
+| Q-103 | P1 | Besides capturing records and tests (Coordinador del SGC) and issuing reports (Jefe de Control de Calidad): who registers clients and projects, sets test ages, and records the press results? Should the Jefe de Laboratorio capture results in the system? | | | Permission matrix (A-100, A-101) |

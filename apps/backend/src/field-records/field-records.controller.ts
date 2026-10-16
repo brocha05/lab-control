@@ -20,6 +20,7 @@ import {
 } from './dto/field-record.dto.js';
 import { FieldRecordsService, type NextNumbers } from './field-records.service.js';
 import type { FieldRecordDetail, FieldRecordSummary } from './field-records.views.js';
+import { RequirePermission } from '../auth/permissions.guard.js';
 
 /** Creation and listing are nested under the project; item access is flat. */
 @Controller()
@@ -43,6 +44,7 @@ export class FieldRecordsController {
     return this.fieldRecords.nextNumbers(tenantId, projectId);
   }
 
+  @RequirePermission('records.capture')
   @Post('projects/:projectId/field-records')
   create(
     @CurrentUser() user: AuthenticatedUser,
@@ -60,6 +62,7 @@ export class FieldRecordsController {
     return this.fieldRecords.get(tenantId, id);
   }
 
+  @RequirePermission('records.capture')
   @Put('field-records/:id')
   replaceForm(
     @CurrentTenant() tenantId: string,
@@ -69,6 +72,7 @@ export class FieldRecordsController {
     return this.fieldRecords.replaceForm(tenantId, id, dto);
   }
 
+  @RequirePermission('records.capture')
   @Post('field-records/:id/complete')
   @HttpCode(HttpStatus.OK)
   complete(
@@ -78,6 +82,7 @@ export class FieldRecordsController {
     return this.fieldRecords.complete(tenantId, id);
   }
 
+  @RequirePermission('records.capture')
   @Post('field-records/:id/cancel')
   @HttpCode(HttpStatus.OK)
   cancel(
@@ -88,6 +93,7 @@ export class FieldRecordsController {
   }
 
   /** Damaged specimen: cancels it and its open tests (5.4). */
+  @RequirePermission('records.capture')
   @Post('specimens/:id/cancel')
   @HttpCode(HttpStatus.OK)
   cancelSpecimen(

@@ -14,6 +14,7 @@ import { CurrentTenant } from '../shared/tenancy/current-tenant.decorator.js';
 import { CreateProjectDto, ListProjectsQueryDto, UpdateProjectDto } from './dto/project.dto.js';
 import { TestConfigurationDto } from './dto/test-configuration.dto.js';
 import { ProjectsService, type ProjectView, type TestAge } from './projects.service.js';
+import { RequirePermission } from '../auth/permissions.guard.js';
 
 @Controller('projects')
 export class ProjectsController {
@@ -27,6 +28,7 @@ export class ProjectsController {
     return this.projects.list(tenantId, query);
   }
 
+  @RequirePermission('catalogs.manage')
   @Post()
   create(@CurrentTenant() tenantId: string, @Body() dto: CreateProjectDto): Promise<ProjectView> {
     return this.projects.create(tenantId, dto);
@@ -40,6 +42,7 @@ export class ProjectsController {
     return this.projects.get(tenantId, id);
   }
 
+  @RequirePermission('catalogs.manage')
   @Patch(':id')
   update(
     @CurrentTenant() tenantId: string,
@@ -57,6 +60,7 @@ export class ProjectsController {
     return this.projects.testConfiguration(tenantId, id);
   }
 
+  @RequirePermission('catalogs.manage')
   @Put(':id/test-configuration')
   replaceTestConfiguration(
     @CurrentTenant() tenantId: string,

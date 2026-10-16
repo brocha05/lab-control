@@ -36,6 +36,14 @@ describe('GET /me (integration)', () => {
         slug: 'lab-a',
         timezone: 'America/Mexico_City',
       },
+      permissions: [
+        'catalogs.manage',
+        'records.capture',
+        'reports.prepare',
+        'reports.issue',
+        'users.manage',
+        'audit.read',
+      ],
     });
 
     const resB = await request(t.http).get('/api/v1/me').set('Authorization', b.auth).expect(200);

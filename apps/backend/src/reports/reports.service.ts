@@ -1,6 +1,5 @@
 import {
   ConflictException,
-  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -11,7 +10,7 @@ import { AuthService } from '../auth/auth.service.js';
 import { ClientsService } from '../clients/clients.service.js';
 import { formatRegistryNumber } from '../field-records/domain/numbering.js';
 import { FieldRecordsService } from '../field-records/field-records.service.js';
-import type { Prisma, Report, UserRole } from '../generated/prisma/client.js';
+import type { Prisma, Report } from '../generated/prisma/client.js';
 import { CalendarDate, calendarDateFromDb } from '../shared/dates/calendar-date.js';
 import { PrismaService } from '../shared/prisma/prisma.service.js';
 import { SpecimenTestsService } from '../specimen-tests/specimen-tests.service.js';
@@ -28,9 +27,6 @@ import type { ReportFieldsDto } from './dto/report.dto.js';
 import { ReportRenderer } from './rendering/report-renderer.js';
 import { ReportStorage } from './storage/report-storage.js';
 import { renderConcreteControlHtml } from './templates/concrete-control.js';
-
-/** Only the Jefe de Control de Calidad issues reports (Q-40). */
-const ISSUER: UserRole = 'QUALITY_MANAGER';
 
 const FIELD_KEYS = [
   'mixingEquipment',
@@ -254,16 +250,12 @@ export class ReportsService {
     return this.view(tenantId, id);
   }
 
-  /** Issues the report: only the Jefe de Control de Calidad (Q-40). FINAL is immutable. */
-  async finalize(
-    tenantId: string,
-    user: { userId: string; role: UserRole },
-    id: string,
-  ): Promise<ReportView> {
+  /**
+   * Issues the report (FINAL is immutable). Only the Jefe de Control de Calidad reaches
+   * this: the route needs `reports.issue` (Q-40).
+   */
+  async finalize(tenantId: string, userId: string, id: string): Promise<ReportView> {
     const report = await this.find(tenantId, id);
-    if (user.role !== ISSUER) {
-      throw new ForbiddenException('Only the Jefe de Control de Calidad issues reports');
-    }
     if (report.status !== 'GENERATED') {
       throw new ConflictException(
         report.status === 'FINAL' ? 'The report is already FINAL' : 'Generate the PDF first',
@@ -273,7 +265,7 @@ export class ReportsService {
     await this.prisma.$transaction(async (tx) => {
       const { count } = await tx.report.updateMany({
         where: { id, tenantId, status: 'GENERATED' },
-        data: { status: 'FINAL', finalizedAt: now, finalizedById: user.userId },
+        data: { status: 'FINAL', finalizedAt: now, finalizedById: userId },
       });
       if (count !== 1) throw new ConflictException('The report changed meanwhile');
       await tx.report.updateMany({

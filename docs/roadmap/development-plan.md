@@ -100,7 +100,7 @@ cross-tenant test.
 
 ## Phase 10 — Hardening
 
-- [ ] 10.1 Permissions per role (roles migrated 2026-10-15; matrix in [entities.md](../domain/entities.md#roles)) and user management screens (A-81, Q-83)
+- [x] 10.1 ✅ Permissions per role (`PermissionsGuard`, matrix in [entities.md](../domain/entities.md#roles), A-100/A-101) and user management (A-81, Q-83)
 - [ ] 10.2 `audit_events`: **required** by the accreditation (Q-54). ADR for its shape; move earlier if corrections after issuing (Q-34) ship first
 - [ ] 10.3 Exhaustive cross-tenant test suite (every endpoint)
 - [ ] 10.4 RLS spike + ADR (enable or not)

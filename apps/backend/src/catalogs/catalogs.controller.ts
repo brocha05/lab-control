@@ -15,6 +15,7 @@ import { CurrentTenant } from '../shared/tenancy/current-tenant.decorator.js';
 import { CatalogsService, type CatalogEntryView } from './catalogs.service.js';
 import { CatalogEntryDto, CreateHolidayDto, HolidaysQueryDto } from './dto/catalog.dto.js';
 import { HolidaysService, type HolidayView } from './holidays.service.js';
+import { RequirePermission } from '../auth/permissions.guard.js';
 
 @Controller('catalogs/suppliers')
 export class SuppliersController {
@@ -25,6 +26,7 @@ export class SuppliersController {
     return this.catalogs.list(tenantId, 'suppliers');
   }
 
+  @RequirePermission('catalogs.manage')
   @Post()
   create(
     @CurrentTenant() tenantId: string,
@@ -33,6 +35,7 @@ export class SuppliersController {
     return this.catalogs.create(tenantId, 'suppliers', dto.name);
   }
 
+  @RequirePermission('catalogs.manage')
   @Patch(':id')
   rename(
     @CurrentTenant() tenantId: string,
@@ -52,6 +55,7 @@ export class CementTypesController {
     return this.catalogs.list(tenantId, 'cementTypes');
   }
 
+  @RequirePermission('catalogs.manage')
   @Post()
   create(
     @CurrentTenant() tenantId: string,
@@ -60,6 +64,7 @@ export class CementTypesController {
     return this.catalogs.create(tenantId, 'cementTypes', dto.name);
   }
 
+  @RequirePermission('catalogs.manage')
   @Patch(':id')
   rename(
     @CurrentTenant() tenantId: string,
@@ -82,11 +87,13 @@ export class HolidaysController {
     return this.holidays.list(tenantId, query.year);
   }
 
+  @RequirePermission('catalogs.manage')
   @Post()
   create(@CurrentTenant() tenantId: string, @Body() dto: CreateHolidayDto): Promise<HolidayView> {
     return this.holidays.create(tenantId, dto.date, dto.name);
   }
 
+  @RequirePermission('catalogs.manage')
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@CurrentTenant() tenantId: string, @Param('id', ParseUUIDPipe) id: string): Promise<void> {

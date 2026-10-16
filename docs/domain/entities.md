@@ -48,7 +48,11 @@ stay on the record for control.
 
 ## Roles
 
-From the lab's hierarchy (Q-39) and permissions (Q-40, Q-34). Enforced in Phase 10.1.
+From the lab's hierarchy (Q-39) and permissions (Q-40, Q-34). Enforced since Phase 10.1 by
+`PermissionsGuard` with the matrix in `apps/backend/src/auth/domain/permissions.ts`
+(`catalogs.manage`, `records.capture`, `reports.prepare`, `reports.issue`, `users.manage`,
+`audit.read`). Every role reads everything in its own lab. Role and active flag are read
+from the database on every request, so changes apply at once.
 
 | Role | Lab position | Captures records/tests | Issues reports | Corrects issued data |
 |------|-------------|------------------------|----------------|----------------------|

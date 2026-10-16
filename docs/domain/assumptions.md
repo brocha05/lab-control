@@ -126,3 +126,5 @@ Introduced while modelling FPC01-01, FPC01-02, FPC06-01 and FPC06-04
 | A-97 | Until scanned signatures are uploaded, the PDF prints blank signature lines for the Jefe de laboratorio and the Jefe de control de calidad. | Q-37 accepts scanned signatures, but none were provided yet. | OPEN | Q-101 |
 | A-98 | Only full reports (every specimen tested) are generated; partial reports wait for the numbering answer. | Q-82 is open. | OPEN | Q-82 |
 | A-99 | "Fecha de informe" is the day the PDF is generated, in the lab's timezone. | FPC06-04 shows the issue date. | OPEN | Q-102 |
+| A-100 | The Coordinador del SGC also manages catalogs (clients, projects, test ages, suppliers, holidays), prepares reports and reads the audit trail; only the Jefe de Control de Calidad issues reports and manages users. | Q-40 names who captures and who issues; catalogs weren't asked. | OPEN | Q-103 |
+| A-101 | The Jefe de Laboratorio and the Jefe de Brigada de Campo only consult the system (read only). | They work mostly on paper (Q-40). | OPEN | Q-93, Q-103 |

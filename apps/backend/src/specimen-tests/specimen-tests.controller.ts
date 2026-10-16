@@ -8,6 +8,7 @@ import { SaveTestResultsDto, WorksheetQueryDto } from './dto/worksheet.dto.js';
 import type { PendingTest } from './pending-tests.js';
 import { SpecimenTestsService, type SpecimenTestBrief } from './specimen-tests.service.js';
 import type { Worksheet } from './worksheet.js';
+import { RequirePermission } from '../auth/permissions.guard.js';
 
 /** `SpecimenTest` is exposed as `/tests` (docs/domain/entities.md). */
 @Controller('tests')
@@ -32,6 +33,7 @@ export class SpecimenTestsController {
   }
 
   /** Saves a sheet's press readings; each row completes (or corrects) its test. */
+  @RequirePermission('records.capture')
   @Put('results')
   saveResults(
     @CurrentTenant() tenantId: string,
@@ -41,6 +43,7 @@ export class SpecimenTestsController {
     return this.tests.saveResults(tenantId, user.userId, dto);
   }
 
+  @RequirePermission('records.capture')
   @Patch(':id/schedule')
   reschedule(
     @CurrentTenant() tenantId: string,
