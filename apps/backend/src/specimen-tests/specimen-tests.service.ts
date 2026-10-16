@@ -1,7 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { AuthService } from '../auth/auth.service.js';
+import { HolidaysService } from '../catalogs/holidays.service.js';
 import type { Prisma, SpecimenTestStatus } from '../generated/prisma/client.js';
+import {
+  addDays,
+  CalendarDate,
+  calendarDateFromDb,
+  compareCalendarDates,
+  InvalidCalendarDateError,
+  parseCalendarDate,
+} from '../shared/dates/calendar-date.js';
+import { timeOfDayFromDb } from '../shared/dates/time-of-day.js';
 import { PrismaService } from '../shared/prisma/prisma.service.js';
 import { assignSpecimensToAges, type TestAgeRule } from './domain/test-schedule.js';
+import type { PendingTestsQueryDto } from './dto/pending-tests.dto.js';
+import { buildPendingList, type PendingCandidate, type PendingTest } from './pending-tests.js';
+
+const DEFAULT_WINDOW_DAYS = 7;
+/** A shift past Sundays and holidays never exceeds a few days; load holidays with margin. */
+const HOLIDAY_MARGIN_DAYS = 14;
 
 /** A sample's specimens, as the field-records module hands them over for planning. */
 export interface SampleToPlan {
@@ -18,10 +35,100 @@ export interface SpecimenTestBrief {
 
 /**
  * Owns `specimen_tests`. Every method takes `tenantId` first.
+ *
+ * The pending list is a documented read query (like the Bitácora, ADR-004): it reads
+ * specimens, samples, deliveries, field records and projects through Prisma relations,
+ * never writes them.
  */
 @Injectable()
 export class SpecimenTestsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auth: AuthService,
+    private readonly holidays: HolidaysService,
+  ) {}
+
+  /**
+   * Open tests (SCHEDULED / IN_PROGRESS) whose scheduled date is on or before `until`,
+   * overdue ones included, with their derived dates and due status (6.5).
+   * At the lab's volume (A-50) the open tests fit in memory, so dates are derived here.
+   */
+  async pending(tenantId: string, query: PendingTestsQueryDto): Promise<PendingTest[]> {
+    const today = await this.auth.tenantToday(tenantId);
+    const until = query.until ? parseDate(query.until) : addDays(today, DEFAULT_WINDOW_DAYS);
+
+    const rows = await this.prisma.specimenTest.findMany({
+      where: {
+        tenantId,
+        status: { in: ['SCHEDULED', 'IN_PROGRESS'] },
+        specimen: {
+          status: 'CREATED',
+          ...(query.projectId && { projectId: query.projectId }),
+        },
+      },
+      include: {
+        specimen: {
+          include: {
+            project: { select: { id: true, name: true, code: true } },
+            sample: {
+              include: {
+                delivery: {
+                  include: {
+                    fieldRecord: {
+                      select: {
+                        id: true,
+                        registrySequence: true,
+                        pourDate: true,
+                        castElement: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const candidates: PendingCandidate[] = rows.map((r) => {
+      const { specimen } = r;
+      const record = specimen.sample.delivery.fieldRecord;
+      return {
+        id: r.id,
+        status: r.status as PendingCandidate['status'],
+        ageDays: r.ageDays,
+        keepExactDate: r.keepExactDate,
+        specimen: {
+          id: specimen.id,
+          specimenNumber: specimen.specimenNumber,
+          moldCode: specimen.moldCode,
+        },
+        sample: {
+          sampleNumber: specimen.sample.sampleNumber,
+          moldedAt: specimen.sample.moldedAt ? timeOfDayFromDb(specimen.sample.moldedAt) : null,
+        },
+        fieldRecord: {
+          id: record.id,
+          registrySequence: record.registrySequence,
+          pourDate: calendarDateFromDb(record.pourDate),
+          castElement: record.castElement,
+        },
+        project: specimen.project,
+      };
+    });
+    if (candidates.length === 0) return [];
+
+    const earliest = candidates
+      .map((c) => addDays(c.fieldRecord.pourDate, c.ageDays))
+      .reduce((min, d) => (compareCalendarDates(d, min) < 0 ? d : min));
+    const holidays = await this.holidays.holidaySet(
+      tenantId,
+      earliest,
+      addDays(until, HOLIDAY_MARGIN_DAYS),
+    );
+    return buildPendingList(candidates, today, until, (d) => holidays.has(d));
+  }
 
   /**
    * Plans one SCHEDULED test per specimen with the project's default ages (Q-20),
@@ -58,5 +165,14 @@ export class SpecimenTestsService {
       select: { id: true, specimenId: true, ageDays: true, keepExactDate: true, status: true },
       orderBy: { createdAt: 'asc' },
     });
+  }
+}
+
+function parseDate(value: string): CalendarDate {
+  try {
+    return parseCalendarDate(value);
+  } catch (error) {
+    if (error instanceof InvalidCalendarDateError) throw new BadRequestException([error.message]);
+    throw error;
   }
 }

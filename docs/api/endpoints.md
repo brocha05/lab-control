@@ -56,7 +56,7 @@ Bodies follow FPC01-01 ([analysis](../domain/analysis/FPC01-01.md)). Column list
 
 | Method | Path | Purpose | Phase |
 |--------|------|---------|-------|
-| GET | `/tests/pending` | `?until=YYYY-MM-DD&projectId=` → tests with derived `scheduledDate`, `dueStatus` | 6 |
+| GET | `/tests/pending` | `?until=YYYY-MM-DD` (default today + 7) `&projectId=` → open tests with `nominalDate`, `scheduledDate` (Sunday/holiday shift), `dueStatus`, specimen/sample/record/project context; overdue included, sorted by date | 6 ✅ |
 | GET | `/projects/:id/tests?testDate=YYYY-MM-DD` | Compression worksheet FPC06-01 (derived, A-72) | 7 |
 | GET | `/tests/:id` | Detail incl. specimen/record context | 7 |
 | PATCH | `/tests/:id/schedule` | Change `ageDays` / `keepExactDate` while not completed (Q-21, Q-22) | 6 |

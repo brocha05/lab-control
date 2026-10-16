@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { User, UserRole } from '../generated/prisma/client.js';
 import type { Env } from '../shared/config/env.validation.js';
+import { CalendarDate, calendarDateInTimeZone } from '../shared/dates/calendar-date.js';
 import { PrismaService } from '../shared/prisma/prisma.service.js';
 import type { AuthenticatedUser } from '../shared/tenancy/authenticated-user.js';
 import { hashPassword, verifyPassword } from './domain/password.js';
@@ -134,6 +135,16 @@ export class AuthService {
       user: toView(user),
       tenant: { id: tenant.id, name: tenant.name, slug: tenant.slug, timezone: tenant.timezone },
     };
+  }
+
+  /** "Today" for the lab: the calendar date in its timezone (A-14). */
+  async tenantToday(tenantId: string, now: Date = new Date()): Promise<CalendarDate> {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { timezone: true },
+    });
+    if (!tenant) throw new UnauthorizedException('Unknown tenant');
+    return calendarDateInTimeZone(tenant.timezone, now);
   }
 
   /** Used by the JWT guard. Throws 401 for any invalid, expired or malformed token. */

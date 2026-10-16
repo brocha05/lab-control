@@ -70,7 +70,7 @@ cross-tenant test.
 - [x] 6.3 ✅ `assignSpecimensToAges`: ascending specimen numbers → ascending ages (Q-14)
 - [x] 6.4 ✅ Migration `specimen_tests`; `complete` plans one SCHEDULED test per specimen with the project's default ages in the same transaction (422 if the project has no ages); the record view shows each specimen's test
 - [ ] 6.4b `PATCH /tests/:id/schedule`: change a test's age / exact-date flag until it is tested (Q-22)
-- [ ] 6.5 `GET /tests/pending` with derived `scheduledDate` + `dueStatus` (today in tenant TZ)
+- [x] 6.5 ✅ `GET /tests/pending?until&projectId`: open tests with derived nominal/scheduled date (Sunday/holiday shift), `dueStatus` against today in the lab's timezone, overdue included
 - [ ] 6.6 Frontend: pending tests page (overdue / today / upcoming)
 
 ## Phase 7 — Test results (readings and formulas known)
