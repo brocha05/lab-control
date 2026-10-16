@@ -145,3 +145,10 @@ Sources and context: [analysis/](analysis/README.md).
 | Q-84 | P2 | What is the age tolerance for ages not listed in NMX-C-083 (e.g. 56 days)? | | | `ageTolerance()` returns null |
 | Q-85 | P1 | Please send the historical Excel (Jul 2025 – 2026) for the import. | | | Import task |
 | Q-86 | P1 | When a test moves from a Sunday to Monday (3 → 4 days), does the worksheet/report print age 3 or 4? Is the age tolerance then checked against 4 days (no tolerance listed) or flagged as outside 3 days ± 2 h? | | | `checkAgeTolerance()` currently says OUTSIDE |
+| Q-87 | P2 | When a sample has a different number of specimens than the project's ages (e.g. 5 for 2 + 2), which age do the extra ones get? | | | `assignSpecimensToAges` (A-82: the last age) |
+| Q-88 | P1 | Thermometer and hygrometer codes and the specimen type were blank on MCH-068. Are they required to finish a record? | | | `missingForCompletion` (optional today) |
+| Q-89 | P0 | The age tolerance needs the time of each break, but FPC06-01 has no time column. Do they write it down? Can the system ask for it when results are entered? | | | `specimen_tests.test_time`, Phase 7 |
+| Q-90 | P2 | If a field record is cancelled, is its MCH number lost or reused? | | | Numbering (lost today) |
+| Q-91 | P1 | Should the Bitácora export match their current Excel (FPC01-02 columns, one tab per project)? | | | Phase 8.3 |
+| Q-92 | P2 | How many days ahead do they plan breaks? Is a printed list of the day's tests useful? | | | Pending tests (7 days by default) |
+| Q-93 | P1 | Who may change a test's age or cancel a damaged specimen: only the Coordinador del SGC, or the Jefe de Laboratorio too? | | | Permissions (Phase 10.1) |

@@ -107,5 +107,5 @@ Introduced while modelling FPC01-01, FPC01-02, FPC06-01 and FPC06-04
 | A-78 | Holidays come from a calendar the lab maintains. Until it exists, only Sundays move a test date. | The lab didn't say which holidays apply. | OPEN | Q-81 |
 | A-79 | The front number ("F1") is stored per field record, default 1. | Q-56: a project can have several fronts. Where the front is chosen isn't on the form. | OPEN | Q-79 |
 | A-80 | Per-age averages are computed from the rounded values and printed with one decimal. | Q-26 ("con valores redondeados") + the report layout (one decimal). | OPEN | Q-80 |
-| A-82 | When a sample's specimens don't match the project's default ages (e.g. 5 specimens for 2 + 2), extra specimens go to the last age and missing ones shorten the last ages. The user then edits single tests. | Q-14 says splits vary; planning shouldn't block completion. | OPEN | Q-14, Q-22 |
+| A-82 | When a sample's specimens don't match the project's default ages (e.g. 5 specimens for 2 + 2), extra specimens go to the last age and missing ones shorten the last ages. The user then edits single tests. | Q-14 says splits vary; planning shouldn't block completion. | OPEN | Q-14, Q-22, Q-87 |
 | A-81 | The Jefe de Control de Calidad (`QUALITY_MANAGER`) administers users. | Top of the hierarchy and sole report authorizer (Q-39/Q-40). | OPEN | Q-83 |

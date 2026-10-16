@@ -11,7 +11,7 @@ cross-tenant test.
 - [x] 0.3 ✅ For each document received: run the checklist and write `docs/domain/analysis/<doc>.md` (2026-10-14: FPC01-01, FPC01-02, FPC06-01, FPC06-04)
 - [x] 0.4 ✅ Update assumptions / open-questions. "Proposed model changes": [analysis/README.md](../domain/analysis/README.md)
 - [x] 0.5 ✅ Questionnaire answered by the lab (2026-10-15): conflicts resolved, numbering, formulas, scheduling, roles. [analysis/questionnaire-2026-10-15.md](../domain/analysis/questionnaire-2026-10-15.md)
-- [ ] 0.7 Follow-up questions Q-79 … Q-86 (front numbering, MPa input, holidays, partial reports, user admin, unlisted tolerances, historical Excel, age after a Sunday shift)
+- [ ] 0.7 Follow-up questions Q-79 … Q-93, listed in section 9 of the online questionnaire (front numbering, MPa input, holidays, partial reports, user admin, unlisted tolerances, historical Excel, age after a Sunday shift, extra specimens, optional field-record items, break time, cancelled numbers, Bitácora export, planning horizon, who reschedules)
 - [ ] 0.6 Request the remaining documents: the historical Excel (Q-53), one record with several samples, one corrected report, 14/28-day examples, specimen labels, procedures ([checklist §3](../domain/discovery-checklist.md#3-documents-to-request-from-the-laboratory))
 
 ## Phase 1 — Architecture & skeleton
