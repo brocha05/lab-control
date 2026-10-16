@@ -163,3 +163,4 @@ Sources and context: [analysis/](analysis/README.md).
 | Q-97 | P2 | 10×20 cylinders: same worksheet and formulas as 15×30? Cubes: which area? | | | A-87 |
 | Q-98 | P2 | Is the failure type required for every specimen, or only when observed? | | | A-89 |
 | Q-99 | P2 | Should the system keep the sheet's observaciones and the names of who signed it, or is paper enough? | | | Printable worksheet (A-91) |
+| Q-100 | P2 | Do cancelled specimens and cancelled or draft records appear in the Bitácora (e.g. marked as cancelled)? | | | Bitácora rows (A-92, A-93) |

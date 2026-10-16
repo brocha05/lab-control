@@ -118,3 +118,7 @@ Introduced while modelling FPC01-01, FPC01-02, FPC06-01 and FPC06-04
 | A-89 | The failure type (1–6, NMX-C-083 patterns) is optional per specimen. | Q-60: the worksheet is authoritative but often leaves it blank. | OPEN | Q-60, Q-98 |
 | A-90 | There is no "start" (IN_PROGRESS) step: entering the readings completes the test. | No form shows an in-progress state (A-22). | OPEN | Q-24 |
 | A-91 | The sheet's signatures and observaciones stay on paper; the system prints blank signature lines for the Jefe de laboratorio and the Coordinador del SGC. | Q-69: printable any time, kept signed on paper. | OPEN | Q-99 |
+| A-92 | Cancelled specimens don't appear in the Bitácora. | A damaged specimen has no result to log. | OPEN | Q-100 |
+| A-93 | Only completed field records appear in the Bitácora; drafts and cancelled ones don't. | A draft is still being transcribed. | OPEN | Q-100 |
+| A-94 | Unit weight in the Bitácora is rounded to 1 kg/m³. | Q-67 gave the formula, not the rounding. | OPEN | Q-67 |
+| A-95 | The Excel export follows FPC01-02: a tab per project, record/sample data in merged cells, untested specimens show their scheduled date in grey. | Q-68 (workbook with a tab per project). | OPEN | Q-91 |

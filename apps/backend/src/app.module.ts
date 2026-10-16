@@ -2,6 +2,7 @@ import { Module, RequestMethod } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module.js';
+import { BitacoraModule } from './bitacora/bitacora.module.js';
 import { CatalogsModule } from './catalogs/catalogs.module.js';
 import { ClientsModule } from './clients/clients.module.js';
 import { FieldRecordsModule } from './field-records/field-records.module.js';
@@ -42,6 +43,7 @@ import { PrismaModule } from './shared/prisma/prisma.module.js';
     CatalogsModule,
     FieldRecordsModule,
     SpecimenTestsModule,
+    BitacoraModule,
   ],
   controllers: [HealthController],
 })

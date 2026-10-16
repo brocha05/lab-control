@@ -13,3 +13,5 @@ minimumReleaseAgeExclude:
 
 overrides:
   mysql2: ^3.23.1
+  # exceljs pins uuid 8 (GHSA-w5hq-g745-h8pq); it only calls v4(), same API in 11.
+  uuid: ^11.1.1

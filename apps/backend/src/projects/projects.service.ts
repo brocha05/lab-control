@@ -151,6 +151,16 @@ export class ProjectsService {
     if (found !== 1) throw new NotFoundException('Project not found');
   }
 
+  /** For other modules (Bitácora export): every project id of the tenant, by name. */
+  async listIds(tenantId: string): Promise<string[]> {
+    const rows = await this.prisma.project.findMany({
+      where: { tenantId },
+      select: { id: true },
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
+    });
+    return rows.map((r) => r.id);
+  }
+
   /** For other modules: name and codes of one of the tenant's projects (404 otherwise). */
   async summary(
     tenantId: string,

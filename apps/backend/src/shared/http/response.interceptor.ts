@@ -1,4 +1,10 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+  StreamableFile,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import { map, Observable } from 'rxjs';
 import type { PaginatedResult, ResponseMeta, SuccessApiResponse } from './api-response.js';
@@ -16,15 +22,22 @@ function isPaginated(value: unknown): value is PaginatedResult<unknown> {
   );
 }
 
-/** Wraps every success body as `{ success:true, data, meta:{requestId} }`. */
+/**
+ * Wraps every success body as `{ success:true, data, meta:{requestId} }`. Files
+ * (`StreamableFile`, e.g. the Bitácora export) go out as they are.
+ */
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<SuccessApiResponse<unknown>> {
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<SuccessApiResponse<unknown> | StreamableFile> {
     const req = context.switchToHttp().getRequest<Request & { id?: unknown }>();
     const meta: ResponseMeta = { requestId: requestIdOf(req) };
 
     return next.handle().pipe(
       map((body: unknown) => {
+        if (body instanceof StreamableFile) return body;
         if (isPaginated(body)) {
           const { data: items, ...page } = body;
           return { success: true as const, data: { items, ...page }, meta };
