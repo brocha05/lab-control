@@ -64,11 +64,11 @@ export function ClientDetail({ id }: { id: string }) {
         <h2 className="border-b px-4 py-3.5 text-[15px] font-semibold">Contacto</h2>
         <div className="grid grid-cols-2 gap-x-5 gap-y-3.5 p-4 text-sm">
           <div>
-            <div className="mb-0.5 text-xs text-[#6A6E73]">Contacto principal</div>
+            <div className="mb-0.5 text-xs text-label">Contacto principal</div>
             <div className="font-medium">{client.contactName ?? '—'}</div>
           </div>
           <div>
-            <div className="mb-0.5 text-xs text-[#6A6E73]">Teléfono</div>
+            <div className="mb-0.5 text-xs text-label">Teléfono</div>
             <div className="font-medium">{client.contactPhone ?? '—'}</div>
           </div>
         </div>

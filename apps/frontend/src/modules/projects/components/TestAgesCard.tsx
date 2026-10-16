@@ -137,7 +137,7 @@ function TestAgesEditor({ projectId, saved }: { projectId: string; saved: TestAg
           type="button"
           variant="outline"
           size="sm"
-          className="border-dashed border-[#A9ACB0] text-primary"
+          className="border-dashed border-dash-strong text-primary"
           onClick={() => setRows((rs) => [...rs, { ageDays: '', specimenCount: 2 }])}
         >
           + Agregar edad de ensayo

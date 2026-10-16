@@ -178,7 +178,7 @@ function Stepper({
                   className={cn(
                     'grid h-7 w-7 shrink-0 place-items-center rounded-full border-[1.5px] font-mono text-xs font-semibold',
                     cur
-                      ? 'border-primary bg-primary text-white'
+                      ? 'border-primary bg-primary text-primary-foreground'
                       : done
                         ? 'border-primary bg-sidebar-accent text-primary'
                         : 'border-input bg-card text-subtle'
@@ -484,7 +484,7 @@ function Wizard({
               <Button
                 type="button"
                 size="lg"
-                className="border-st-done-fg bg-st-done-fg hover:bg-[#174F2D]"
+                className="border-st-done-fg bg-st-done-fg hover:bg-st-done-hover"
                 onClick={() => complete.mutate()}
                 disabled={busy || dirty || missing.length > 0}
                 title={dirty ? 'Guarda los cambios antes de completar' : undefined}
@@ -522,8 +522,8 @@ function PlannedAges({ projectId }: { projectId: string }) {
   const { data } = useTestConfiguration(projectId);
   const pourDate = useWatch<FieldRecordValues, 'pourDate'>({ name: 'pourDate' });
   return (
-    <div className="rounded-md border border-st-progress-bd bg-[#F7FAFD]">
-      <div className="border-b border-[#DCE6F3] px-3.5 py-2.5 text-[13px] font-semibold text-accent-foreground">
+    <div className="rounded-md border border-st-progress-bd bg-accent-soft">
+      <div className="border-b border-accent-border px-3.5 py-2.5 text-[13px] font-semibold text-accent-foreground">
         Ensayos que se programarán
       </div>
       <div className="px-3.5 py-2.5 text-[13px]">
@@ -546,7 +546,7 @@ function PlannedAges({ projectId }: { projectId: string }) {
                 </div>
               ))}
             </div>
-            <span className="text-xs text-[#6A6E73]">
+            <span className="text-xs text-label">
               Los especímenes de menor número van a la primera edad. Si la fecha cae en domingo o
               festivo se recorre al día hábil siguiente.
             </span>

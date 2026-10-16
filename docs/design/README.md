@@ -12,7 +12,9 @@ and flow only; fields and rules still come from the lab's documents (`docs/domai
 - IBM Plex Sans for text, IBM Plex Mono for numbers, codes and dates in tables.
 - Status chips with a dot: Pendiente (grey-blue), Hoy (amber), Atrasado (red),
   Completado (green), Borrador (dashed grey), Cancelado (light grey), En proceso (blue).
-- Light only (no dark theme).
+- Light by default; a soft dark variant (warm greys, lighter blue `#4A7FC9`) behind the
+  top-bar toggle, stored per browser. Same tokens redefined under `.dark`; print is
+  always light. Use tokens, never hex classes, so both themes follow.
 
 Tokens live in `apps/frontend/src/app/globals.css`; the domain status → chip mapping in
 `apps/frontend/src/lib/status.ts`.

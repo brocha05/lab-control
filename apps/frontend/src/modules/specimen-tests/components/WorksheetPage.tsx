@@ -372,7 +372,7 @@ function WorksheetEditor({ sheet, editable }: { sheet: Worksheet; editable: bool
                   return (
                     <tr
                       key={row.id}
-                      className={cn('border-b border-row last:border-0', dirty && 'bg-[#F7FAFD]')}
+                      className={cn('border-b border-row last:border-0', dirty && 'bg-accent-soft')}
                     >
                       <td className="h-11 px-3">
                         <span className="font-mono font-semibold">

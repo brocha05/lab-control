@@ -8,6 +8,7 @@ import { useProjects } from '@/modules/projects/hooks/useProjects';
 import { useUiStore } from '@/store/uiStore';
 import { MAX_PAGE_SIZE } from '@/types';
 import { Can } from '@/components/shared/Can';
+import { ThemeToggle } from './ThemeToggle';
 
 function Breadcrumbs() {
   const crumbs = useUiStore((s) => s.crumbs);
@@ -21,7 +22,7 @@ function Breadcrumbs() {
           <Fragment key={`${i}-${c.label}`}>
             {i > 0 && (
               <span
-                className={`text-[13px] text-[#B5B8BC] ${i < crumbs.length - 1 ? 'hidden md:inline' : ''}`}
+                className={`text-[13px] text-fainter ${i < crumbs.length - 1 ? 'hidden md:inline' : ''}`}
               >
                 /
               </span>
@@ -29,13 +30,13 @@ function Breadcrumbs() {
             {c.href && !last ? (
               <Link
                 href={c.href}
-                className={`truncate text-[13px] text-[#6A6E73] hover:text-foreground ${hideOnMobile ? 'hidden md:inline' : ''}`}
+                className={`truncate text-[13px] text-label hover:text-foreground ${hideOnMobile ? 'hidden md:inline' : ''}`}
               >
                 {c.label}
               </Link>
             ) : (
               <span
-                className={`truncate text-[13px] ${last ? 'font-medium text-foreground' : 'text-[#6A6E73]'} ${hideOnMobile ? 'hidden md:inline' : ''}`}
+                className={`truncate text-[13px] ${last ? 'font-medium text-foreground' : 'text-label'} ${hideOnMobile ? 'hidden md:inline' : ''}`}
                 aria-current={last ? 'page' : undefined}
               >
                 {c.label}
@@ -58,7 +59,7 @@ function ProjectPicker() {
 
   return (
     <label className="hidden h-9 items-center gap-2 rounded-md border bg-surface pl-3 pr-1 md:flex">
-      <span className="text-xs text-[#6A6E73]">Proyecto</span>
+      <span className="text-xs text-label">Proyecto</span>
       <select
         value={value}
         onChange={(e) => setCurrentProjectId(e.target.value)}
@@ -92,6 +93,7 @@ export function Topbar() {
       </Button>
       <Breadcrumbs />
       <ProjectPicker />
+      <ThemeToggle />
       <Can permission="records.capture">
         <Button onClick={() => setNewRecordOpen(true)} aria-label="Nuevo registro">
           <Plus strokeWidth={2} />

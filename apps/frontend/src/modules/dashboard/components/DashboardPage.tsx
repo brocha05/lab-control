@@ -176,7 +176,7 @@ export function DashboardPage() {
                       <Badge tone={look.tone}>{look.label}</Badge>
                     </TableCell>
                     <TableCell>
-                      <ChevronRight className="h-4 w-4 text-[#9A9DA1]" />
+                      <ChevronRight className="h-4 w-4 text-faint" />
                     </TableCell>
                   </TableRow>
                 );

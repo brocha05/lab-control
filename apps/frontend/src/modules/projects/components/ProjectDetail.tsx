@@ -93,13 +93,13 @@ export function ProjectDetail({ id }: { id: string }) {
             </div>
             <div className="mt-3 flex flex-wrap gap-x-7 gap-y-2 text-[13px]">
               <div>
-                <span className="text-[#6A6E73]">Cliente</span>{' '}
+                <span className="text-label">Cliente</span>{' '}
                 <Link href={`/clients/${project.client.id}`} className="font-medium text-primary">
                   {project.client.name}
                 </Link>
               </div>
               <div>
-                <span className="text-[#6A6E73]">Ubicación</span>{' '}
+                <span className="text-label">Ubicación</span>{' '}
                 <span className="font-medium">{project.location ?? '—'}</span>
               </div>
             </div>
@@ -131,7 +131,7 @@ export function ProjectDetail({ id }: { id: string }) {
               >
                 {t.label}
                 {count !== undefined && (
-                  <span className="rounded-full bg-row px-1.5 py-px font-mono text-[11px] text-[#6A6E73]">
+                  <span className="rounded-full bg-row px-1.5 py-px font-mono text-[11px] text-label">
                     {count}
                   </span>
                 )}
@@ -171,7 +171,7 @@ export function ProjectDetail({ id }: { id: string }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <div className="mb-0.5 text-xs text-[#6A6E73]">{label}</div>
+      <div className="mb-0.5 text-xs text-label">{label}</div>
       <div className="font-medium">{children}</div>
     </div>
   );
@@ -226,7 +226,7 @@ function Summary({
             ))}
           </div>
           <div className="flex flex-col gap-0.5 px-4 py-3">
-            <div className="mb-1.5 text-xs text-[#6A6E73]">Próximos ensayos</div>
+            <div className="mb-1.5 text-xs text-label">Próximos ensayos</div>
             {next.map((t) => {
               const look = DUE_STATUS[t.dueStatus];
               return (

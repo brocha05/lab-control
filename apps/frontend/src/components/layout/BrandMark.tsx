@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils/cn';
 export function BrandMark({ className }: { className?: string }) {
   return (
     <div className={cn('flex min-w-0 items-center gap-2.5', className)}>
-      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-[5px] bg-foreground font-mono text-[11px] font-medium tracking-[0.02em] text-white">
+      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-[5px] bg-foreground font-mono text-[11px] font-medium tracking-[0.02em] text-background">
         LCC
       </div>
       <div className="min-w-0 leading-tight">

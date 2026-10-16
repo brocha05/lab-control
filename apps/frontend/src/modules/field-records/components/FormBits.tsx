@@ -16,7 +16,7 @@ interface BaseProps {
   hint?: string;
 }
 
-const labelClass = 'text-[13px] font-medium text-[#33363A]';
+const labelClass = 'text-[13px] font-medium text-strong';
 
 export function TextField({
   name,
@@ -45,7 +45,7 @@ export function TextField({
           </span>
         )}
       </div>
-      {hint && <p className="text-xs text-[#6A6E73]">{hint}</p>}
+      {hint && <p className="text-xs text-label">{hint}</p>}
     </div>
   );
 }
@@ -105,7 +105,7 @@ export function TextAreaField({
         className="flex w-full resize-y rounded-md border border-input bg-card px-2.5 py-2 text-sm disabled:bg-surface disabled:opacity-70"
         {...register(name)}
       />
-      {hint && <p className="text-xs text-[#6A6E73]">{hint}</p>}
+      {hint && <p className="text-xs text-label">{hint}</p>}
     </div>
   );
 }

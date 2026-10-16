@@ -67,8 +67,8 @@ const TILE: Record<DueStatus, { active: string; dot: string; value: string }> = 
 };
 
 const ROW_BG: Record<DueStatus, string> = {
-  OVERDUE: 'bg-[#FFFAFA]',
-  DUE_TODAY: 'bg-[#FFFDF6]',
+  OVERDUE: 'bg-st-late-row',
+  DUE_TODAY: 'bg-st-today-row',
   UPCOMING: '',
 };
 
@@ -158,7 +158,7 @@ export function PendingTestsView({ projectId: fixedProject }: { projectId?: stri
               >
                 {isLoading ? '—' : value}
               </span>
-              <span className="text-xs text-[#6A6E73]">{t.sub}</span>
+              <span className="text-xs text-label">{t.sub}</span>
             </button>
           );
         })}
@@ -340,7 +340,7 @@ function PendingTable({
               <TableCell className="h-[52px]">
                 <span className="flex flex-col leading-snug">
                   {showProject && <span className="font-medium">{t.project.name}</span>}
-                  <span className={showProject ? 'text-xs text-[#6A6E73]' : ''}>
+                  <span className={showProject ? 'text-xs text-label' : ''}>
                     {t.fieldRecord.castElement ?? '—'}
                   </span>
                 </span>
@@ -408,9 +408,7 @@ function PendingCard({
         <div>
           <div className="font-mono text-[15px] font-medium">
             Esp. {t.specimen.specimenNumber ?? '—'}{' '}
-            <span className="text-[13px] text-[#6A6E73]">
-              · Muestra {t.sample.sampleNumber ?? '—'}
-            </span>
+            <span className="text-[13px] text-label">· Muestra {t.sample.sampleNumber ?? '—'}</span>
           </div>
           <div className="mt-0.5 text-[13px] text-muted-foreground">
             {t.project.name} · {t.fieldRecord.registryNumber ?? '—'}

@@ -105,7 +105,7 @@ export function PlannedTestsSection({ record }: { record: FieldRecordDetail }) {
                   {test?.stressKgCm2 != null ? (
                     <>
                       <span className="font-mono font-semibold">{test.stressKgCm2}</span>{' '}
-                      <span className="text-xs text-[#6A6E73]">
+                      <span className="text-xs text-label">
                         kg/cm² · {test.percentOfDesign?.toFixed(1)}%
                       </span>
                     </>

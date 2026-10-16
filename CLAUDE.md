@@ -145,7 +145,7 @@ callers get `data` directly), and refreshes on 401. It sends no tenant header.
 `src/proxy.ts` is the Next 16 route guard (cookie `access-token`), a UX redirect only.
 Zustand is for auth/UI state (`store/uiStore.ts`: top-bar project, breadcrumbs set with
 `useBreadcrumbs`, "Nuevo registro" dialog); server data goes through TanStack Query. UI
-text is Spanish (A-40). Visual system (tokens, status chips, light only):
+text is Spanish (A-40). Visual system (tokens, status chips, light + soft dark via `.dark`):
 `docs/design/README.md`; domain status → chip in `src/lib/status.ts`. Field records live
 under their project (no global list); a DRAFT opens as the step wizard. Format domain dates with the `formatDate*` helpers in
 `lib/utils/formatters.ts`, never `new Date('YYYY-MM-DD')`.

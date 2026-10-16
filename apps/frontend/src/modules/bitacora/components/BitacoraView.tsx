@@ -209,7 +209,7 @@ function RecordRows({ record: r }: { record: BitacoraRecord }) {
       const firstOfRecord = si === 0 && k === 0;
       const firstOfSample = k === 0;
       rows.push(
-        <tr key={`${s.id}:${sp?.id ?? 'none'}`} className="hover:bg-[#F8F8F6]">
+        <tr key={`${s.id}:${sp?.id ?? 'none'}`} className="hover:bg-row-hover">
           {firstOfRecord && (
             <>
               <td rowSpan={recordSpan} className={cn(td, 'whitespace-nowrap font-mono')}>

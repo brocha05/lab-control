@@ -27,7 +27,7 @@ export function FilterChips<T extends string>({
             className={cn(
               'h-[30px] whitespace-nowrap rounded-full border px-[11px] text-[13px] font-medium transition-colors',
               active
-                ? 'border-foreground bg-foreground text-white'
+                ? 'border-foreground bg-foreground text-background'
                 : 'border-input bg-card text-sidebar-foreground hover:bg-surface'
             )}
           >

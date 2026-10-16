@@ -122,7 +122,7 @@ export function ClientsPage() {
                     <span className="flex flex-col leading-snug">
                       <span>{client.contactName ?? '—'}</span>
                       {client.contactPhone && (
-                        <span className="text-xs text-[#6A6E73]">{client.contactPhone}</span>
+                        <span className="text-xs text-label">{client.contactPhone}</span>
                       )}
                     </span>
                   </TableCell>

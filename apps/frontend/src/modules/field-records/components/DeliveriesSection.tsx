@@ -114,7 +114,7 @@ function DeliveryRow({
         <TextField name={`${p}.ticketNumber`} label="Remisión / placas" className="lg:col-span-2" />
         <NumberField name={`${p}.volumeM3`} label="Volumen" unit="m³" step="0.01" />
         <div className="space-y-1.5">
-          <p className="text-[13px] font-medium text-[#33363A]">Acumulado</p>
+          <p className="text-[13px] font-medium text-strong">Acumulado</p>
           <p className="flex h-[38px] items-center font-mono text-sm">
             {cumulative ?? '—'} <span className="ml-1 text-[13px] text-subtle">m³</span>
           </p>
@@ -208,7 +208,7 @@ function SamplesEditor({
   };
 
   return (
-    <div className="border-t bg-[#FCFCFB] px-3 py-3">
+    <div className="border-t bg-sunken px-3 py-3">
       {fields.map((field, j) => (
         <SampleEditor
           key={field.id}
@@ -267,7 +267,7 @@ function SampleEditor({
         </Button>
       </div>
 
-      <p className="mb-1.5 text-[13px] font-medium text-[#33363A]">
+      <p className="mb-1.5 text-[13px] font-medium text-strong">
         Especímenes (clave de espécimen · clave de molde, en el orden de la hoja)
       </p>
       <div className="flex flex-wrap gap-2">

@@ -31,7 +31,7 @@ function Card({ title, items, onEdit }: { title: string; items: Item[]; onEdit?:
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 px-3.5 py-2.5 text-[13px]">
         {items.map((i) => (
           <div key={i.k} className="contents">
-            <dt className="text-[#6A6E73]">{i.k}</dt>
+            <dt className="text-label">{i.k}</dt>
             <dd className={`text-right font-medium ${i.mono ? 'font-mono' : ''}`}>{i.v}</dd>
           </div>
         ))}
@@ -119,8 +119,8 @@ export function RecordSummary({
       <div className="overflow-hidden rounded-md border bg-card">
         <div className="flex items-center justify-between border-b border-row px-3.5 py-2.5">
           <span className="text-[13px] font-semibold">
-            Entregas <span className="font-mono text-[#6A6E73]">({values.deliveries.length})</span>
-            {' · '}Muestras <span className="font-mono text-[#6A6E73]">({samples.length})</span>
+            Entregas <span className="font-mono text-label">({values.deliveries.length})</span>
+            {' · '}Muestras <span className="font-mono text-label">({samples.length})</span>
           </span>
           {onEditStep && (
             <button

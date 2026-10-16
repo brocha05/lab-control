@@ -3,8 +3,11 @@
 /*
  * Visual system from the "Laboratorio" design (docs/design/README.md): warm grey canvas,
  * white panels, one blue for actions, IBM Plex Sans for text and IBM Plex Mono for
- * numbers and codes. Light only.
+ * numbers and codes. A soft dark variant (`.dark` on <html>, ThemeToggle) redefines the
+ * same tokens; printing always uses the light ones.
  */
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* ─── TailwindCSS v4: map CSS variables → utility classes ─────────────────── */
 @theme inline {
@@ -36,36 +39,50 @@
   --color-sidebar-accent: var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--accent-foreground);
   --color-sidebar-border: var(--border);
+  --color-label: var(--label);
+  --color-strong: var(--strong);
+  --color-faint: var(--faint);
+  --color-fainter: var(--fainter);
+  --color-row-hover: var(--row-hover);
+  --color-sunken: var(--sunken);
+  --color-skeleton: var(--skeleton);
+  --color-dash: var(--dash);
+  --color-dash-strong: var(--dash-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-border: var(--accent-border);
 
   /* Status tones (badges, tiles, rows). */
-  --color-st-pending: #f3f5f8;
-  --color-st-pending-fg: #3d4b5c;
-  --color-st-pending-bd: #d9dfe7;
-  --color-st-pending-dot: #8794a5;
-  --color-st-today: #fff5dc;
-  --color-st-today-fg: #7a4f00;
-  --color-st-today-bd: #f0d89c;
-  --color-st-today-dot: #d99a0b;
-  --color-st-late: #fdedec;
-  --color-st-late-fg: #9b2420;
-  --color-st-late-bd: #f3c9c6;
-  --color-st-late-dot: #c9342e;
-  --color-st-done: #e9f5ee;
-  --color-st-done-fg: #1d6339;
-  --color-st-done-bd: #c6e3d1;
-  --color-st-done-dot: #2f8a55;
-  --color-st-draft: #f7f7f5;
-  --color-st-draft-fg: #55585d;
-  --color-st-draft-bd: #b9bbbe;
-  --color-st-draft-dot: #a3a6aa;
-  --color-st-off: #f3f3f3;
-  --color-st-off-fg: #7a7d82;
-  --color-st-off-bd: #e0e0e0;
-  --color-st-off-dot: #b4b6b9;
-  --color-st-progress: #ebf1f9;
-  --color-st-progress-fg: #1d4f91;
-  --color-st-progress-bd: #ccdbee;
-  --color-st-progress-dot: #2f6bc0;
+  --color-st-pending: var(--st-pending);
+  --color-st-pending-fg: var(--st-pending-fg);
+  --color-st-pending-bd: var(--st-pending-bd);
+  --color-st-pending-dot: var(--st-pending-dot);
+  --color-st-today: var(--st-today);
+  --color-st-today-fg: var(--st-today-fg);
+  --color-st-today-bd: var(--st-today-bd);
+  --color-st-today-dot: var(--st-today-dot);
+  --color-st-late: var(--st-late);
+  --color-st-late-fg: var(--st-late-fg);
+  --color-st-late-bd: var(--st-late-bd);
+  --color-st-late-dot: var(--st-late-dot);
+  --color-st-done: var(--st-done);
+  --color-st-done-fg: var(--st-done-fg);
+  --color-st-done-bd: var(--st-done-bd);
+  --color-st-done-dot: var(--st-done-dot);
+  --color-st-draft: var(--st-draft);
+  --color-st-draft-fg: var(--st-draft-fg);
+  --color-st-draft-bd: var(--st-draft-bd);
+  --color-st-draft-dot: var(--st-draft-dot);
+  --color-st-off: var(--st-off);
+  --color-st-off-fg: var(--st-off-fg);
+  --color-st-off-bd: var(--st-off-bd);
+  --color-st-off-dot: var(--st-off-dot);
+  --color-st-progress: var(--st-progress);
+  --color-st-progress-fg: var(--st-progress-fg);
+  --color-st-progress-bd: var(--st-progress-bd);
+  --color-st-progress-dot: var(--st-progress-dot);
+  --color-st-done-hover: var(--st-done-hover);
+  --color-st-today-row: var(--st-today-row);
+  --color-st-late-row: var(--st-late-row);
 
   --radius-lg: 8px;
   --radius-md: 6px;
@@ -111,6 +128,120 @@
   --sidebar: #fbfbf9;
   --sidebar-foreground: #3a3d41;
   --sidebar-accent: #e6edf7;
+  --label: #6a6e73;
+  --strong: #33363a;
+  --faint: #9a9da1;
+  --fainter: #b5b8bc;
+  --row-hover: #f8f8f6;
+  --sunken: #fcfcfb;
+  --skeleton: #ededea;
+  --dash: #c9cbce;
+  --dash-strong: #a9acb0;
+  --accent-soft: #f7fafd;
+  --accent-border: #dce6f3;
+
+  --st-pending: #f3f5f8;
+  --st-pending-fg: #3d4b5c;
+  --st-pending-bd: #d9dfe7;
+  --st-pending-dot: #8794a5;
+  --st-today: #fff5dc;
+  --st-today-fg: #7a4f00;
+  --st-today-bd: #f0d89c;
+  --st-today-dot: #d99a0b;
+  --st-late: #fdedec;
+  --st-late-fg: #9b2420;
+  --st-late-bd: #f3c9c6;
+  --st-late-dot: #c9342e;
+  --st-done: #e9f5ee;
+  --st-done-fg: #1d6339;
+  --st-done-bd: #c6e3d1;
+  --st-done-dot: #2f8a55;
+  --st-draft: #f7f7f5;
+  --st-draft-fg: #55585d;
+  --st-draft-bd: #b9bbbe;
+  --st-draft-dot: #a3a6aa;
+  --st-off: #f3f3f3;
+  --st-off-fg: #7a7d82;
+  --st-off-bd: #e0e0e0;
+  --st-off-dot: #b4b6b9;
+  --st-progress: #ebf1f9;
+  --st-progress-fg: #1d4f91;
+  --st-progress-bd: #ccdbee;
+  --st-progress-dot: #2f6bc0;
+  --st-done-hover: #174f2d;
+  --st-today-row: #fffdf6;
+  --st-late-row: #fffafa;
+}
+
+/* Soft dark: warm greys like the light canvas, a lighter blue for contrast. Screen only. */
+@media screen {
+  .dark {
+    color-scheme: dark;
+    --background: #1d1e1c;
+    --foreground: #e4e4e0;
+    --card: #252624;
+    --primary: #4a7fc9;
+    --primary-hover: #5b8dd3;
+    --primary-foreground: #ffffff;
+    --secondary: #2d2e2c;
+    --muted: #2d2e2c;
+    --muted-foreground: #a4a7aa;
+    --subtle: #8d9094;
+    --surface: #222321;
+    --accent: #263449;
+    --accent-foreground: #aecaef;
+    --destructive: #e0645e;
+    --border: #363734;
+    --row: #2f302e;
+    --input: #474845;
+    --ring: #3e6296;
+    --sidebar: #212220;
+    --sidebar-foreground: #c9cbcd;
+    --sidebar-accent: #2a3a52;
+    --label: #9a9da1;
+    --strong: #d4d6d8;
+    --faint: #73767a;
+    --fainter: #5c5f62;
+    --row-hover: #2a2b29;
+    --sunken: #212220;
+    --skeleton: #30312f;
+    --dash: #50524f;
+    --dash-strong: #63655f;
+    --accent-soft: #232b37;
+    --accent-border: #30445f;
+
+    --st-pending: #2a2f36;
+    --st-pending-fg: #b9c4d2;
+    --st-pending-bd: #3c4654;
+    --st-pending-dot: #8794a5;
+    --st-today: #372e1d;
+    --st-today-fg: #efc56c;
+    --st-today-bd: #5a4824;
+    --st-today-dot: #d99a0b;
+    --st-late: #3b2423;
+    --st-late-fg: #f0a29d;
+    --st-late-bd: #5e3330;
+    --st-late-dot: #e0645e;
+    --st-done: #1f3328;
+    --st-done-fg: #93d3ad;
+    --st-done-bd: #2e4f3b;
+    --st-done-dot: #44a46c;
+    --st-draft: #2a2b29;
+    --st-draft-fg: #b6b8bb;
+    --st-draft-bd: #575956;
+    --st-draft-dot: #7f8285;
+    --st-off: #272826;
+    --st-off-fg: #8d9094;
+    --st-off-bd: #3b3c3a;
+    --st-off-dot: #626568;
+    --st-progress: #263449;
+    --st-progress-fg: #aecaef;
+    --st-progress-bd: #30445f;
+    --st-progress-dot: #4a7fc9;
+    --st-done-hover: #2f7a4e;
+    --st-today-row: #2a261d;
+    --st-late-row: #2c2120;
+  }
 }
 
 /* ─── Base styles ─────────────────────────────────────────────────────────── */
