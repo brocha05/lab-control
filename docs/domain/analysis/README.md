@@ -11,6 +11,7 @@ registro MCH-068, muestra 102, specimens 405–408, report MAR-PVLT-F1-CTO-REC-0
 | FPC06-01 | Registro de resultados de resistencia a la compresión (cilindros), 3 and 7 days | [FPC06-01.md](FPC06-01.md) |
 | FPC06-04 | Informe de pruebas de control de concreto hidráulico | [FPC06-04.md](FPC06-04.md) |
 | — | `docs/general_flow.png` (process diagram from the product owner) | below |
+| — | Lab questionnaire, answered 2026-10-15 (Word file, not in git) | [questionnaire-2026-10-15.md](questionnaire-2026-10-15.md) |
 
 ## Process (general_flow.png + documents)
 
@@ -55,10 +56,14 @@ Deliberately **not** done:
   sample, specimen or report numbers (Q-55…Q-58).
 - `ProjectTestConfiguration` is unchanged (A-10 still open; see Q-20, Q-74).
 
-## Conflicts that need an answer from the lab
+## Conflicts (resolved 2026-10-15)
 
-1. **% de resistencia rounding** (Q-59): Bitácora and worksheet compute it from the
-   rounded stress; the report computes it from the unrounded stress.
-2. **Tipo de falla** for 407 (Q-60): "3" on the worksheet, "-" on the report.
-3. **Report number** (Q-56): the file name says "CON-REC-068", the PDF says "CTO-REC-068".
-4. **Obra name** (Q-78): three spellings across three forms.
+1. **% de resistencia rounding** (Q-59): the **rounded** stress is official; the report
+   value (84.6) was wrong.
+2. **Tipo de falla** for 407 (Q-60): the **worksheet** ("3") is official.
+3. **Report number** (Q-56): **CTO** is correct.
+4. **Obra name** (Q-78): the **report's** spelling is the official name.
+
+The questionnaire also changed several of the model changes above (ticket values per
+delivery, report-only fields captured at report time, numbering per project, real
+roles). See [questionnaire-2026-10-15.md](questionnaire-2026-10-15.md).

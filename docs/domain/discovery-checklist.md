@@ -111,6 +111,7 @@ client asking for a partial report, a pour cancelled mid-way.
 | FPC06-01 | Registro de resultados de resistencia a la compresión (cilindros), 3 days and 7 days | Scanned PDF ×2 | 2026-10-14 | `docs/lab-pdfs/003 …A 3 DÍAS.pdf`, `004 …A 7 DÍAS.pdf` | 2026-10-14 | [analysis/FPC06-01.md](analysis/FPC06-01.md) |
 | FPC06-04 | Informe de pruebas de control de concreto hidráulico (MAR-PVLT-F1-CTO-REC-068) | PDF | 2026-10-14 | `docs/lab-pdfs/005 INFORME DE ENSAYOS (MAR-PVLT-F1-CON-REC-068).pdf` | 2026-10-14 | [analysis/FPC06-04.md](analysis/FPC06-04.md) |
 | — | Process diagram | PNG | 2026-10-14 | `docs/general_flow.png` | 2026-10-14 | [analysis/README.md](analysis/README.md#process-general_flowpng--documents) |
+| — | Questionnaire answered by the lab (Q-02 … Q-78) | Word | 2026-10-15 | Outside git (`docs/*.docx` is ignored) | 2026-10-15 | [analysis/questionnaire-2026-10-15.md](analysis/questionnaire-2026-10-15.md) |
 
 > The PDFs contain client data (client and contact names, a mobile phone number) and
 > staff names/signatures, so they are **not in git** (§0). `docs/lab-pdfs/` is
