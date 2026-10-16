@@ -65,7 +65,8 @@ Bodies follow FPC01-01 ([analysis](../domain/analysis/FPC01-01.md)). Column list
 
 | Method | Path | Purpose | Phase |
 |--------|------|---------|-------|
-| GET | `/projects/:id/bitacora` | Composed view, one row per specimen, FPC01-02 columns. Scope 🔒 (Q-68) | 8 |
+| GET | `/projects/:id/bitacora` | `?from=&to=` (pour dates) → FPC01-02 view: records (completed only, A-93) → samples (sampled truck's slumps and temperature, Q-66) → specimens (cancelled left out, A-92) with derived results (ADR-008), plus `summary`. Other lab → 404 | 8 ✅ |
+| GET | `/bitacora/export` | `?projectId=` → `.xlsx`, one tab; omitted → a tab per project (Q-68, A-95). Raw file, no JSON envelope | 8 ✅ |
 
 ## Reports
 
