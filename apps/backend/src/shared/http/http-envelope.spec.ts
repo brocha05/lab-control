@@ -5,6 +5,7 @@ import {
   INestApplication,
   NotFoundException,
   Post,
+  UnprocessableEntityException,
   ValidationPipe,
 } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
@@ -34,6 +35,14 @@ class ThingsController {
   @Get('missing')
   missing() {
     throw new NotFoundException('Thing not found');
+  }
+
+  @Get('unready')
+  unready() {
+    throw new UnprocessableEntityException({
+      message: 'Thing is incomplete',
+      details: ['name', 'size'],
+    });
   }
 
   @Get('boom')
@@ -84,6 +93,15 @@ describe('HTTP envelope (docs/api/conventions.md)', () => {
       success: false,
       error: { code: 'NOT_FOUND', message: 'Thing not found' },
       meta: { requestId: '' },
+    });
+  });
+
+  it('keeps the message and details of a business-rule error', async () => {
+    const res = await request(server).get('/things/unready').expect(422);
+    expect(res.body.error).toEqual({
+      code: 'UNPROCESSABLE_ENTITY',
+      message: 'Thing is incomplete',
+      details: ['name', 'size'],
     });
   });
 

@@ -273,4 +273,51 @@ describe('field records (integration)', () => {
       { registryNumber: 'MCH-068', deliveryCount: 4, sampleCount: 1, specimenCount: 4 },
     ]);
   });
+
+  describe('complete and cancel (4.3, 4.4)', () => {
+    let id: string;
+    beforeEach(async () => {
+      id = idOf(
+        await as(a).post(`/projects/${projectId}/field-records`, { pourDate: '2026-09-02' }),
+      );
+    });
+
+    it('refuses to complete an incomplete record (422) and lists what is missing', async () => {
+      const empty = await as(a).get(`/field-records/${id}`);
+      expect(empty.body.data.missingForCompletion).toEqual(
+        expect.arrayContaining(['supplier', 'castElement', 'approvedByName', 'deliveries']),
+      );
+
+      const form = mch068Form(catalog);
+      form.approvedByName = '';
+      await as(a).put(`/field-records/${id}`, form).expect(200);
+      const res = await as(a).post(`/field-records/${id}/complete`, {}).expect(422);
+      expect(res.body.error).toMatchObject({
+        code: 'UNPROCESSABLE_ENTITY',
+        message: 'The field record is incomplete',
+        details: ['approvedByName'],
+      });
+    });
+
+    it('completes the MCH-068 record, then it can no longer be edited or cancelled', async () => {
+      await as(a).put(`/field-records/${id}`, mch068Form(catalog)).expect(200);
+      const done = await as(a).post(`/field-records/${id}/complete`, {}).expect(200);
+      expect(done.body.data).toMatchObject({ status: 'COMPLETED', missingForCompletion: [] });
+
+      await as(a).put(`/field-records/${id}`, mch068Form(catalog)).expect(409);
+      await as(a).post(`/field-records/${id}/complete`, {}).expect(409);
+      await as(a).post(`/field-records/${id}/cancel`, {}).expect(409);
+    });
+
+    it('cancels a draft, which is then read-only', async () => {
+      const res = await as(a).post(`/field-records/${id}/cancel`, {}).expect(200);
+      expect(res.body.data.status).toBe('CANCELLED');
+      await as(a).put(`/field-records/${id}`, mch068Form(catalog)).expect(409);
+    });
+
+    it('returns 404 for another lab', async () => {
+      await as(b).post(`/field-records/${id}/complete`, {}).expect(404);
+      await as(b).post(`/field-records/${id}/cancel`, {}).expect(404);
+    });
+  });
 });

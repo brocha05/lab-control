@@ -32,7 +32,7 @@ transcribed".
 
 | Transition | Guard |
 |-----------|-------|
-| DRAFT → COMPLETED | Every field filled in on the lab's example is present (Q-33): header, specified values, conditions, equipment used, each delivery's row, specimen references, elements, sampler, visto bueno. Humidity, unit weight, air content and the sketch stay optional |
+| DRAFT → COMPLETED | Every field filled in on the lab's example is present (Q-33): header, specified values, conditions, the six equipment codes used on the example, each delivery's row, at least one sample with molding time and numbered, molded specimens, elements, sampler, visto bueno. Thermometer/hygrometer codes, humidity, unit weight, air content, ticket values, second slump, observations, specimen type and the sketch stay optional. Rule: `missingForCompletion()` in `field-records/domain/completeness.ts` |
 | DRAFT → CANCELLED | Allowed |
 | COMPLETED → (edit) | Corrections allowed (e.g. typos), only for `QMS_COORDINATOR` and `QUALITY_MANAGER`, always audited (Q-34). No state change |
 

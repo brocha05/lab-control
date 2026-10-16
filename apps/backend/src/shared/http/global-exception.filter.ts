@@ -36,12 +36,16 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       const body = exception.getResponse();
       const raw: unknown =
         typeof body === 'object' && body !== null ? (body as { message?: unknown }).message : body;
+      const extra: unknown =
+        typeof body === 'object' && body !== null ? (body as { details?: unknown }).details : null;
       if (Array.isArray(raw)) {
         // ValidationPipe errors: one entry per invalid field.
         details = raw.map(String);
         message = 'Validation failed';
       } else if (typeof raw === 'string') {
         message = raw;
+        // Business-rule errors: `new UnprocessableEntityException({ message, details })`.
+        if (Array.isArray(extra)) details = extra.map(String);
       } else {
         message = exception.message;
       }

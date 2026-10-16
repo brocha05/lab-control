@@ -45,7 +45,7 @@ Error (global filter):
 | 401 / 403 | Not authenticated / role not allowed |
 | 404 | Not found **or belongs to another tenant** |
 | 409 | Invalid state transition (e.g. completing a `CANCELLED` record), unique conflict |
-| 422 | Business rule violated (e.g. report not ready). Used once the rules are known. |
+| 422 | Business rule violated (e.g. completing an incomplete field record). `details` lists what is missing: `new UnprocessableEntityException({ message, details })`. |
 
 ## State changes are actions, not field updates
 

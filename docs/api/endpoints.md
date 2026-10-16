@@ -40,10 +40,10 @@ Bodies follow FPC01-01 ([analysis](../domain/analysis/FPC01-01.md)). Column list
 | POST | `/projects/:id/field-records` | Create `DRAFT` (`pourDate`, `registrySequence?` = next number if omitted, `frontNumber?`). Taken number → 409 | 4 ✅ |
 | GET | `/field-records/:id` | Record with deliveries → samples → specimens; derived `registryNumber`, `sheet`, `sheetCount`, `cumulativeVolumeM3` | 4 ✅ |
 | PUT | `/field-records/:id` | Replace the whole form while `DRAFT` (otherwise 409): header + nested deliveries (numbered by position), samples, specimens. Repeated numbers → 400, numbers used elsewhere in the project → 409 | 4 ✅ |
-| POST | `/field-records/:id/complete` | `DRAFT → COMPLETED` (completeness, Q-33), plans tests with the project's default ages | 4/6 |
+| POST | `/field-records/:id/complete` | `DRAFT → COMPLETED`. Incomplete → 422 with `details` = missing items (Q-33); other states → 409. Test planning joins in 6.4 | 4 ✅ |
 | GET / POST / PATCH | `/catalogs/suppliers`, `/catalogs/cement-types`, `…/:id` | List / add / rename catalog entries; duplicate name (any case) → 409 (Q-06). No delete: records reference them | 4 ✅ |
 | GET / POST / DELETE | `/holidays?year=`, `/holidays`, `/holidays/:id` | The lab's holiday calendar (Q-21, Q-81). Duplicate date → 409 | 4 ✅ |
-| POST | `/field-records/:id/cancel` | `→ CANCELLED` | 4 |
+| POST | `/field-records/:id/cancel` | `DRAFT → CANCELLED`; other states → 409 | 4 ✅ |
 | POST | `/specimens/:id/cancel` | Cancel specimen + open tests | 5 |
 
 > FPC01-01 is filled in as one sheet (header + delivery table + specimen references), so

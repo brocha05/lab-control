@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import type { PaginatedResult } from '../shared/http/api-response.js';
 import type { AuthenticatedUser } from '../shared/tenancy/authenticated-user.js';
 import { CurrentTenant, CurrentUser } from '../shared/tenancy/current-tenant.decorator.js';
@@ -56,5 +67,23 @@ export class FieldRecordsController {
     @Body() dto: FieldRecordFormDto,
   ): Promise<FieldRecordDetail> {
     return this.fieldRecords.replaceForm(tenantId, id, dto);
+  }
+
+  @Post('field-records/:id/complete')
+  @HttpCode(HttpStatus.OK)
+  complete(
+    @CurrentTenant() tenantId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<FieldRecordDetail> {
+    return this.fieldRecords.complete(tenantId, id);
+  }
+
+  @Post('field-records/:id/cancel')
+  @HttpCode(HttpStatus.OK)
+  cancel(
+    @CurrentTenant() tenantId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<FieldRecordDetail> {
+    return this.fieldRecords.cancel(tenantId, id);
   }
 }

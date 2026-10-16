@@ -16,6 +16,7 @@ import type {
 } from '../generated/prisma/client.js';
 import { CalendarDate, calendarDateFromDb } from '../shared/dates/calendar-date.js';
 import { TimeOfDay, timeOfDayFromDb } from '../shared/dates/time-of-day.js';
+import { missingForCompletion } from './domain/completeness.js';
 import { formatRegistryNumber, sheetCount, sheetOfDelivery } from './domain/numbering.js';
 
 // API shapes of a field record (FPC01-01). Decimals are numbers, dates `YYYY-MM-DD`,
@@ -124,6 +125,8 @@ export interface FieldRecordDetail {
   approvedByName: string | null;
   /** "Hoja _ de _": sheets the paper record needs. */
   sheetCount: number;
+  /** What still blocks `complete()` (Q-33); empty when it can be completed. */
+  missingForCompletion: string[];
   deliveries: DeliveryView[];
   createdAt: Date;
   updatedAt: Date;
@@ -205,7 +208,7 @@ export function toDetail(r: DetailRow, project: FieldRecordDetail['project']): F
     };
   });
 
-  return {
+  const detail: Omit<FieldRecordDetail, 'missingForCompletion'> = {
     id: r.id,
     status: r.status,
     project,
@@ -253,6 +256,7 @@ export function toDetail(r: DetailRow, project: FieldRecordDetail['project']): F
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
   };
+  return { ...detail, missingForCompletion: missingForCompletion(detail) };
 }
 
 function round2(value: number): number {

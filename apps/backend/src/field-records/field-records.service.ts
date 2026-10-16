@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { CatalogsService } from '../catalogs/catalogs.service.js';
 import type { Prisma } from '../generated/prisma/client.js';
@@ -18,6 +19,11 @@ import type { PaginatedResult } from '../shared/http/api-response.js';
 import { paginated, searchTerm, skipTake } from '../shared/http/pagination.js';
 import { isUniqueViolation } from '../shared/prisma/prisma-errors.js';
 import { PrismaService } from '../shared/prisma/prisma.service.js';
+import {
+  assertFieldRecordTransition,
+  type FieldRecordStatus,
+  InvalidTransitionError,
+} from './domain/lifecycle.js';
 import { duplicateNumbers, formatRegistryNumber, nextNumber } from './domain/numbering.js';
 import type {
   CreateFieldRecordDto,
@@ -251,6 +257,54 @@ export class FieldRecordsService {
       throw error;
     }
     return this.get(tenantId, id);
+  }
+
+  /**
+   * DRAFT → COMPLETED once everything on the lab's example is filled in (Q-33), else
+   * 422 with the missing items. Tests are planned here in Phase 6 (development-plan 6.4).
+   */
+  async complete(tenantId: string, id: string): Promise<FieldRecordDetail> {
+    const record = await this.get(tenantId, id);
+    this.assertTransition(record.status, 'COMPLETED');
+    if (record.missingForCompletion.length > 0) {
+      throw new UnprocessableEntityException({
+        message: 'The field record is incomplete',
+        details: record.missingForCompletion,
+      });
+    }
+    await this.setStatus(tenantId, id, record.status, 'COMPLETED');
+    return this.get(tenantId, id);
+  }
+
+  /** DRAFT → CANCELLED. Completed records are corrected, not cancelled (Q-34). */
+  async cancel(tenantId: string, id: string): Promise<FieldRecordDetail> {
+    const record = await this.get(tenantId, id);
+    this.assertTransition(record.status, 'CANCELLED');
+    await this.setStatus(tenantId, id, record.status, 'CANCELLED');
+    return this.get(tenantId, id);
+  }
+
+  private assertTransition(from: FieldRecordStatus, to: FieldRecordStatus): void {
+    try {
+      assertFieldRecordTransition(from, to);
+    } catch (error) {
+      if (error instanceof InvalidTransitionError) throw new ConflictException(error.message);
+      throw error;
+    }
+  }
+
+  /** Conditional on the status read, so two concurrent transitions can't both win. */
+  private async setStatus(
+    tenantId: string,
+    id: string,
+    from: FieldRecordStatus,
+    to: FieldRecordStatus,
+  ): Promise<void> {
+    const { count } = await this.prisma.fieldRecord.updateMany({
+      where: { id, tenantId, status: from },
+      data: { status: to },
+    });
+    if (count !== 1) throw new ConflictException('The field record changed; reload it');
   }
 
   private assertNoDuplicateNumbers(deliveries: readonly DeliveryFormDto[]): void {
