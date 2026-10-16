@@ -144,3 +144,4 @@ Sources and context: [analysis/](analysis/README.md).
 | Q-83 | P1 | Who manages users in the system (creates accounts, assigns roles)? | | | Admin permission (Phase 10.1) |
 | Q-84 | P2 | What is the age tolerance for ages not listed in NMX-C-083 (e.g. 56 days)? | | | `ageTolerance()` returns null |
 | Q-85 | P1 | Please send the historical Excel (Jul 2025 – 2026) for the import. | | | Import task |
+| Q-86 | P1 | When a test moves from a Sunday to Monday (3 → 4 days), does the worksheet/report print age 3 or 4? Is the age tolerance then checked against 4 days (no tolerance listed) or flagged as outside 3 days ± 2 h? | | | `checkAgeTolerance()` currently says OUTSIDE |

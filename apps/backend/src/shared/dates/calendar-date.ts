@@ -56,6 +56,11 @@ export function daysBetween(from: CalendarDate, to: CalendarDate): number {
   return Math.round((toUtcMs(to) - toUtcMs(from)) / MS_PER_DAY);
 }
 
+/** 0 = Sunday … 6 = Saturday. */
+export function dayOfWeek(date: CalendarDate): number {
+  return new Date(toUtcMs(date)).getUTCDay();
+}
+
 export function compareCalendarDates(a: CalendarDate, b: CalendarDate): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }

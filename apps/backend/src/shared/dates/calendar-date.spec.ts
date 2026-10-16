@@ -4,6 +4,7 @@ import {
   calendarDateInTimeZone,
   calendarDateToDb,
   compareCalendarDates,
+  dayOfWeek,
   daysBetween,
   InvalidCalendarDateError,
   parseCalendarDate,
@@ -79,5 +80,15 @@ describe('DB conversion', () => {
     const db = calendarDateToDb(date);
     expect(db.toISOString()).toBe('2026-10-02T00:00:00.000Z');
     expect(calendarDateFromDb(db)).toBe(date);
+  });
+});
+
+describe('dayOfWeek', () => {
+  it.each([
+    ['2026-09-02', 3], // Wednesday: MCH-068 pour date
+    ['2026-09-05', 6], // Saturday: its 3-day test (Saturdays are working days, Q-21)
+    ['2026-09-06', 0], // Sunday
+  ] as const)('%s → %i', (date, expected) => {
+    expect(dayOfWeek(d(date))).toBe(expected);
   });
 });
