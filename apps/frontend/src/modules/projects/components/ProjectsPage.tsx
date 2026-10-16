@@ -33,7 +33,11 @@ export function ProjectsPage() {
       </PageHeader>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <SearchInput value={search} onChange={setSearch} placeholder="Buscar obra o ubicación…" />
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar obra, clave o ubicación…"
+        />
         <div className="w-full sm:w-72">
           <ClientSelect
             value={clientId}

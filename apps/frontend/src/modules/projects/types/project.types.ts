@@ -5,6 +5,8 @@ export interface Project {
   id: string;
   /** Official name as printed on the report (Q-78). */
   name: string;
+  /** 3–4 letters for the report number (Q-56). null only for older projects. */
+  code: string | null;
   location: string | null;
   client: { id: string; name: string };
   createdAt: string;
@@ -15,6 +17,7 @@ export interface Project {
 export interface ProjectInput {
   clientId: string;
   name: string;
+  code: string;
   location: string | null;
 }
 

@@ -39,6 +39,7 @@ export function ProjectForm({
     defaultValues: {
       clientId: project?.client.id ?? defaultClientId ?? '',
       name: project?.name ?? '',
+      code: project?.code ?? '',
       location: project?.location ?? '',
     },
   });
@@ -76,6 +77,21 @@ export function ProjectForm({
           placeholder='CONSTRUCCIÓN DE PUENTE VEHICULAR "LAS TUNAS"'
           className={cn(errors.name && 'border-destructive')}
           {...register('name')}
+        />
+      </FormField>
+
+      <FormField
+        id="code"
+        label="Clave"
+        hint="3 o 4 letras para el número de informe, p. ej. PVLT."
+        error={errors.code?.message}
+        required
+      >
+        <Input
+          id="code"
+          maxLength={4}
+          className={cn('w-32 uppercase', errors.code && 'border-destructive')}
+          {...register('code')}
         />
       </FormField>
 

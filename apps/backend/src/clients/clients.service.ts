@@ -1,13 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import type { Client } from '../generated/prisma/client.js';
 import type { PaginatedResult } from '../shared/http/api-response.js';
 import { ListQueryDto, paginated, searchTerm, skipTake } from '../shared/http/pagination.js';
+import { isUniqueViolation } from '../shared/prisma/prisma-errors.js';
 import { PrismaService } from '../shared/prisma/prisma.service.js';
 import type { CreateClientDto, UpdateClientDto } from './dto/client.dto.js';
 
 export interface ClientView {
   id: string;
   name: string;
+  /** null only for clients created before codes existed. */
+  code: string | null;
   contactName: string | null;
   contactPhone: string | null;
   createdAt: Date;
@@ -19,12 +22,17 @@ export interface ClientView {
 export class ClientsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /** `q` matches the name (case-insensitive). Sorted by name. */
+  /** `q` matches the name or the code (case-insensitive). Sorted by name. */
   async list(tenantId: string, query: ListQueryDto): Promise<PaginatedResult<ClientView>> {
     const q = searchTerm(query.q);
     const where = {
       tenantId,
-      ...(q && { name: { contains: q, mode: 'insensitive' as const } }),
+      ...(q && {
+        OR: [
+          { name: { contains: q, mode: 'insensitive' as const } },
+          { code: { contains: q, mode: 'insensitive' as const } },
+        ],
+      }),
     };
     const [rows, total] = await this.prisma.$transaction([
       this.prisma.client.findMany({
@@ -44,26 +52,37 @@ export class ClientsService {
   }
 
   async create(tenantId: string, dto: CreateClientDto): Promise<ClientView> {
-    const client = await this.prisma.client.create({
-      data: {
-        tenantId,
-        name: dto.name,
-        contactName: dto.contactName ?? null,
-        contactPhone: dto.contactPhone ?? null,
-      },
-    });
-    return toView(client);
+    try {
+      const client = await this.prisma.client.create({
+        data: {
+          tenantId,
+          name: dto.name,
+          code: dto.code,
+          contactName: dto.contactName ?? null,
+          contactPhone: dto.contactPhone ?? null,
+        },
+      });
+      return toView(client);
+    } catch (error) {
+      throw codeConflict(error, dto.code);
+    }
   }
 
   async update(tenantId: string, id: string, dto: UpdateClientDto): Promise<ClientView> {
-    const { count } = await this.prisma.client.updateMany({
-      where: { id, tenantId },
-      data: {
-        name: dto.name,
-        contactName: dto.contactName,
-        contactPhone: dto.contactPhone,
-      },
-    });
+    let count: number;
+    try {
+      ({ count } = await this.prisma.client.updateMany({
+        where: { id, tenantId },
+        data: {
+          name: dto.name,
+          code: dto.code,
+          contactName: dto.contactName,
+          contactPhone: dto.contactPhone,
+        },
+      }));
+    } catch (error) {
+      throw codeConflict(error, dto.code);
+    }
     if (count !== 1) throw new NotFoundException('Client not found');
     return this.get(tenantId, id);
   }
@@ -85,10 +104,17 @@ export class ClientsService {
   }
 }
 
+function codeConflict(error: unknown, code: string | undefined): unknown {
+  return isUniqueViolation(error)
+    ? new ConflictException(`Client code "${code}" is already in use`)
+    : error;
+}
+
 function toView(c: Client): ClientView {
   return {
     id: c.id,
     name: c.name,
+    code: c.code,
     contactName: c.contactName,
     contactPhone: c.contactPhone,
     createdAt: c.createdAt,

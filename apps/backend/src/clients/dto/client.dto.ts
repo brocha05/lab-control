@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { RecordCode } from '../../shared/http/record-code.js';
 import { Trim, TrimToNull } from '../../shared/http/transforms.js';
 
 export class CreateClientDto {
@@ -8,6 +9,10 @@ export class CreateClientDto {
   @IsNotEmpty()
   @MaxLength(200)
   name: string;
+
+  /** 3–4 letters, first segment of the report number, e.g. "MAR" (Q-56). Unique per lab. */
+  @RecordCode()
+  code: string;
 
   /** ASSUMPTION A-70: the report's "Contacto" belongs to the client. */
   @TrimToNull()
@@ -31,6 +36,10 @@ export class UpdateClientDto {
   @IsNotEmpty()
   @MaxLength(200)
   name?: string;
+
+  @IsOptional()
+  @RecordCode()
+  code?: string;
 
   @TrimToNull()
   @IsOptional()

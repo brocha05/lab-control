@@ -33,11 +33,13 @@ describe('clients (integration)', () => {
   it('creates, reads and updates a client', async () => {
     const created = await createClient(a, {
       name: '  MARECOMSA S.A. DE C.V. ',
+      code: ' mar ',
       contactName: 'Ing. Jorge Valenzuela',
       contactPhone: '312 000 0000',
     });
     expect(created).toMatchObject({
       name: 'MARECOMSA S.A. DE C.V.',
+      code: 'MAR',
       contactName: 'Ing. Jorge Valenzuela',
       contactPhone: '312 000 0000',
     });
@@ -61,10 +63,14 @@ describe('clients (integration)', () => {
   });
 
   it('lists only the tenant’s clients, sorted, paginated and searchable', async () => {
-    for (const name of ['Zeta Constructora', 'Alfa Obras', 'Marecomsa']) {
-      await createClient(a, { name });
+    for (const [name, code] of [
+      ['Zeta Constructora', 'ZET'],
+      ['Alfa Obras', 'ALF'],
+      ['Marecomsa', 'MAR'],
+    ]) {
+      await createClient(a, { name, code });
     }
-    await createClient(b, { name: 'Alfa de otro laboratorio' });
+    await createClient(b, { name: 'Alfa de otro laboratorio', code: 'ALF' });
 
     const page1 = await request(t.http)
       .get(api('/clients?limit=2'))
@@ -94,7 +100,7 @@ describe('clients (integration)', () => {
   });
 
   it('returns 404 for another tenant’s client, on read and on update', async () => {
-    const foreign = await createClient(a, { name: 'Cliente de A' });
+    const foreign = await createClient(a, { name: 'Cliente de A', code: 'CDA' });
 
     await request(t.http)
       .get(api(`/clients/${foreign.id}`))
@@ -111,6 +117,50 @@ describe('clients (integration)', () => {
       .set('Authorization', a.auth)
       .expect(200);
     expect(still.body.data.name).toBe('Cliente de A');
+  });
+
+  it('requires a 3–4 letter code, unique per lab (409), reusable in another lab', async () => {
+    const bad = await request(t.http)
+      .post(api('/clients'))
+      .set('Authorization', a.auth)
+      .send({ name: 'Sin clave' })
+      .expect(400);
+    expect(bad.body.error.details).toContain('code must be 3 or 4 letters');
+    for (const code of ['MA', 'MAREC', 'M4R']) {
+      await request(t.http)
+        .post(api('/clients'))
+        .set('Authorization', a.auth)
+        .send({ name: 'X', code })
+        .expect(400);
+    }
+
+    const first = await createClient(a, { name: 'Marecomsa', code: 'MAR' });
+    const dup = await request(t.http)
+      .post(api('/clients'))
+      .set('Authorization', a.auth)
+      .send({ name: 'Otro', code: 'mar' })
+      .expect(409);
+    expect(dup.body.error.code).toBe('CONFLICT');
+
+    const other = await createClient(a, { name: 'Otro', code: 'OTR' });
+    await request(t.http)
+      .patch(api(`/clients/${other.id}`))
+      .set('Authorization', a.auth)
+      .send({ code: 'MAR' })
+      .expect(409);
+
+    await createClient(b, { name: 'Marecomsa en B', code: 'MAR' });
+    expect(first.id).toBeDefined();
+  });
+
+  it('searches by code too', async () => {
+    await createClient(a, { name: 'Marecomsa S.A. de C.V.', code: 'MAR' });
+    await createClient(a, { name: 'Constructora Tunas', code: 'CTU' });
+    const res = await request(t.http)
+      .get(api('/clients?q=ctu'))
+      .set('Authorization', a.auth)
+      .expect(200);
+    expect(names(res)).toEqual(['Constructora Tunas']);
   });
 
   it('requires authentication', async () => {

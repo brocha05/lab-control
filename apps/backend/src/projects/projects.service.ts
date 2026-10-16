@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ClientsService } from '../clients/clients.service.js';
 import type { Prisma, Project } from '../generated/prisma/client.js';
 import type { PaginatedResult } from '../shared/http/api-response.js';
 import { paginated, searchTerm, skipTake } from '../shared/http/pagination.js';
+import { isUniqueViolation } from '../shared/prisma/prisma-errors.js';
 import { PrismaService } from '../shared/prisma/prisma.service.js';
 import type {
   CreateProjectDto,
@@ -13,6 +14,8 @@ import type {
 export interface ProjectView {
   id: string;
   name: string;
+  /** null only for projects created before codes existed. */
+  code: string | null;
   location: string | null;
   client: { id: string; name: string };
   createdAt: Date;
@@ -30,7 +33,7 @@ export class ProjectsService {
     private readonly clients: ClientsService,
   ) {}
 
-  /** `q` matches name or location (case-insensitive). Sorted by name. */
+  /** `q` matches name, code or location (case-insensitive). Sorted by name. */
   async list(tenantId: string, query: ListProjectsQueryDto): Promise<PaginatedResult<ProjectView>> {
     const q = searchTerm(query.q);
     const where: Prisma.ProjectWhereInput = {
@@ -39,6 +42,7 @@ export class ProjectsService {
       ...(q && {
         OR: [
           { name: { contains: q, mode: 'insensitive' } },
+          { code: { contains: q, mode: 'insensitive' } },
           { location: { contains: q, mode: 'insensitive' } },
         ],
       }),
@@ -65,20 +69,35 @@ export class ProjectsService {
     // 404 for another tenant's client. The composite FK (client_id, tenant_id) would
     // reject it anyway; this check gives the right status code.
     await this.clients.assertExists(tenantId, dto.clientId);
-    const project = await this.prisma.project.create({
-      data: { tenantId, clientId: dto.clientId, name: dto.name, location: dto.location ?? null },
-    });
-    return this.get(tenantId, project.id);
+    try {
+      const project = await this.prisma.project.create({
+        data: {
+          tenantId,
+          clientId: dto.clientId,
+          name: dto.name,
+          code: dto.code,
+          location: dto.location ?? null,
+        },
+      });
+      return await this.get(tenantId, project.id);
+    } catch (error) {
+      throw codeConflict(error, dto.code);
+    }
   }
 
   async update(tenantId: string, id: string, dto: UpdateProjectDto): Promise<ProjectView> {
     if (dto.clientId !== undefined) {
       await this.clients.assertExists(tenantId, dto.clientId);
     }
-    const { count } = await this.prisma.project.updateMany({
-      where: { id, tenantId },
-      data: { clientId: dto.clientId, name: dto.name, location: dto.location },
-    });
+    let count: number;
+    try {
+      ({ count } = await this.prisma.project.updateMany({
+        where: { id, tenantId },
+        data: { clientId: dto.clientId, name: dto.name, code: dto.code, location: dto.location },
+      }));
+    } catch (error) {
+      throw codeConflict(error, dto.code);
+    }
     if (count !== 1) throw new NotFoundException('Project not found');
     return this.get(tenantId, id);
   }
@@ -91,6 +110,7 @@ export class ProjectsService {
     return rows.map((p) => ({
       id: p.id,
       name: p.name,
+      code: p.code,
       location: p.location,
       // The composite FK guarantees the client exists in the same tenant.
       client: { id: p.clientId, name: names.get(p.clientId) ?? '' },
@@ -98,4 +118,10 @@ export class ProjectsService {
       updatedAt: p.updatedAt,
     }));
   }
+}
+
+function codeConflict(error: unknown, code: string | undefined): unknown {
+  return isUniqueViolation(error)
+    ? new ConflictException(`Project code "${code}" is already used by this client`)
+    : error;
 }

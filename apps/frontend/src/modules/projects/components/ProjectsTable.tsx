@@ -66,6 +66,7 @@ export function ProjectsTable({
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-24">Clave</TableHead>
             <TableHead>Obra</TableHead>
             {!hideClient && <TableHead>Cliente</TableHead>}
             <TableHead>Ubicación</TableHead>
@@ -74,6 +75,7 @@ export function ProjectsTable({
         <TableBody>
           {items.map((project) => (
             <TableRow key={project.id}>
+              <TableCell className="font-mono text-xs">{project.code ?? '—'}</TableCell>
               <TableCell className="font-medium">
                 <Link href={`/projects/${project.id}`} className="hover:underline">
                   {project.name}

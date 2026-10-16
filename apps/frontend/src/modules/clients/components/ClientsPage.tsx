@@ -42,7 +42,7 @@ export function ClientsPage() {
         </Button>
       </PageHeader>
 
-      <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nombre…" />
+      <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nombre o clave…" />
 
       <Card>
         {isLoading ? (
@@ -69,6 +69,7 @@ export function ClientsPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-24">Clave</TableHead>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Contacto</TableHead>
                 <TableHead>Teléfono</TableHead>
@@ -77,6 +78,7 @@ export function ClientsPage() {
             <TableBody>
               {items.map((client) => (
                 <TableRow key={client.id}>
+                  <TableCell className="font-mono text-xs">{client.code ?? '—'}</TableCell>
                   <TableCell className="font-medium">
                     <Link href={`/clients/${client.id}`} className="hover:underline">
                       {client.name}

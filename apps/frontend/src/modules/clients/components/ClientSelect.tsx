@@ -50,7 +50,7 @@ export function ClientSelect({
         {allLabel && <SelectItem value={ALL}>{allLabel}</SelectItem>}
         {clients.map((c) => (
           <SelectItem key={c.id} value={c.id}>
-            {c.name}
+            {c.code ? `${c.code} · ${c.name}` : c.name}
           </SelectItem>
         ))}
       </SelectContent>

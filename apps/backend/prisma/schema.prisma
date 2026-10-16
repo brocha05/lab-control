@@ -110,11 +110,12 @@ model Client {
   tenantId     String   @map("tenant_id") @db.Uuid
   /// Legal name, e.g. "MARECOMSA S.A. DE C.V.".
   name         String
+  /// 3–4 letter code, first segment of the report number ("MAR-…"). Q-56, A-76.
+  code         String?
   /// FPC06-04 "Contacto" (name). ASSUMPTION A-70 (per client, not per project).
   contactName  String?  @map("contact_name")
   /// FPC06-04 "Contacto" (phone). ASSUMPTION A-70.
   contactPhone String?  @map("contact_phone")
-  // TBD: code used in report numbers ("MAR-…", Q-56)
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
@@ -122,6 +123,7 @@ model Client {
   projects Project[]
 
   @@unique([id, tenantId])
+  @@unique([tenantId, code])
   @@index([tenantId, name])
   @@map("clients")
 }
@@ -134,9 +136,10 @@ model Project {
   clientId  String   @map("client_id") @db.Uuid
   /// Official name as printed on the report (FPC06-04 "Proyecto"). Q-78.
   name      String
+  /// 3–4 letter code, second segment of the report number ("…-PVLT-…"). Q-56, A-76.
+  code      String?
   /// FPC01-01 "Obra y ubicación", location part.
   location  String?
-  // TBD: code used in report numbers ("…-PVLT-…", Q-56)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
@@ -145,6 +148,7 @@ model Project {
   testConfigurations ProjectTestConfiguration[]
 
   @@unique([id, tenantId])
+  @@unique([clientId, code])
   @@index([tenantId, clientId])
   @@map("projects")
 }

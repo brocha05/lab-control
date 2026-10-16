@@ -33,6 +33,7 @@ export function ClientForm({
     resolver: zodResolver(clientSchema),
     defaultValues: {
       name: client?.name ?? '',
+      code: client?.code ?? '',
       contactName: client?.contactName ?? '',
       contactPhone: client?.contactPhone ?? '',
     },
@@ -56,6 +57,21 @@ export function ClientForm({
           className={cn(errors.name && 'border-destructive')}
           autoFocus={!client}
           {...register('name')}
+        />
+      </FormField>
+
+      <FormField
+        id="code"
+        label="Clave"
+        hint="3 o 4 letras para el número de informe, p. ej. MAR."
+        error={errors.code?.message}
+        required
+      >
+        <Input
+          id="code"
+          maxLength={4}
+          className={cn('w-32 uppercase', errors.code && 'border-destructive')}
+          {...register('code')}
         />
       </FormField>
 

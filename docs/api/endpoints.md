@@ -19,11 +19,11 @@ Legend: **Phase** = roadmap phase · 🔒 = blocked on domain documents
 
 | Method | Path | Purpose | Phase |
 |--------|------|---------|-------|
-| GET | `/clients` | `?page&limit&q` (q = name, case-insensitive), sorted by name | 3 ✅ |
-| POST | `/clients` | Create (`name`, `contactName?`, `contactPhone?`) | 3 ✅ |
+| GET | `/clients` | `?page&limit&q` (q = name or code, case-insensitive), sorted by name | 3 ✅ |
+| POST | `/clients` | Create (`name`, `code` 3–4 letters unique per lab → 409, `contactName?`, `contactPhone?`) | 3 ✅ |
 | GET / PATCH | `/clients/:id` | Read / update (`null` or `""` clears an optional field). No delete (A-24) | 3 ✅ |
-| GET | `/projects` | `?page&limit&q&clientId` (q = name or location), sorted by name. Items include `client: { id, name }` | 3 ✅ |
-| POST | `/projects` | Create (`clientId`, `name`, `location?`). Another tenant's client → 404 | 3 ✅ |
+| GET | `/projects` | `?page&limit&q&clientId` (q = name, code or location), sorted by name. Items include `client: { id, name }` | 3 ✅ |
+| POST | `/projects` | Create (`clientId`, `name`, `code` 3–4 letters unique per client → 409, `location?`). Another tenant's client → 404 | 3 ✅ |
 | GET / PATCH | `/projects/:id` | Read / update (`clientId` re-checked). No delete (A-24) | 3 ✅ |
 | GET | `/projects/:id/test-configuration` | Configured ages | 6 |
 | PUT | `/projects/:id/test-configuration` | Replace the set of `{ ageDays, specimenCount }` | 6 |
